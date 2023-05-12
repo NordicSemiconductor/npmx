@@ -1,0 +1,8 @@
+/**
+@defgroup npmx_drivers Drivers
+@{
+    @brief List of all drivers available in npmx.
+@}
+
+@defgroup npmx npmx API
+*/
