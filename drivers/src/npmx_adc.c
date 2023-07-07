@@ -35,7 +35,7 @@
 #include <npmx_instance.h>
 
 /**
- * @brief Definition of pointer to funtion type, that evaluates value for ADC measurement from received code.
+ * @brief Definition of pointer to function type, that evaluates value for ADC measurement from received code.
  *
  * @param[in]  p_instance Pointer to the ADC instance.
  * @param[in]  code       Code read from ADC.
@@ -46,7 +46,7 @@
  */
 typedef npmx_error_t (*code_to_val_fun_t)(npmx_adc_t const * p_instance,
                                           uint16_t           code,
-                                          uint16_t *         p_val);
+                                          int32_t *          p_val);
 
 static npmx_error_t task_trigger(npmx_adc_t const * p_instance, npmx_adc_task_t task)
 {
@@ -63,27 +63,38 @@ static npmx_error_t task_trigger(npmx_adc_t const * p_instance, npmx_adc_task_t 
         [NPMX_ADC_TASK_UPDATE_AUTO_INTERVAL] = NPMX_REG_TO_ADDR(NPM_ADC->TASKAUTOTIMUPDATE),
     };
 
-    return npmx_backend_register_write(p_instance->p_backend, task_addr[task], &data, 1);
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend, task_addr[task], &data, 1);
 }
 
 /**
  * @brief Function for converting the value from NTC enumeration type to resistance.
  *
- * @param[in] battery_ntc Battery NTC type.
+ * @param[in]  battery_ntc Battery NTC type.
+ * @param[out] p_val       Pointer to the variable that stores the conversion result.
  *
- * @return Resistance value in ohms.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-static uint32_t ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc)
+static bool ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc, uint32_t * p_val)
 {
-    static const uint32_t resistances[] =
+    switch (battery_ntc)
     {
-        [NPMX_ADC_NTC_TYPE_HI_Z]  = 0,
-        [NPMX_ADC_NTC_TYPE_10_K]  = 10000,
-        [NPMX_ADC_NTC_TYPE_47_K]  = 47000,
-        [NPMX_ADC_NTC_TYPE_100_K] = 100000,
-    };
-
-    return resistances[battery_ntc];
+        case NPMX_ADC_NTC_TYPE_HI_Z:
+            *p_val = 0;
+            break;
+        case NPMX_ADC_NTC_TYPE_10_K:
+            *p_val = 10000;
+            break;
+        case NPMX_ADC_NTC_TYPE_47_K:
+            *p_val = 47000;
+            break;
+        case NPMX_ADC_NTC_TYPE_100_K:
+            *p_val = 100000;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 /**
@@ -97,15 +108,15 @@ static uint16_t msb_register_address_get(npmx_adc_meas_t meas)
 {
     static const uint16_t msb_addresses[] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
-        [NPMX_ADC_MEAS_NTC]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
-        [NPMX_ADC_MEAS_DIE_TEMP] = NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
-        [NPMX_ADC_MEAS_VSYS]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
-        [NPMX_ADC_MEAS_VBUS]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT0]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT1]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT2]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT3]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
+        [NPMX_ADC_MEAS_NTC]        = NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
+        [NPMX_ADC_MEAS_DIE_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
+        [NPMX_ADC_MEAS_VSYS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
+        [NPMX_ADC_MEAS_VBUS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT0]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT1]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
     };
 
     return msb_addresses[meas];
@@ -120,26 +131,26 @@ static uint16_t msb_register_address_get(npmx_adc_meas_t meas)
  */
 static uint16_t lsb_register_offset_get(npmx_adc_meas_t meas)
 {
-    static const uint16_t lsb_registers[] =
+    static const uint16_t lsb_registers[NPMX_ADC_MEAS_COUNT] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
-        [NPMX_ADC_MEAS_NTC]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
-        [NPMX_ADC_MEAS_DIE_TEMP] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
-        [NPMX_ADC_MEAS_VSYS]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
-        [NPMX_ADC_MEAS_VBUS]     = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT0]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT1]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT2]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT3]    = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                   NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
+        [NPMX_ADC_MEAS_NTC]        = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
+        [NPMX_ADC_MEAS_DIE_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
+        [NPMX_ADC_MEAS_VSYS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
+        [NPMX_ADC_MEAS_VBUS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT0]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT1]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
+                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
     };
 
     return lsb_registers[meas];
@@ -154,17 +165,17 @@ static uint16_t lsb_register_offset_get(npmx_adc_meas_t meas)
  */
 static uint16_t lsb_mask_get(npmx_adc_meas_t meas)
 {
-    static const uint16_t lsb_masks[] =
+    static const uint16_t lsb_masks[NPMX_ADC_MEAS_COUNT] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = ADC_ADCGP0RESULTLSBS_VBATRESULTLSB_Msk,
-        [NPMX_ADC_MEAS_NTC]      = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Msk,
-        [NPMX_ADC_MEAS_DIE_TEMP] = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VSYS]     = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBUS]     = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBAT0]    = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBAT1]    = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBAT2]    = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBAT3]    = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBAT]       = ADC_ADCGP0RESULTLSBS_VBATRESULTLSB_Msk,
+        [NPMX_ADC_MEAS_NTC]        = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Msk,
+        [NPMX_ADC_MEAS_DIE_TEMP]   = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VSYS]       = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBUS]       = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBAT0]      = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBAT1]      = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Msk,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Msk,
     };
 
     return lsb_masks[meas];
@@ -179,17 +190,17 @@ static uint16_t lsb_mask_get(npmx_adc_meas_t meas)
  */
 static uint16_t lsb_position_get(npmx_adc_meas_t meas)
 {
-    static const uint16_t lsb_positions[] =
+    static const uint16_t lsb_positions[NPMX_ADC_MEAS_COUNT] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = ADC_ADCGP0RESULTLSBS_VBATRESULTLSB_Pos,
-        [NPMX_ADC_MEAS_NTC]      = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Pos,
-        [NPMX_ADC_MEAS_DIE_TEMP] = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VSYS]     = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBUS]     = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBAT0]    = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBAT1]    = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBAT2]    = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBAT3]    = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBAT]       = ADC_ADCGP0RESULTLSBS_VBATRESULTLSB_Pos,
+        [NPMX_ADC_MEAS_NTC]        = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Pos,
+        [NPMX_ADC_MEAS_DIE_TEMP]   = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VSYS]       = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBUS]       = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBAT0]      = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBAT1]      = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Pos,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Pos,
     };
 
     return lsb_positions[meas];
@@ -206,10 +217,10 @@ static uint16_t lsb_position_get(npmx_adc_meas_t meas)
  */
 static npmx_error_t vbat_value_from_code(npmx_adc_t const * p_instance,
                                          uint16_t           code,
-                                         uint16_t *         p_val)
+                                         int32_t *          p_val)
 {
     (void)p_instance;
-    *p_val = (uint16_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VBAT_MV) /
+    *p_val = (int32_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VBAT_MV) /
                         NPMX_PERIPH_ADC_BITS_RESOLUTION);
 
     return NPMX_SUCCESS;
@@ -228,7 +239,7 @@ static npmx_error_t ntc_get(npmx_adc_t const * p_instance, npmx_adc_ntc_type_t *
 {
     uint8_t data;
 
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRSEL),
                                                        &data,
                                                        1);
@@ -254,9 +265,37 @@ static npmx_error_t ntc_resistance_get(npmx_adc_t const * p_instance, uint32_t *
         return err_code;
     }
 
-    *p_resistance = ntc_type_convert_to_ohms(ntc_type);
+    bool convert_status = ntc_type_convert_to_ohms(ntc_type, p_resistance);
 
-    return NPMX_SUCCESS;
+    return (convert_status ? NPMX_SUCCESS : NPMX_ERROR_INVALID_PARAM);
+}
+
+static npmx_error_t adc_ibat_meas_status_get(npmx_adc_t const            * p_instance,
+                                             npmx_adc_ibat_meas_status_t * p_ibat_meas_status)
+{
+    uint8_t      data;
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
+                                                       NPMX_REG_TO_ADDR(NPM_ADC->ADCIBATMEASSTATUS),
+                                                       &data,
+                                                       1);
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    p_ibat_meas_status->charge_current =
+        (npmx_adc_ibat_meas_current_t)((data & ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_Msk)
+                                        >> ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_Pos);
+
+    p_ibat_meas_status->charging = (((data & ADC_ADCIBATMEASSTATUS_BCHARGERMODE_Msk)
+                                     >> ADC_ADCIBATMEASSTATUS_BCHARGERMODE_Pos)
+                                    == ADC_ADCIBATMEASSTATUS_BCHARGERMODE_CHARGE);
+
+    bool invalid_status = (((data & ADC_ADCIBATMEASSTATUS_IBATMEASEINVALID_Msk)
+                            >> ADC_ADCIBATMEASSTATUS_IBATMEASEINVALID_Pos)
+                           == ADC_ADCIBATMEASSTATUS_IBATMEASEINVALID_INVALID);
+
+    return (invalid_status ? NPMX_ERROR_INVALID_MEAS: NPMX_SUCCESS);
 }
 
 /**
@@ -271,7 +310,7 @@ static npmx_error_t ntc_resistance_get(npmx_adc_t const * p_instance, uint32_t *
  */
 static npmx_error_t ntc_value_from_code(npmx_adc_t const * p_instance,
                                         uint16_t           code,
-                                        uint16_t *         p_val)
+                                        int32_t *          p_val)
 {
     uint32_t     ntc_resistance;
     npmx_error_t err_code = ntc_resistance_get(p_instance, &ntc_resistance);
@@ -281,7 +320,7 @@ static npmx_error_t ntc_value_from_code(npmx_adc_t const * p_instance,
         return err_code;
     }
 
-    *p_val = (uint16_t)((ntc_resistance * ((uint32_t)code)) /
+    *p_val = (int32_t)((ntc_resistance * ((uint32_t)code)) /
                         (NPMX_PERIPH_ADC_BITS_RESOLUTION - code));
 
     return NPMX_SUCCESS;
@@ -298,10 +337,10 @@ static npmx_error_t ntc_value_from_code(npmx_adc_t const * p_instance,
  */
 static npmx_error_t die_temp_value_from_code(npmx_adc_t const * p_instance,
                                              uint16_t           code,
-                                             uint16_t *         p_val)
+                                             int32_t *          p_val)
 {
     (void)p_instance;
-    *p_val = (uint16_t)(NPMX_PERIPH_ADC_DIE_TEMP_OFFSET_MC -
+    *p_val = (int32_t)(NPMX_PERIPH_ADC_DIE_TEMP_OFFSET_MC -
                         (NPMX_PERIPH_ADC_DIE_TEMP_MULT_MC * (uint32_t)code));
 
     return NPMX_SUCCESS;
@@ -318,10 +357,10 @@ static npmx_error_t die_temp_value_from_code(npmx_adc_t const * p_instance,
  */
 static npmx_error_t vsys_value_from_code(npmx_adc_t const * p_instance,
                                          uint16_t           code,
-                                         uint16_t *         p_val)
+                                         int32_t *          p_val)
 {
     (void)p_instance;
-    *p_val = (uint16_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VSYS_MV) /
+    *p_val = (int32_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VSYS_MV) /
                         NPMX_PERIPH_ADC_BITS_RESOLUTION);
 
     return NPMX_SUCCESS;
@@ -338,11 +377,73 @@ static npmx_error_t vsys_value_from_code(npmx_adc_t const * p_instance,
  */
 static npmx_error_t vbus_value_from_code(npmx_adc_t const * p_instance,
                                          uint16_t           code,
-                                         uint16_t *         p_val)
+                                         int32_t *          p_val)
 {
     (void)p_instance;
-    *p_val = (uint16_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VBUS_MV) /
+    *p_val = (int32_t)(((uint32_t)code * NPMX_PERIPH_ADC_VFS_VBUS_MV) /
                         NPMX_PERIPH_ADC_BITS_RESOLUTION);
+
+    return NPMX_SUCCESS;
+}
+
+/**
+ * @brief Function for calculating measured battery current from ADC code.
+ *
+ * @param[in]  p_instance Pointer to the ADC instance.
+ * @param[in]  code       Code read from ADC.
+ * @param[out] p_val      Pointer to measured battery current in milliamperes.
+ *
+ * @retval NPMX_SUCCESS Operation performed successfully.
+ */
+static npmx_error_t ibat_value_from_code(npmx_adc_t const * p_instance,
+                                         uint16_t           code,
+                                         int32_t *          p_val)
+{
+    npmx_adc_ibat_meas_status_t ibat_meas_status;
+
+    npmx_error_t err_code = adc_ibat_meas_status_get(p_instance, &ibat_meas_status);
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    int32_t full_scale_ma = 0;
+
+    uint16_t current_val;
+
+    if (ibat_meas_status.charging)
+    {
+        current_val = p_instance->p_pmic->charger->charging_current_ma;
+
+        switch (ibat_meas_status.charge_current)
+        {
+            case NPMX_ADC_IBAT_MEAS_CURRENT_TRICKLE:
+                /* FALLTHROUGH */
+            case NPMX_ADC_IBAT_MEAS_CURRENT_RFU:
+                full_scale_ma = (-1) * (int32_t)(current_val * code) / 10;
+                break;
+
+            case NPMX_ADC_IBAT_MEAS_CURRENT_LOWTEMP:
+                full_scale_ma = (-1) * (int32_t)(current_val * code) / 2;
+                break;
+
+            case NPMX_ADC_IBAT_MEAS_CURRENT_FAST:
+                full_scale_ma = (-1) * (int32_t)(current_val * code);
+                break;
+
+            default:
+                full_scale_ma = 0;
+                break;
+        }
+    }
+    else
+    {
+        current_val = p_instance->p_pmic->charger->discharging_current_ma;
+
+        full_scale_ma = (int32_t)(current_val * code);
+    }
+
+    *p_val = full_scale_ma / (int32_t)NPMX_PERIPH_ADC_BITS_RESOLUTION;
 
     return NPMX_SUCCESS;
 }
@@ -357,25 +458,31 @@ static npmx_error_t vbus_value_from_code(npmx_adc_t const * p_instance,
  *
  * @retval NPMX_SUCCESS             Operation performed successfully.
  * @retval NPMX_ERROR_IO            Error using IO bus line.
- * @retval NPMX_ERROR_INVALID_PARAM No possibility to calculate value for geaven npmx_adc_meas_t.
+ * @retval NPMX_ERROR_INVALID_PARAM No possibility to calculate value for given npmx_adc_meas_t.
  */
 static npmx_error_t value_from_code_get(npmx_adc_t const * p_instance,
                                         npmx_adc_meas_t    meas,
                                         uint16_t           code,
-                                        uint16_t *         p_val)
+                                        int32_t *          p_val)
 {
-    static const code_to_val_fun_t code_to_value_funs[NPMX_PERIPH_ADC_MEAS_REGISTERS_COUNT] =
+    static code_to_val_fun_t code_to_value_funs[NPMX_PERIPH_ADC_MEAS_REGISTERS_COUNT] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = vbat_value_from_code,
-        [NPMX_ADC_MEAS_NTC]      = ntc_value_from_code,
-        [NPMX_ADC_MEAS_DIE_TEMP] = die_temp_value_from_code,
-        [NPMX_ADC_MEAS_VSYS]     = vsys_value_from_code,
-        [NPMX_ADC_MEAS_VBUS]     = vbus_value_from_code,
-        [NPMX_ADC_MEAS_VBAT0]    = NULL,
-        [NPMX_ADC_MEAS_VBAT1]    = NULL,
-        [NPMX_ADC_MEAS_VBAT2]    = NULL,
-        [NPMX_ADC_MEAS_VBAT3]    = NULL,
+        [NPMX_ADC_MEAS_VBAT]       = vbat_value_from_code,
+        [NPMX_ADC_MEAS_NTC]        = ntc_value_from_code,
+        [NPMX_ADC_MEAS_DIE_TEMP]   = die_temp_value_from_code,
+        [NPMX_ADC_MEAS_VSYS]       = vsys_value_from_code,
+        [NPMX_ADC_MEAS_VBUS]       = vbus_value_from_code,
+        [NPMX_ADC_MEAS_VBAT0]      = NULL,
+        [NPMX_ADC_MEAS_VBAT1]      = NULL,
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = ibat_value_from_code,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = NULL,
     };
+
+    if (p_instance->burst)
+    {
+        code_to_value_funs[NPMX_ADC_MEAS_VBAT2_IBAT] = vbat_value_from_code;
+        code_to_value_funs[NPMX_ADC_MEAS_VBAT3_VBUS] = vbat_value_from_code;
+    }
 
     if (code_to_value_funs[meas] == NULL)
     {
@@ -410,11 +517,11 @@ npmx_adc_ntc_type_t npmx_adc_ntc_type_convert(uint32_t resistance)
     }
 }
 
-uint32_t npmx_adc_ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc)
+bool npmx_adc_ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc, uint32_t * p_val)
 {
-    NPMX_ASSERT(battery_ntc != NPMX_ADC_NTC_TYPE_INVALID);
+    NPMX_ASSERT(battery_ntc < NPMX_ADC_NTC_TYPE_COUNT);
 
-    return ntc_type_convert_to_ohms(battery_ntc);
+    return ntc_type_convert_to_ohms(battery_ntc, p_val);
 }
 
 npmx_adc_ntc_meas_interval_t npmx_adc_ntc_meas_interval_convert(uint32_t time) {
@@ -433,19 +540,27 @@ npmx_adc_ntc_meas_interval_t npmx_adc_ntc_meas_interval_convert(uint32_t time) {
     }
 }
 
-uint32_t npmx_adc_ntc_meas_interval_convert_to_ms(npmx_adc_ntc_meas_interval_t enum_value)
+bool npmx_adc_ntc_meas_interval_convert_to_ms(npmx_adc_ntc_meas_interval_t enum_value,
+                                              uint32_t *                   p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_ADC_NTC_MEAS_INTERVAL_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_ADC_NTC_MEAS_INTERVAL_4_MS]    = 4,
-        [NPMX_ADC_NTC_MEAS_INTERVAL_64_MS]   = 64,
-        [NPMX_ADC_NTC_MEAS_INTERVAL_128_MS]  = 128,
-        [NPMX_ADC_NTC_MEAS_INTERVAL_1024_MS] = 1024,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_ADC_NTC_MEAS_INTERVAL_4_MS:
+            *p_val = 4;
+            break;
+        case NPMX_ADC_NTC_MEAS_INTERVAL_64_MS:
+            *p_val = 64;
+            break;
+        case NPMX_ADC_NTC_MEAS_INTERVAL_128_MS:
+            *p_val = 128;
+            break;
+        case NPMX_ADC_NTC_MEAS_INTERVAL_1024_MS:
+            *p_val = 1024;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_adc_die_temp_meas_interval_t npmx_adc_die_temp_meas_interval_convert(uint32_t time)
@@ -465,44 +580,55 @@ npmx_adc_die_temp_meas_interval_t npmx_adc_die_temp_meas_interval_convert(uint32
     }
 }
 
-uint32_t npmx_adc_die_temp_meas_interval_convert_to_ms(npmx_adc_die_temp_meas_interval_t enum_value)
+bool npmx_adc_die_temp_meas_interval_convert_to_ms(npmx_adc_die_temp_meas_interval_t enum_value,
+                                                   uint32_t *                        p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_4_MS]  = 4,
-        [NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_8_MS]  = 8,
-        [NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_16_MS] = 16,
-        [NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_32_MS] = 32,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_4_MS:
+            *p_val = 4;
+            break;
+        case NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_8_MS:
+            *p_val = 8;
+            break;
+        case NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_16_MS:
+            *p_val = 16;
+            break;
+        case NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_32_MS:
+            *p_val = 32;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 const char * const npmx_adc_ntc_type_map_to_string(npmx_adc_ntc_type_t enum_value)
 {
-    NPMX_ASSERT(enum_value != NPMX_ADC_NTC_TYPE_INVALID);
-
-    static const char * const mapping_table [] =
+    switch (enum_value)
     {
-        [NPMX_ADC_NTC_TYPE_HI_Z]  = "HI_Z",
-        [NPMX_ADC_NTC_TYPE_10_K]  = "10k",
-        [NPMX_ADC_NTC_TYPE_47_K]  = "47k",
-        [NPMX_ADC_NTC_TYPE_100_K] = "100k",
-    };
-
-    return mapping_table[enum_value];
+        case NPMX_ADC_NTC_TYPE_HI_Z:
+            return "HI_Z";
+        case NPMX_ADC_NTC_TYPE_10_K:
+            return "10k";
+        case NPMX_ADC_NTC_TYPE_47_K:
+            return "47k";
+        case NPMX_ADC_NTC_TYPE_100_K:
+            return "100k";
+        default:
+            return "INVALID";
+    }
 }
 
 npmx_error_t npmx_adc_task_trigger(npmx_adc_t const * p_instance, npmx_adc_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_ADC_TASK_COUNT);
 
     return task_trigger(p_instance, task);
 }
 
-npmx_error_t npmx_adc_config_set(npmx_adc_t const * p_instance, npmx_adc_config_t const * p_config)
+npmx_error_t npmx_adc_config_set(npmx_adc_t * p_instance, npmx_adc_config_t const * p_config)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
@@ -529,7 +655,9 @@ npmx_error_t npmx_adc_config_set(npmx_adc_t const * p_instance, npmx_adc_config_
              << ADC_ADCCONFIG_VBATBURSTENABLE_Pos) &
             ADC_ADCCONFIG_VBATBURSTENABLE_Msk;
 
-    return npmx_backend_register_write(p_instance->p_backend,
+    p_instance->burst = p_config->vbat_burst;
+
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCCONFIG),
                                        &data,
                                        1);
@@ -541,7 +669,7 @@ npmx_error_t npmx_adc_config_get(npmx_adc_t const * p_instance, npmx_adc_config_
     NPMX_ASSERT(p_config);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCCONFIG),
                                                        &data,
                                                        1);
@@ -564,11 +692,12 @@ npmx_error_t npmx_adc_config_get(npmx_adc_t const * p_instance, npmx_adc_config_
 npmx_error_t npmx_adc_ntc_set(npmx_adc_t * p_instance, npmx_adc_ntc_type_t battery_ntc)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(battery_ntc < NPMX_ADC_NTC_TYPE_COUNT);
 
     uint8_t data = (((uint8_t)battery_ntc) << ADC_ADCNTCRSEL_ADCNTCRSEL_Pos) &
                    ADC_ADCNTCRSEL_ADCNTCRSEL_Msk;
 
-    return npmx_backend_register_write(p_instance->p_backend,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRSEL),
                                        &data,
                                        1);
@@ -598,21 +727,21 @@ npmx_error_t npmx_adc_meas_check(npmx_adc_t const * p_instance,
     NPMX_ASSERT(meas < NPMX_ADC_MEAS_COUNT);
     NPMX_ASSERT(p_ready);
 
-    static const uint8_t meas_masks[] =
+    static const uint8_t meas_masks[NPMX_ADC_MEAS_COUNT] =
     {
-        [NPMX_ADC_MEAS_VBAT]     = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
-        [NPMX_ADC_MEAS_NTC]      = MAIN_EVENTSADCSET_EVENTADCNTCRDY_Msk,
-        [NPMX_ADC_MEAS_DIE_TEMP] = MAIN_EVENTSADCSET_EVENTADCTEMPRDY_Msk,
-        [NPMX_ADC_MEAS_VSYS]     = MAIN_EVENTSADCSET_EVENTADCVSYSRDY_Msk,
-        [NPMX_ADC_MEAS_VBUS]     = MAIN_EVENTSADCSET_EVENTADCVBUS7V0RDY_Msk,
-        [NPMX_ADC_MEAS_VBAT0]    = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
-        [NPMX_ADC_MEAS_VBAT1]    = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
-        [NPMX_ADC_MEAS_VBAT2]    = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
-        [NPMX_ADC_MEAS_VBAT3]    = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
+        [NPMX_ADC_MEAS_VBAT]       = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
+        [NPMX_ADC_MEAS_NTC]        = MAIN_EVENTSADCSET_EVENTADCNTCRDY_Msk,
+        [NPMX_ADC_MEAS_DIE_TEMP]   = MAIN_EVENTSADCSET_EVENTADCTEMPRDY_Msk,
+        [NPMX_ADC_MEAS_VSYS]       = MAIN_EVENTSADCSET_EVENTADCVSYSRDY_Msk,
+        [NPMX_ADC_MEAS_VBUS]       = MAIN_EVENTSADCSET_EVENTADCVBUS7V0RDY_Msk,
+        [NPMX_ADC_MEAS_VBAT0]      = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
+        [NPMX_ADC_MEAS_VBAT1]      = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = MAIN_EVENTSADCSET_EVENTADCIBATRDY_Msk,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
     };
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSADCSET),
                                                        &data,
                                                        1);
@@ -628,7 +757,7 @@ npmx_error_t npmx_adc_meas_check(npmx_adc_t const * p_instance,
 
 npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
                                npmx_adc_meas_t    meas,
-                               uint16_t *         p_value)
+                               int32_t *          p_value)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(meas < NPMX_ADC_MEAS_COUNT);
@@ -639,7 +768,7 @@ npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
 
     uint8_t lsb_reg_offset = lsb_register_offset_get(meas);
 
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        msb_reg_address,
                                                        data,
                                                        lsb_reg_offset + 1U);
@@ -666,7 +795,7 @@ npmx_error_t npmx_adc_meas_all_get(npmx_adc_t const *    p_instance,
 
     uint8_t data[NPMX_PERIPH_ADC_MEAS_REGISTERS_COUNT];
 
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
                                                        data,
                                                        NPMX_PERIPH_ADC_MEAS_REGISTERS_COUNT);
@@ -683,7 +812,7 @@ npmx_error_t npmx_adc_meas_all_get(npmx_adc_t const *    p_instance,
         code |= ((uint16_t)data[i] << NPMX_PERIPH_ADC_RESULT_MSB_SHIFT);
 
         err_code = value_from_code_get(p_instance, (npmx_adc_meas_t)i, code, &p_values->values[i]);
-        if (err_code != NPMX_SUCCESS)
+        if (err_code != NPMX_SUCCESS && err_code != NPMX_ERROR_INVALID_PARAM)
         {
             return err_code;
         }
@@ -696,9 +825,10 @@ npmx_error_t npmx_adc_ntc_meas_interval_set(npmx_adc_t *                 p_insta
                                             npmx_adc_ntc_meas_interval_t interval)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(interval < NPMX_ADC_NTC_MEAS_INTERVAL_COUNT);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                                        &data,
                                                        1);
@@ -711,7 +841,7 @@ npmx_error_t npmx_adc_ntc_meas_interval_set(npmx_adc_t *                 p_insta
     data |= ((uint8_t)interval << ADC_ADCAUTOTIMCONF_NTCAUTOTIM_Pos) &
             ADC_ADCAUTOTIMCONF_NTCAUTOTIM_Msk;
 
-    err_code = npmx_backend_register_write(p_instance->p_backend,
+    err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                            NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                            &data,
                                            1);
@@ -731,7 +861,7 @@ npmx_error_t npmx_adc_ntc_meas_interval_get(npmx_adc_t *                   p_ins
     NPMX_ASSERT(p_interval);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                                        &data,
                                                        1);
@@ -750,9 +880,10 @@ npmx_error_t npmx_adc_die_temp_meas_interval_set(npmx_adc_t *                   
                                                  npmx_adc_die_temp_meas_interval_t interval)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(interval < NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_COUNT);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                                        &data,
                                                        1);
@@ -765,7 +896,7 @@ npmx_error_t npmx_adc_die_temp_meas_interval_set(npmx_adc_t *                   
     data |= ((uint8_t)interval << ADC_ADCAUTOTIMCONF_TEMPAUTOTIM_Pos) &
             ADC_ADCAUTOTIMCONF_TEMPAUTOTIM_Msk;
 
-    err_code = npmx_backend_register_write(p_instance->p_backend,
+    err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                            NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                            &data,
                                            1);
@@ -792,7 +923,7 @@ npmx_error_t npmx_adc_die_temp_meas_interval_get(npmx_adc_t *                   
     NPMX_ASSERT(p_interval);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCAUTOTIMCONF),
                                                        &data,
                                                        1);
@@ -814,7 +945,7 @@ npmx_error_t npmx_adc_vbat_meas_delay_set(npmx_adc_t const * p_instance, uint8_t
     uint8_t data = delay << ADC_ADCDELTIMCONF_VBATDELTIM_Pos;
     data &= ADC_ADCDELTIMCONF_VBATDELTIM_Msk;
 
-    return npmx_backend_register_write(p_instance->p_backend,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCDELTIMCONF),
                                        &data,
                                        1);
@@ -826,7 +957,7 @@ npmx_error_t npmx_adc_vbat_meas_delay_get(npmx_adc_t const * p_instance, uint8_t
     NPMX_ASSERT(p_delay);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ADC->ADCDELTIMCONF),
                                                        &data,
                                                        1);
@@ -838,6 +969,54 @@ npmx_error_t npmx_adc_vbat_meas_delay_get(npmx_adc_t const * p_instance, uint8_t
 
     *p_delay = ((data & ADC_ADCDELTIMCONF_VBATDELTIM_Msk)
                 >> ADC_ADCDELTIMCONF_VBATDELTIM_Pos);
+
+    return NPMX_SUCCESS;
+}
+
+npmx_error_t npmx_adc_ibat_meas_status_get(npmx_adc_t const            * p_instance,
+                                           npmx_adc_ibat_meas_status_t * p_ibat_meas_status)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_ibat_meas_status);
+
+    return adc_ibat_meas_status_get(p_instance, p_ibat_meas_status);
+}
+
+npmx_error_t npmx_adc_ibat_meas_enable_set(npmx_adc_t const * p_instance, bool enable)
+{
+    NPMX_ASSERT(p_instance);
+
+    uint8_t data = ((enable ? ADC_ADCIBATMEASEN_IBATMEASENABLE_ENABLE :
+                              ADC_ADCIBATMEASEN_IBATMEASENABLE_DISABLE)
+                    << ADC_ADCIBATMEASEN_IBATMEASENABLE_Pos)
+                   & ADC_ADCIBATMEASEN_IBATMEASENABLE_Msk;
+
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
+                                       NPMX_REG_TO_ADDR(NPM_ADC->ADCIBATMEASEN),
+                                       &data,
+                                       1);
+}
+
+npmx_error_t npmx_adc_ibat_meas_enable_check(npmx_adc_t const * p_instance,
+                                             bool *             p_enable)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_enable);
+
+    uint8_t      data;
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
+                                                       NPMX_REG_TO_ADDR(NPM_ADC->ADCIBATMEASEN),
+                                                       &data,
+                                                       1);
+
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    *p_enable = ((data & ADC_ADCIBATMEASEN_IBATMEASENABLE_Msk)
+                 >> ADC_ADCIBATMEASEN_IBATMEASENABLE_Pos)
+                == ADC_ADCIBATMEASEN_IBATMEASENABLE_ENABLE;
 
     return NPMX_SUCCESS;
 }

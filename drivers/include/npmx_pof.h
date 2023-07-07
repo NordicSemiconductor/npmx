@@ -52,13 +52,17 @@ typedef enum
 {
     NPMX_POF_STATUS_DISABLE = POF_POFCONFIG_POFENA_OFF,     ///< Disable POF warning.
     NPMX_POF_STATUS_ENABLE  = POF_POFCONFIG_POFENA_ENABLED, ///< Enable POF warning.
+    NPMX_POF_STATUS_COUNT,                                  ///< POF warnings count.
+    NPMX_POF_STATUS_INVALID = NPMX_INVALID_ENUM_VALUE,      ///< Invalid POF warning.
 } npmx_pof_status_t;
 
 /** @brief POF warning polarity. */
 typedef enum
 {
-    NPMX_POF_POLARITY_HIGH = POF_POFCONFIG_POFWARNPOLARITY_HIACTIVE, ///< Active in high state.
-    NPMX_POF_POLARITY_LOW  = POF_POFCONFIG_POFWARNPOLARITY_LOACTIVE, ///< Active in low state.
+    NPMX_POF_POLARITY_LOW     = POF_POFCONFIG_POFWARNPOLARITY_LOACTIVE, ///< Active in low state.
+    NPMX_POF_POLARITY_HIGH    = POF_POFCONFIG_POFWARNPOLARITY_HIACTIVE, ///< Active in high state.
+    NPMX_POF_POLARITY_COUNT,                                            ///< POF polarity count.
+    NPMX_POF_POLARITY_INVALID = NPMX_INVALID_ENUM_VALUE,                ///< Invalid POF polarity.
 } npmx_pof_polarity_t;
 
 /** @brief POF warning voltage threshold values. */
@@ -74,6 +78,7 @@ typedef enum
     NPMX_POF_THRESHOLD_3V3     = POF_POFCONFIG_POFVSYSTHRESHSEL_3V3, ///< 3.3 V.
     NPMX_POF_THRESHOLD_3V4     = POF_POFCONFIG_POFVSYSTHRESHSEL_3V4, ///< 3.4 V.
     NPMX_POF_THRESHOLD_3V5     = POF_POFCONFIG_POFVSYSTHRESHSEL_3V5, ///< 3.5 V.
+    NPMX_POF_THRESHOLD_COUNT,                                        ///< Threshold values count.
     NPMX_POF_THRESHOLD_DEFAULT = NPMX_POF_THRESHOLD_2V8,             ///< Default voltage.
     NPMX_POF_THRESHOLD_MAX     = NPMX_POF_THRESHOLD_3V5,             ///< Maximum voltage.
     NPMX_POF_THRESHOLD_INVALID = NPMX_INVALID_ENUM_VALUE,            ///< Invalid voltage.
@@ -82,7 +87,7 @@ typedef enum
 /** @brief Data structure of the POF driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
 } npmx_pof_t;
 
 /** @brief Configuration structure for POF comparator. */
@@ -116,11 +121,13 @@ npmx_pof_threshold_t npmx_pof_threshold_convert(uint32_t millivolts);
 /**
  * @brief Function for converting @ref npmx_pof_threshold_t enumeration to millivolts.
  *
- * @param[in] enum_value Voltage defined as @ref npmx_pof_threshold_t enumeration to be converted into millivolts.
+ * @param[in]  enum_value Voltage defined as @ref npmx_pof_threshold_t enumeration to be converted into millivolts.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_pof_threshold_convert_to_mv(npmx_pof_threshold_t enum_value);
+bool npmx_pof_threshold_convert_to_mv(npmx_pof_threshold_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for setting configuration and enabling POF comparator.

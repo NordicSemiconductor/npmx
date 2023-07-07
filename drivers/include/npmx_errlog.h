@@ -50,9 +50,10 @@ extern "C" {
 /** @brief Available scratch registers. */
 typedef enum
 {
-    NPMX_ERRLOG_SCRATCH0,      ///< Scratch 0 register.
-    NPMX_ERRLOG_SCRATCH1,      ///< Scratch 1 register.
-    NPMX_ERRLOG_SCRATCH_COUNT, ///< Scratch registers count.
+    NPMX_ERRLOG_SCRATCH0,                                  ///< Scratch 0 register.
+    NPMX_ERRLOG_SCRATCH1,                                  ///< Scratch 1 register.
+    NPMX_ERRLOG_SCRATCH_COUNT,                             ///< Scratch registers count.
+    NPMX_ERRLOG_SCRATCH_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid scratch register.
 } npmx_errlog_scratch_t;
 
 /** @brief Data structure of the error log driver instance. */
@@ -64,7 +65,8 @@ typedef struct
 /** @brief Error log tasks. */
 typedef enum
 {
-    NPMX_ERRLOG_TASK_CLEAR, ///< Clear all error log registers.
+    NPMX_ERRLOG_TASK_CLEAR,  ///< Clear all error log registers.
+    NPMX_ERRLOG_TASK_COUNT,  ///< Error log tasks count.
 } npmx_errlog_task_t;
 
 /**
@@ -126,7 +128,6 @@ npmx_error_t npmx_errlog_scratch_get(npmx_errlog_t const * p_instance,
                                      npmx_errlog_scratch_t scratch,
                                      uint8_t *             p_value);
 
-#if defined(ERRLOG_SCRATCH0_BOOTTIMEREN_Msk) || defined(__NPMX_DOXYGEN__)
 /**
  * @brief Function for enabling or disabling boot monitor timer.
  *
@@ -148,8 +149,6 @@ npmx_error_t npmx_errlog_boot_timer_enable_set(npmx_errlog_t const * p_instance,
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_errlog_boot_timer_enable_get(npmx_errlog_t const * p_instance, bool * p_enable);
-
-#endif
 
 /** @} */
 

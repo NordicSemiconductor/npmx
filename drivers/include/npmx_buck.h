@@ -50,8 +50,8 @@ extern "C" {
 /** @brief Data structure of the buck converter (BUCK) driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
-    uint8_t                   hw_index;  ///< Hardware index of buck instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of buck instance.
 } npmx_buck_t;
 
 /** @brief Buck tasks. */
@@ -61,20 +61,17 @@ typedef enum
     NPMX_BUCK_TASK_DISABLE,     ///< Disable buck.
     NPMX_BUCK_TASK_ENABLE_PWM,  ///< Enable PWM mode for buck.
     NPMX_BUCK_TASK_DISABLE_PWM, ///< Disable PWM mode for buck.
+    NPMX_BUCK_TASK_COUNT,       ///< Buck tasks count.
 } npmx_buck_task_t;
 
 /** @brief Possible converter modes of each buck. */
 typedef enum
 {
-#if defined(BUCK_BUCKSTATUS_BUCK1MODE_AUTOMODE) || defined(__NPMX_DOXYGEN__)
     NPMX_BUCK_MODE_AUTO = BUCK_BUCKSTATUS_BUCK1MODE_AUTOMODE, ///< AUTO converter mode, PWM or PFM.
     NPMX_BUCK_MODE_PFM  = BUCK_BUCKSTATUS_BUCK1MODE_PFMMODE,  ///< Force PFM converter mode.
     NPMX_BUCK_MODE_PWM  = BUCK_BUCKSTATUS_BUCK1MODE_PWMMODE,  ///< Force PWM converter mode.
-#else
-    NPMX_BUCK_MODE_AUTO, ///< AUTO converter mode, PWM or PFM.
-    NPMX_BUCK_MODE_PFM,  ///< Force PFM converter mode.
-    NPMX_BUCK_MODE_PWM,  ///< Force PWM converter mode.
-#endif
+    NPMX_BUCK_MODE_COUNT,                                     ///< Buck modes count.
+    NPMX_BUCK_MODE_INVALID = NPMX_INVALID_ENUM_VALUE,         ///< Invalid buck mode.
 } npmx_buck_mode_t;
 
 /** @brief The source of VOUT voltage reference.
@@ -85,57 +82,54 @@ typedef enum
 {
     NPMX_BUCK_VOUT_SELECT_VSET_PIN = BUCK_BUCKSWCTRLSEL_BUCK1SWCTRLSEL_VSETANDSWCTRL, ///< Allow VSET pins to set VOUT.
     NPMX_BUCK_VOUT_SELECT_SOFTWARE = BUCK_BUCKSWCTRLSEL_BUCK1SWCTRLSEL_SWCTRL,        ///< Allow software to override VSET pin.
+    NPMX_BUCK_VOUT_SELECT_COUNT,                                                      ///< VOUT source configs count.
+    NPMX_BUCK_VOUT_SELECT_INVALID  = NPMX_INVALID_ENUM_VALUE,                         ///< Invalid VOUT source config.
 } npmx_buck_vout_select_t;
 
 /** @brief Possible buck output voltages to be set. */
 typedef enum
 {
-    NPMX_BUCK_VOLTAGE_1V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V,   ///< 1.0 V
-    NPMX_BUCK_VOLTAGE_1V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V1,  ///< 1.1 V
-    NPMX_BUCK_VOLTAGE_1V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V2,  ///< 1.2 V
-    NPMX_BUCK_VOLTAGE_1V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V3,  ///< 1.3 V
-    NPMX_BUCK_VOLTAGE_1V4     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V4,  ///< 1.4 V
-    NPMX_BUCK_VOLTAGE_1V5     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V5,  ///< 1.5 V
-    NPMX_BUCK_VOLTAGE_1V6     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V6,  ///< 1.6 V
-    NPMX_BUCK_VOLTAGE_1V7     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V7,  ///< 1.7 V
-    NPMX_BUCK_VOLTAGE_1V8     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V8,  ///< 1.8 V
-    NPMX_BUCK_VOLTAGE_1V9     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V9,  ///< 1.9 V
-#if defined(BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V) || defined(__NPMX_DOXYGEN__)
-    NPMX_BUCK_VOLTAGE_2V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V,   ///< 2.0 V
-#elif defined(BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V0)
-    NPMX_BUCK_VOLTAGE_2V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V0,  ///< 2.0 V
-#endif
-    NPMX_BUCK_VOLTAGE_2V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V1,  ///< 2.1 V
-    NPMX_BUCK_VOLTAGE_2V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V2,  ///< 2.2 V
-    NPMX_BUCK_VOLTAGE_2V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V3,  ///< 2.3 V
-    NPMX_BUCK_VOLTAGE_2V4     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V4,  ///< 2.4 V
-    NPMX_BUCK_VOLTAGE_2V5     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V5,  ///< 2.5 V
-    NPMX_BUCK_VOLTAGE_2V6     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V6,  ///< 2.6 V
-    NPMX_BUCK_VOLTAGE_2V7     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V7,  ///< 2.7 V
-    NPMX_BUCK_VOLTAGE_2V8     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V8,  ///< 2.8 V
-    NPMX_BUCK_VOLTAGE_2V9     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V9,  ///< 2.9 V
-#if defined(BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V) || defined(__NPMX_DOXYGEN__)
-    NPMX_BUCK_VOLTAGE_3V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V,   ///< 3.0 V
-#elif defined(BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V0)
-    NPMX_BUCK_VOLTAGE_3V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V0,  ///< 3.0 V
-#endif
-    NPMX_BUCK_VOLTAGE_3V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V1,  ///< 3.1 V
-    NPMX_BUCK_VOLTAGE_3V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V2,  ///< 3.2 V
-    NPMX_BUCK_VOLTAGE_3V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V3,  ///< 3.3 V
-    NPMX_BUCK_VOLTAGE_MAX     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V3,  ///< 3.3 V
-    NPMX_BUCK_VOLTAGE_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid voltage.
+    NPMX_BUCK_VOLTAGE_1V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V,  ///< 1.0 V
+    NPMX_BUCK_VOLTAGE_1V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V1, ///< 1.1 V
+    NPMX_BUCK_VOLTAGE_1V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V2, ///< 1.2 V
+    NPMX_BUCK_VOLTAGE_1V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V3, ///< 1.3 V
+    NPMX_BUCK_VOLTAGE_1V4     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V4, ///< 1.4 V
+    NPMX_BUCK_VOLTAGE_1V5     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V5, ///< 1.5 V
+    NPMX_BUCK_VOLTAGE_1V6     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V6, ///< 1.6 V
+    NPMX_BUCK_VOLTAGE_1V7     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V7, ///< 1.7 V
+    NPMX_BUCK_VOLTAGE_1V8     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V8, ///< 1.8 V
+    NPMX_BUCK_VOLTAGE_1V9     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_1V9, ///< 1.9 V
+    NPMX_BUCK_VOLTAGE_2V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V0, ///< 2.0 V
+    NPMX_BUCK_VOLTAGE_2V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V1, ///< 2.1 V
+    NPMX_BUCK_VOLTAGE_2V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V2, ///< 2.2 V
+    NPMX_BUCK_VOLTAGE_2V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V3, ///< 2.3 V
+    NPMX_BUCK_VOLTAGE_2V4     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V4, ///< 2.4 V
+    NPMX_BUCK_VOLTAGE_2V5     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V5, ///< 2.5 V
+    NPMX_BUCK_VOLTAGE_2V6     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V6, ///< 2.6 V
+    NPMX_BUCK_VOLTAGE_2V7     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V7, ///< 2.7 V
+    NPMX_BUCK_VOLTAGE_2V8     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V8, ///< 2.8 V
+    NPMX_BUCK_VOLTAGE_2V9     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_2V9, ///< 2.9 V
+    NPMX_BUCK_VOLTAGE_3V0     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V0, ///< 3.0 V
+    NPMX_BUCK_VOLTAGE_3V1     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V1, ///< 3.1 V
+    NPMX_BUCK_VOLTAGE_3V2     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V2, ///< 3.2 V
+    NPMX_BUCK_VOLTAGE_3V3     = BUCK_BUCK1NORMVOUT_BUCK1NORMVOUT_3V3, ///< 3.3 V
+    NPMX_BUCK_VOLTAGE_COUNT,                                          ///< Possible voltages count.
+    NPMX_BUCK_VOLTAGE_MAX     = NPMX_BUCK_VOLTAGE_3V3,                ///< Maximum voltage.
+    NPMX_BUCK_VOLTAGE_INVALID = NPMX_INVALID_ENUM_VALUE,              ///< Invalid voltage.
 } npmx_buck_voltage_t;
 
 /** @brief Possible GPIO to be selected with buck configurations. */
 typedef enum
 {
-    NPMX_BUCK_GPIO_NC  = BUCK_BUCKENCTRL_BUCK1ENGPISEL_NOTUSED,  ///< Not used.
-    NPMX_BUCK_GPIO_0   = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO0,    ///< GPI_0 selected.
-    NPMX_BUCK_GPIO_1   = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO1,    ///< GPI_1 selected.
-    NPMX_BUCK_GPIO_2   = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO2,    ///< GPI_2 selected.
-    NPMX_BUCK_GPIO_3   = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO3,    ///< GPI_3 selected.
-    NPMX_BUCK_GPIO_4   = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO4,    ///< GPI_4 selected.
-    NPMX_BUCK_GPIO_NC1 = BUCK_BUCKENCTRL_BUCK1ENGPISEL_NOTUSED1, ///< No GPI selected.
+    NPMX_BUCK_GPIO_NC      = BUCK_BUCKENCTRL_BUCK1ENGPISEL_NOTUSED,  ///< Not used.
+    NPMX_BUCK_GPIO_0       = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO0,    ///< GPI_0 selected.
+    NPMX_BUCK_GPIO_1       = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO1,    ///< GPI_1 selected.
+    NPMX_BUCK_GPIO_2       = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO2,    ///< GPI_2 selected.
+    NPMX_BUCK_GPIO_3       = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO3,    ///< GPI_3 selected.
+    NPMX_BUCK_GPIO_4       = BUCK_BUCKENCTRL_BUCK1ENGPISEL_GPIO4,    ///< GPI_4 selected.
+    NPMX_BUCK_GPIO_NC1     = BUCK_BUCKENCTRL_BUCK1ENGPISEL_NOTUSED1, ///< No GPI selected.
+    NPMX_BUCK_GPIO_COUNT,                                            ///< GPIO configs count.
+    NPMX_BUCK_GPIO_INVALID = NPMX_INVALID_ENUM_VALUE,                ///< Invalid BUCK GPIO.
 } npmx_buck_gpio_t;
 
 /** @brief Configuration structure for GPIO used as input signal for buck. */
@@ -145,7 +139,6 @@ typedef struct
     bool             inverted; ///< If true, the GPI state will be inverted, logical low will activate the signal.
 } npmx_buck_gpio_config_t;
 
-#if defined(BUCK_BUCKSTATUS_BUCK1MODE_Msk) || defined(__NPMX_DOXYGEN__)
 /** @brief Buck status structure. */
 typedef struct
 {
@@ -153,7 +146,6 @@ typedef struct
     bool             powered;     ///< True if buck is powered on, false otherwise.
     bool             pwm_enabled; ///< True if PWM mode is enabled, false otherwise.
 } npmx_buck_status_t;
-#endif
 
 /**
  * @brief Function for returning buck instance based on index.
@@ -179,10 +171,12 @@ npmx_buck_voltage_t npmx_buck_voltage_convert(uint32_t millivolts);
  * @brief Function for converting @ref npmx_buck_voltage_t enumeration to millivolts.
  *
  * @param[in] enum_value Voltage defined as @ref npmx_buck_voltage_t enumeration to be converted into millivolts.
+ * @param[out] p_val     Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_buck_voltage_convert_to_mv(npmx_buck_voltage_t enum_value);
+bool npmx_buck_voltage_convert_to_mv(npmx_buck_voltage_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for activating the specified buck task.
@@ -417,7 +411,6 @@ npmx_error_t npmx_buck_active_discharge_enable_set(npmx_buck_t const * p_instanc
  */
 npmx_error_t npmx_buck_active_discharge_enable_get(npmx_buck_t const * p_instance, bool * p_enable);
 
-#if defined(BUCK_BUCKSTATUS_BUCK1MODE_Msk) || defined(__NPMX_DOXYGEN__)
 /**
  * @brief Function for getting status of the specified buck converter.
  *
@@ -428,7 +421,6 @@ npmx_error_t npmx_buck_active_discharge_enable_get(npmx_buck_t const * p_instanc
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_buck_status_get(npmx_buck_t const * p_instance, npmx_buck_status_t * p_status);
-#endif
 
 /** @} */
 

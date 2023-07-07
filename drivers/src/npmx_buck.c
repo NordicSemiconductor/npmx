@@ -92,7 +92,6 @@ static const uint16_t m_norm_vol_addr[NPMX_PERIPH_BUCK_COUNT] =
     [1] = NPMX_REG_TO_ADDR(NPM_BUCK->BUCK2NORMVOUT),
 };
 
-#if defined(BUCK_BUCKSTATUS_BUCK1MODE_Msk)
 static const uint8_t m_status_mode_msk[NPMX_PERIPH_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1MODE_Msk,
@@ -128,7 +127,6 @@ static const uint8_t m_status_pwmok_pos[NPMX_PERIPH_BUCK_COUNT] =
     [0] = BUCK_BUCKSTATUS_BUCK1PWMOK_Pos,
     [1] = BUCK_BUCKSTATUS_BUCK2PWMOK_Pos,
 };
-#endif
 
 /**
  * @brief Function for activating the specified BUCK task.
@@ -143,7 +141,7 @@ static npmx_error_t task_trigger(npmx_buck_t const * p_instance, npmx_buck_task_
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint16_t task_addr[NPMX_BUCK_TASK_COUNT][NPMX_PERIPH_BUCK_COUNT] =
     {
         [NPMX_BUCK_TASK_ENABLE] =
         {
@@ -514,16 +512,23 @@ npmx_buck_voltage_t npmx_buck_voltage_convert(uint32_t millivolts)
     }
 }
 
-uint32_t npmx_buck_voltage_convert_to_mv(npmx_buck_voltage_t enum_value)
+bool npmx_buck_voltage_convert_to_mv(npmx_buck_voltage_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_BUCK_VOLTAGE_INVALID);
-
-    return BUCK_VOLTAGE_BASE + (uint32_t)enum_value * BUCK_VOLTAGE_DIFF;
+    if (enum_value < NPMX_BUCK_VOLTAGE_COUNT)
+    {
+        *p_val = BUCK_VOLTAGE_BASE + (uint32_t)enum_value * BUCK_VOLTAGE_DIFF;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 npmx_error_t npmx_buck_task_trigger(npmx_buck_t const * p_instance, npmx_buck_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_BUCK_TASK_COUNT);
 
     return task_trigger(p_instance, task);
 }
@@ -531,6 +536,7 @@ npmx_error_t npmx_buck_task_trigger(npmx_buck_t const * p_instance, npmx_buck_ta
 npmx_error_t npmx_buck_converter_mode_set(npmx_buck_t const * p_instance, npmx_buck_mode_t mode)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(mode < NPMX_BUCK_MODE_COUNT);
 
     /* Setting the mode of the buck converter to force PWM mode or AUTO. */
     npmx_error_t err_code = pwm_enable_set(p_instance, (mode == NPMX_BUCK_MODE_PWM));
@@ -650,6 +656,7 @@ npmx_error_t npmx_buck_enable_gpio_config_set(npmx_buck_t const *             p_
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->gpio < NPMX_BUCK_GPIO_COUNT);
 
     return gpio_config_set(p_instance, NPMX_BUCK_GPIO_TYPE_ENABLE, p_config);
 }
@@ -668,6 +675,7 @@ npmx_error_t npmx_buck_retention_gpio_config_set(npmx_buck_t const *            
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->gpio < NPMX_BUCK_GPIO_COUNT);
 
     return gpio_config_set(p_instance, NPMX_BUCK_GPIO_TYPE_VRET, p_config);
 }
@@ -686,6 +694,7 @@ npmx_error_t npmx_buck_forced_pwm_gpio_config_set(npmx_buck_t const *           
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->gpio < NPMX_BUCK_GPIO_COUNT);
 
     return gpio_config_set(p_instance, NPMX_BUCK_GPIO_TYPE_PWM, p_config);
 }
@@ -703,6 +712,7 @@ npmx_error_t npmx_buck_vout_select_set(npmx_buck_t const *     p_instance,
                                        npmx_buck_vout_select_t selection)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(selection < NPMX_BUCK_VOUT_SELECT_COUNT);
 
     uint8_t control;
 
@@ -823,7 +833,6 @@ npmx_error_t npmx_buck_active_discharge_enable_get(npmx_buck_t const * p_instanc
     return NPMX_SUCCESS;
 }
 
-#if defined(BUCK_BUCKSTATUS_BUCK1MODE_Msk)
 npmx_error_t npmx_buck_status_get(npmx_buck_t const * p_instance, npmx_buck_status_t * p_status)
 {
     NPMX_ASSERT(p_instance);
@@ -852,4 +861,3 @@ npmx_error_t npmx_buck_status_get(npmx_buck_t const * p_instance, npmx_buck_stat
 
     return NPMX_SUCCESS;
 }
-#endif

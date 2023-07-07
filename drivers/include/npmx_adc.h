@@ -50,7 +50,8 @@ extern "C" {
 /** @brief Data structure of the Analog-to-Digital Converter (ADC) driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
+    npmx_instance_t * p_pmic; ///< Pointer to the PMIC instance.
+    bool              burst;  ///< True if burst measurement is enabled, false otherwise.
 } npmx_adc_t;
 
 /** @brief ADC tasks. */
@@ -63,21 +64,23 @@ typedef enum
     NPMX_ADC_TASK_SINGLE_SHOT_VBUS,     ///< VBUS (7 Volt range) single-shot measurement trigger.
     NPMX_ADC_TASK_DELAYED_MEAS_VBAT,    ///< VBAT delay measurement trigger.
     NPMX_ADC_TASK_UPDATE_AUTO_INTERVAL, ///< Update intervals for NTC and die temperature auto measurements trigger.
+    NPMX_ADC_TASK_COUNT,                ///< ADC tasks count.
 } npmx_adc_task_t;
 
 /** @brief Possible measurements that can be read from ADC. */
 typedef enum
 {
-    NPMX_ADC_MEAS_VBAT,     ///< VBAT measurement.
-    NPMX_ADC_MEAS_NTC,      ///< Battery NTC measurement.
-    NPMX_ADC_MEAS_DIE_TEMP, ///< Internal die temperature measurement.
-    NPMX_ADC_MEAS_VSYS,     ///< VSYS voltage measurement.
-    NPMX_ADC_MEAS_VBUS,     ///< VBUS (7 Volt range) measurement.
-    NPMX_ADC_MEAS_VBAT0,    ///< VBAT0 from burst mode.
-    NPMX_ADC_MEAS_VBAT1,    ///< VBAT1 from burst mode.
-    NPMX_ADC_MEAS_VBAT2,    ///< VBAT2 from burst mode.
-    NPMX_ADC_MEAS_VBAT3,    ///< VBAT3 from burst mode.
-    NPMX_ADC_MEAS_COUNT,    ///< ADC requests maximum count.
+    NPMX_ADC_MEAS_VBAT,                              ///< VBAT measurement (in millivolts).
+    NPMX_ADC_MEAS_NTC,                               ///< Battery NTC measurement (in ohms).
+    NPMX_ADC_MEAS_DIE_TEMP,                          ///< Internal die temperature measurement (in millidegrees Celsius).
+    NPMX_ADC_MEAS_VSYS,                              ///< VSYS voltage measurement (in millivolts).
+    NPMX_ADC_MEAS_VBUS,                              ///< VBUS (7 Volt range) measurement (in millivolts).
+    NPMX_ADC_MEAS_VBAT0,                             ///< VBAT0 from burst mode measurement (in millivolts).
+    NPMX_ADC_MEAS_VBAT1,                             ///< VBAT1 from burst mode measurement (in millivolts).
+    NPMX_ADC_MEAS_VBAT2_IBAT,                        ///< Measurement of either VBAT2 in burst mode or IBAT (respectively in millivolts or milliamperes).
+    NPMX_ADC_MEAS_VBAT3_VBUS,                        ///< Measurement of either VBAT3 in burst mode or VBUS (both in millivolts).
+    NPMX_ADC_MEAS_COUNT,                             ///< ADC requests maximum count.
+    NPMX_ADC_MEAS_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid ADC measurement.
 } npmx_adc_meas_t;
 
 /**
@@ -90,6 +93,7 @@ typedef enum
     NPMX_ADC_NTC_TYPE_10_K    = ADC_ADCNTCRSEL_ADCNTCRSEL_10K,  ///< NTC10K.
     NPMX_ADC_NTC_TYPE_47_K    = ADC_ADCNTCRSEL_ADCNTCRSEL_47K,  ///< NTC47K.
     NPMX_ADC_NTC_TYPE_100_K   = ADC_ADCNTCRSEL_ADCNTCRSEL_100K, ///< NTC100K.
+    NPMX_ADC_NTC_TYPE_COUNT,                                    ///< NTC types count.
     NPMX_ADC_NTC_TYPE_MAX     = NPMX_ADC_NTC_TYPE_100_K,        ///< Maximum resistance.
     NPMX_ADC_NTC_TYPE_INVALID = NPMX_INVALID_ENUM_VALUE,        ///< Invalid battery NTC type.
 } npmx_adc_ntc_type_t;
@@ -101,6 +105,7 @@ typedef enum
     NPMX_ADC_NTC_MEAS_INTERVAL_64_MS   = ADC_ADCAUTOTIMCONF_NTCAUTOTIM_64MS,   ///< Interval equal to 64 ms.
     NPMX_ADC_NTC_MEAS_INTERVAL_128_MS  = ADC_ADCAUTOTIMCONF_NTCAUTOTIM_128MS,  ///< Interval equal to 128 ms.
     NPMX_ADC_NTC_MEAS_INTERVAL_1024_MS = ADC_ADCAUTOTIMCONF_NTCAUTOTIM_1024MS, ///< Interval equal to 1024 ms.
+    NPMX_ADC_NTC_MEAS_INTERVAL_COUNT,                                          ///< Interval values count.
     NPMX_ADC_NTC_MEAS_INTERVAL_MAX     = NPMX_ADC_NTC_MEAS_INTERVAL_1024_MS,   ///< Maximum interval value.
     NPMX_ADC_NTC_MEAS_INTERVAL_INVALID = NPMX_INVALID_ENUM_VALUE,              ///< Invalid interval value.
 } npmx_adc_ntc_meas_interval_t;
@@ -112,9 +117,21 @@ typedef enum
     NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_8_MS    = ADC_ADCAUTOTIMCONF_TEMPAUTOTIM_8MS,    ///< Interval equal to 8 ms.
     NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_16_MS   = ADC_ADCAUTOTIMCONF_TEMPAUTOTIM_16MS,   ///< Interval equal to 16 ms.
     NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_32_MS   = ADC_ADCAUTOTIMCONF_TEMPAUTOTIM_32MS,   ///< Interval equal to 32 ms.
+    NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_COUNT,                                           ///< Interval values count.
     NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_MAX     = NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_32_MS, ///< Maximum interval value.
     NPMX_ADC_DIE_TEMP_MEAS_INTERVAL_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid interval value.
 } npmx_adc_die_temp_meas_interval_t;
+
+/** @brief Battery charging current. */
+typedef enum
+{
+    NPMX_ADC_IBAT_MEAS_CURRENT_TRICKLE = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_TRICKLE, ///< 10% charge (Trickle).
+    NPMX_ADC_IBAT_MEAS_CURRENT_LOWTEMP = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_LOWTEMP, ///< 50% charge (Low Temp).
+    NPMX_ADC_IBAT_MEAS_CURRENT_RFU     = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_RFU,     ///< 10% charge (default, RFU).
+    NPMX_ADC_IBAT_MEAS_CURRENT_FAST    = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_FAST,    ///< 100% charge (Fast).
+    NPMX_ADC_IBAT_MEAS_CURRENT_MAX     = NPMX_ADC_IBAT_MEAS_CURRENT_FAST,               ///< Maximum current value.
+    NPMX_ADC_IBAT_MEAS_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,                       ///< Invalid current value.
+} npmx_adc_ibat_meas_current_t;
 
 /** @brief Configuration structure for ADC. */
 typedef struct
@@ -126,8 +143,15 @@ typedef struct
 /** @brief Structure for all measurements readings. */
 typedef struct
 {
-    uint16_t values[NPMX_ADC_MEAS_COUNT]; ///< Table for all measurements readings.
+    int32_t values[NPMX_ADC_MEAS_COUNT]; ///< Table for all measurements readings.
 } npmx_adc_meas_all_t;
+
+/** @brief Structure for the battery current measurement status. */
+typedef struct
+{
+    npmx_adc_ibat_meas_current_t charge_current; ///< Charging current type.
+    bool                         charging;       ///< True if battery is being charged, false if battery is discharging.
+} npmx_adc_ibat_meas_status_t;
 
 /**
  * @brief Function for returning ADC instance based on index.
@@ -154,11 +178,13 @@ npmx_adc_ntc_type_t npmx_adc_ntc_type_convert(uint32_t resistance);
 /**
  * @brief Function for converting the value from NTC enumeration type to resistance.
  *
- * @param[in] battery_ntc Battery NTC type.
+ * @param[in]  battery_ntc Battery NTC type.
+ * @param[out] p_val       Pointer to the variable that stores the conversion result.
  *
- * @return Resistance value in ohms.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_adc_ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc);
+bool npmx_adc_ntc_type_convert_to_ohms(npmx_adc_ntc_type_t battery_ntc, uint32_t * p_val);
 
 /**
  * @brief Function for converting time in milliseconds to
@@ -175,11 +201,14 @@ npmx_adc_ntc_meas_interval_t npmx_adc_ntc_meas_interval_convert(uint32_t time);
 /**
  * @brief Function for converting @ref npmx_adc_ntc_meas_interval_t enumeration to milliseconds.
  *
- * @param[in] enum_value Time defined as @ref npmx_adc_ntc_meas_interval_t enumeration to be converted into milliseconds.
- *
- * @return Result of conversion.
+ * @param[in]  enum_value Time defined as @ref npmx_adc_ntc_meas_interval_t enumeration to be converted into milliseconds.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
+ * 
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_adc_ntc_meas_interval_convert_to_ms(npmx_adc_ntc_meas_interval_t enum_value);
+bool npmx_adc_ntc_meas_interval_convert_to_ms(npmx_adc_ntc_meas_interval_t enum_value,
+                                              uint32_t *                   p_val);
 
 /**
  * @brief Function for converting time in milliseconds to
@@ -196,12 +225,14 @@ npmx_adc_die_temp_meas_interval_t npmx_adc_die_temp_meas_interval_convert(uint32
 /**
  * @brief Function for converting @ref npmx_adc_die_temp_meas_interval_t enumeration to milliseconds.
  *
- * @param[in] enum_value Time defined as @ref npmx_adc_die_temp_meas_interval_t enumeration to be converted into milliseconds.
- *
- * @return Result of conversion.
+ * @param[in]  enum_value Time defined as @ref npmx_adc_die_temp_meas_interval_t enumeration to be converted into milliseconds.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
+ * 
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t
-npmx_adc_die_temp_meas_interval_convert_to_ms(npmx_adc_die_temp_meas_interval_t enum_value);
+bool npmx_adc_die_temp_meas_interval_convert_to_ms(npmx_adc_die_temp_meas_interval_t enum_value,
+                                                   uint32_t *                        p_val);
 
 /**
  * @brief Function for mapping @ref npmx_adc_ntc_type_t enumeration values to string.
@@ -232,7 +263,7 @@ npmx_error_t npmx_adc_task_trigger(npmx_adc_t const * p_instance, npmx_adc_task_
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_adc_config_set(npmx_adc_t const * p_instance, npmx_adc_config_t const * p_config);
+npmx_error_t npmx_adc_config_set(npmx_adc_t * p_instance, npmx_adc_config_t const * p_config);
 
 /**
  * @brief Function for reading the ADC configuration.
@@ -306,7 +337,7 @@ npmx_error_t npmx_adc_meas_check(npmx_adc_t const * p_instance,
  */
 npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
                                npmx_adc_meas_t    meas,
-                               uint16_t *         p_value);
+                               int32_t *          p_value);
 
 /**
  * @brief Function for getting all measured values.
@@ -388,6 +419,40 @@ npmx_error_t npmx_adc_vbat_meas_delay_set(npmx_adc_t const * p_instance, uint8_t
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_adc_vbat_meas_delay_get(npmx_adc_t const * p_instance, uint8_t * p_delay);
+
+/**
+ * @brief Function for getting the battery current measurement status.
+ *
+ * @param[in]  p_instance         Pointer to the ADC instance.
+ * @param[out] p_ibat_meas_status Pointer to the IBAT measurement status structure.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_adc_ibat_meas_status_get(npmx_adc_t const            * p_instance,
+                                           npmx_adc_ibat_meas_status_t * p_ibat_meas_status);
+
+/**
+ * @brief Function for setting the auto measurement of battery current.
+ *
+ * @param[in] p_instance Pointer to the ADC instance.
+ * @param[in] enable     True if auto IBAT measurement is to be enabled, false otherwise.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_adc_ibat_meas_enable_set(npmx_adc_t const * p_instance, bool enable);
+
+/**
+ * @brief Function for checking whether auto measurement of battery current is enabled.
+ *
+ * @param[in]  p_instance Pointer to the ADC instance.
+ * @param[out] p_enable   Pointer to the auto IBAT measurement variable. True if auto measurement is enabled, false otherwise.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_adc_ibat_meas_enable_check(npmx_adc_t const * p_instance, bool * p_enable);
 
 /** @} */
 

@@ -72,7 +72,6 @@ static const uint8_t m_en_gpio_mask[NPMX_PERIPH_LDSW_COUNT] =
     [1] = LDSW_LDSW2GPISEL_LDSW2GPISEL_Msk,
 };
 
-#if defined(LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk)
 static const uint8_t m_inv_gpio_pos[NPMX_PERIPH_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1GPISEL_LDSW1GPIINV_Pos,
@@ -84,7 +83,6 @@ static const uint8_t m_inv_gpio_mask[NPMX_PERIPH_LDSW_COUNT] =
     [0] = LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk,
     [1] = LDSW_LDSW2GPISEL_LDSW2GPIINV_Msk,
 };
-#endif // defined(LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk)
 
 static const uint16_t m_en_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
 {
@@ -106,24 +104,14 @@ static const uint8_t m_soft_start_current_mask[NPMX_PERIPH_LDSW_COUNT] =
 
 static const uint8_t m_soft_start_en_pos[NPMX_PERIPH_LDSW_COUNT] =
 {
-#if defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTEN_Msk)
-    [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTEN_Pos,
-    [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_Pos,
-#elif defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Msk)
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Pos,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_Pos,
-#endif
 };
 
 static const uint8_t m_soft_start_en_mask[NPMX_PERIPH_LDSW_COUNT] =
 {
-#if defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTEN_Msk)
-    [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTEN_Msk,
-    [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_Msk,
-#elif defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Msk)
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Msk,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_Msk,
-#endif
 };
 
 static const uint8_t m_en_dis_pos[NPMX_PERIPH_LDSW_COUNT] =
@@ -138,7 +126,6 @@ static const uint8_t m_en_dis_mask[NPMX_PERIPH_LDSW_COUNT] =
     [1] = LDSW_LDSWCONFIG_LDSW2ACTIVEDISCHARGE_Msk,
 };
 
-#if defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V)
 static const uint16_t m_ldo_sel_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW1LDOSEL),
@@ -162,7 +149,6 @@ static const uint16_t m_vout_sel_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
     [0] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW1VOUTSEL),
     [1] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW2VOUTSEL),
 };
-#endif // defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V)
 
 /**
  * @brief Function for activating the specified LDSW task.
@@ -177,7 +163,7 @@ static npmx_error_t task_trigger(npmx_ldsw_t const * p_instance, npmx_ldsw_task_
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[][NPMX_PERIPH_LDSW_COUNT] =
+    static const uint16_t task_addr[NPMX_LDSW_TASK_COUNT][NPMX_PERIPH_LDSW_COUNT] =
     {
         [NPMX_LDSW_TASK_ENABLE] =
         {
@@ -204,7 +190,6 @@ npmx_ldsw_t * npmx_ldsw_get(npmx_instance_t * p_pmic, uint8_t idx)
     return &p_pmic->ldsw[idx];
 }
 
-#if defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V)
 npmx_ldsw_voltage_t npmx_ldsw_voltage_convert(uint32_t millivolts)
 {
     switch (millivolts)
@@ -262,13 +247,18 @@ npmx_ldsw_voltage_t npmx_ldsw_voltage_convert(uint32_t millivolts)
     }
 }
 
-uint32_t npmx_ldsw_voltage_convert_to_mv(npmx_ldsw_voltage_t enum_value)
+bool npmx_ldsw_voltage_convert_to_mv(npmx_ldsw_voltage_t enum_value,  uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_LDSW_VOLTAGE_INVALID);
-
-    return LDSW_VOLTAGE_BASE + (uint32_t)enum_value * LDSW_VOLTAGE_DIFF;
+    if (enum_value < NPMX_LDSW_VOLTAGE_COUNT)
+    {
+        *p_val = LDSW_VOLTAGE_BASE + (uint32_t)enum_value * LDSW_VOLTAGE_DIFF;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
-#endif
 
 npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t milliamperes)
 {
@@ -287,16 +277,24 @@ npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t mil
     }
 }
 
-uint32_t npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t enum_value)
+bool npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t enum_value,
+                                                uint32_t *                     p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_LDSW_SOFT_START_CURRENT_INVALID);
-
-    return LDSW_SOFT_START_CURRENT_BASE + (uint32_t)enum_value * LDSW_SOFT_START_CURRENT_DIFF;
+    if (enum_value < NPMX_LDSW_SOFT_START_CURRENT_COUNT)
+    {
+        *p_val = LDSW_SOFT_START_CURRENT_BASE + (uint32_t)enum_value * LDSW_SOFT_START_CURRENT_DIFF;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 npmx_error_t npmx_ldsw_task_trigger(npmx_ldsw_t const * p_instance, npmx_ldsw_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_LDSW_TASK_COUNT);
 
     return task_trigger(p_instance, task);
 }
@@ -305,16 +303,16 @@ npmx_error_t npmx_ldsw_enable_gpio_set(npmx_ldsw_t const *             p_instanc
                                        npmx_ldsw_gpio_config_t const * p_config)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->gpio < NPMX_LDSW_GPIO_COUNT);
 
     uint8_t data = ((uint8_t)p_config->gpio << m_en_gpio_pos[p_instance->hw_index]) &
                    m_en_gpio_mask[p_instance->hw_index];
 
-#if defined(LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk)
     data |= ((p_config->inverted ? LDSW_LDSW1GPISEL_LDSW1GPIINV_INVERTED :
                                    LDSW_LDSW1GPISEL_LDSW1GPIINV_NORMAL)
              << m_inv_gpio_pos[p_instance->hw_index]) &
             m_inv_gpio_mask[p_instance->hw_index];
-#endif
 
     return npmx_backend_register_write(p_instance->p_backend,
                                        m_en_reg_addr[p_instance->hw_index],
@@ -342,11 +340,9 @@ npmx_error_t npmx_ldsw_enable_gpio_get(npmx_ldsw_t const *       p_instance,
     p_config->gpio = (npmx_ldsw_gpio_t)((data & m_en_gpio_mask[p_instance->hw_index])
                                         >> m_en_gpio_pos[p_instance->hw_index]);
 
-#if defined(LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk)
     p_config->inverted = ((data & m_inv_gpio_mask[p_instance->hw_index])
                           >> m_inv_gpio_pos[p_instance->hw_index]) ==
                          LDSW_LDSW1GPISEL_LDSW1GPIINV_INVERTED;
-#endif
 
     return NPMX_SUCCESS;
 }
@@ -367,7 +363,7 @@ npmx_error_t npmx_ldsw_soft_start_config_set(npmx_ldsw_t const *                
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
-    NPMX_ASSERT(p_config->current != NPMX_LDSW_SOFT_START_CURRENT_INVALID);
+    NPMX_ASSERT(p_config->current < NPMX_LDSW_SOFT_START_CURRENT_COUNT);
 
     uint8_t      data;
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
@@ -384,17 +380,10 @@ npmx_error_t npmx_ldsw_soft_start_config_set(npmx_ldsw_t const *                
 
     data |= ((uint8_t)p_config->current << m_soft_start_current_pos[p_instance->hw_index]) &
             m_soft_start_current_mask[p_instance->hw_index];
-#if defined(LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_SOFTSTART)
-    data |= ((p_config->enable ? LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_SOFTSTART :
-                                 LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_NOEFFECT)
-             << m_soft_start_en_pos[p_instance->hw_index]) &
-            m_soft_start_en_mask[p_instance->hw_index];
-#elif defined(LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_NOSOFTSTART)
     data |= ((p_config->enable ? LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_NOEFFECT :
                                  LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_NOSOFTSTART)
              << m_soft_start_en_pos[p_instance->hw_index]) &
             m_soft_start_en_mask[p_instance->hw_index];
-#endif
 
     err_code = npmx_backend_register_write(p_instance->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_LDSW->LDSWCONFIG),
@@ -427,15 +416,9 @@ npmx_error_t npmx_ldsw_soft_start_config_get(npmx_ldsw_t const *             p_i
     p_config->current =
         (npmx_ldsw_soft_start_current_t)((data & m_soft_start_current_mask[p_instance->hw_index])
                                          >> m_soft_start_current_pos[p_instance->hw_index]);
-#if defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTEN_Msk)
-    p_config->enable = ((data & m_soft_start_en_mask[p_instance->hw_index])
-                        >> m_soft_start_en_pos[p_instance->hw_index]) ==
-                       LDSW_LDSWCONFIG_LDSW2SOFTSTARTEN_SOFTSTART;
-#elif defined(LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Msk)
     p_config->enable = ((data & m_soft_start_en_mask[p_instance->hw_index])
                         >> m_soft_start_en_pos[p_instance->hw_index]) ==
                        LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_NOSOFTSTART;
-#endif
 
     return NPMX_SUCCESS;
 }
@@ -494,10 +477,10 @@ npmx_error_t npmx_ldsw_active_discharge_enable_get(npmx_ldsw_t const * p_instanc
     return NPMX_SUCCESS;
 }
 
-#if defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V)
 npmx_error_t npmx_ldsw_mode_set(npmx_ldsw_t const * p_instance, npmx_ldsw_mode_t mode)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(mode < NPMX_LDSW_MODE_COUNT);
 
     uint8_t      data;
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
@@ -554,7 +537,7 @@ npmx_error_t npmx_ldsw_mode_get(npmx_ldsw_t const * p_instance, npmx_ldsw_mode_t
 npmx_error_t npmx_ldsw_ldo_voltage_set(npmx_ldsw_t const * p_instance, npmx_ldsw_voltage_t voltage)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(voltage <= NPMX_LDSW_VOLTAGE_MAX);
+    NPMX_ASSERT(voltage < NPMX_LDSW_VOLTAGE_COUNT);
 
     uint8_t data = ((uint8_t)voltage << LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_Pos) &
                    LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_Msk;
@@ -587,5 +570,3 @@ npmx_error_t npmx_ldsw_ldo_voltage_get(npmx_ldsw_t const *   p_instance,
 
     return NPMX_SUCCESS;
 }
-
-#endif // defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V)

@@ -72,37 +72,6 @@ extern "C" {
  */
 #define NPMX_STATIC_ASSERT(expression)
 
-/**
- * @brief Function for I2C write.
- *
- * @param[in] p_inst           The pointer to the backend instance.
- * @param[in] register_address The register address in npmx device to be modified.
- * @param[in] p_data           The pointer to data to write.
- * @param[in] num_of_bytes     The number of bytes of data to write.
- *
- * @return NPMX_SUCCESS  All data written successfully.
- * @return NPMX_ERROR_IO Backend returned IO error during data writing.
- */
-npmx_error_t npmx_backend_i2c_write(npmx_backend_instance_t const * p_inst,
-                                    uint16_t                        register_address,
-                                    uint8_t *                       p_data,
-                                    uint32_t                        num_of_bytes);
-/**
- * @brief Function for I2C read.
- *
- * @param[in] p_inst           The pointer to the backend instance.
- * @param[in] register_address The register address in npmx device to be read.
- * @param[in] p_data           The pointer to buffer for read data.
- * @param[in] num_of_bytes     The number of bytes to read.
- *
- * @return NPMX_SUCCESS  All data read successfully.
- * @return NPMX_ERROR_IO Backend returned IO error during data reading.
- */
-npmx_error_t npmx_backend_i2c_read(npmx_backend_instance_t const * p_inst,
-                                   uint16_t                        register_address,
-                                   uint8_t *                       p_data,
-                                   uint32_t                        num_of_bytes);
-
 /** @} */
 
 #ifdef __cplusplus

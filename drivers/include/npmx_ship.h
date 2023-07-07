@@ -47,26 +47,6 @@ extern "C" {
  * @brief   Ship and hibernate modes peripheral driver.
  */
 
-#if defined(SHPHLD_SHPHLDCONFIG_SHPHLDTIM_10ms) || defined(__NPMX_DOXYGEN__)
-/**
- * @brief Symbol indicating whether the time required to exit ship or hibernate mode, when pressing
- *        SHPHLD button, could be configured as 10ms.
- */
-#define NPMX_SHIP_HAS_10MS_SHPHLDCONFIG 1
-#else
-#define NPMX_SHIP_HAS_10MS_SHPHLDCONFIG 0
-#endif
-
-#if defined(SHPHLD_SHPHLDCONFIG_SHPHLDTIM_16ms) || defined(__NPMX_DOXYGEN__)
-/**
- * @brief Symbol indicating whether the time required to exit ship or hibernate mode, when pressing
- *        SHPHLD button, could be configured as 16ms.
- */
-#define NPMX_SHIP_HAS_16MS_SHPHLDCONFIG 1
-#else
-#define NPMX_SHIP_HAS_16MS_SHPHLDCONFIG 0
-#endif
-
 /** @brief Ship and hibernate tasks. */
 typedef enum
 {
@@ -74,24 +54,12 @@ typedef enum
     NPMX_SHIP_TASK_CONFIG_SHIPHOLD, ///< Task ship hold configuration.
     NPMX_SHIP_TASK_SHIPMODE,        ///< Task enter ship mode.
     NPMX_SHIP_TASK_CONFIG_RESET,    ///< Task request reset configuration.
+    NPMX_SHIP_TASK_COUNT,           ///< Tasks count.
 } npmx_ship_task_t;
 
 /** @brief SHPHLD duration button must be pressed to exit ship or hibernate mode. */
 typedef enum
 {
-#if NPMX_SHIP_HAS_10MS_SHPHLDCONFIG
-    NPMX_SHIP_TIME_10_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_10ms,   ///< 10 ms.
-    NPMX_SHIP_TIME_30_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_30ms,   ///< 30 ms.
-    NPMX_SHIP_TIME_60_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_60ms,   ///< 60 ms.
-    NPMX_SHIP_TIME_100_MS  = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_100ms,  ///< 100 ms.
-    NPMX_SHIP_TIME_300_MS  = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_300ms,  ///< 300 ms.
-    NPMX_SHIP_TIME_600_MS  = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_600ms,  ///< 600 ms.
-    NPMX_SHIP_TIME_1000_MS = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_1000ms, ///< 1000 ms.
-    NPMX_SHIP_TIME_3000_MS = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_3000ms, ///< 3000 ms.
-    NPMX_SHIP_TIME_DEFAULT = NPMX_SHIP_TIME_100_MS,                ///< Default time.
-    NPMX_SHIP_TIME_MAX     = NPMX_SHIP_TIME_3000_MS,               ///< Maximum time.
-#endif
-#if NPMX_SHIP_HAS_16MS_SHPHLDCONFIG
     NPMX_SHIP_TIME_16_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_16ms,   ///< 16 ms.
     NPMX_SHIP_TIME_32_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_32ms,   ///< 32 ms.
     NPMX_SHIP_TIME_64_MS   = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_64ms,   ///< 64 ms.
@@ -100,26 +68,24 @@ typedef enum
     NPMX_SHIP_TIME_608_MS  = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_608ms,  ///< 608 ms.
     NPMX_SHIP_TIME_1008_MS = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_1008ms, ///< 1008 ms.
     NPMX_SHIP_TIME_3008_MS = SHPHLD_SHPHLDCONFIG_SHPHLDTIM_3008ms, ///< 3008 ms.
+    NPMX_SHIP_TIME_COUNT,                                          ///< Possible durations count.
+    NPMX_SHIP_TIME_MIN     = NPMX_SHIP_TIME_16_MS,                 ///< Minimum time.
     NPMX_SHIP_TIME_DEFAULT = NPMX_SHIP_TIME_96_MS,                 ///< Default time.
     NPMX_SHIP_TIME_MAX     = NPMX_SHIP_TIME_3008_MS,               ///< Maximum time.
-#endif
-    NPMX_SHIP_INVALID      = NPMX_INVALID_ENUM_VALUE,              ///< Invalid time.
+    NPMX_SHIP_TIME_INVALID = NPMX_INVALID_ENUM_VALUE,              ///< Invalid time.
 } npmx_ship_time_t;
 
 /** @brief Data structure of the SHIP driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend;            ///< Pointer to backend instance.
-    bool                      ship_button_inverted; ///< Flag set when polarity of SHPHLD button is inverted. False by default.
+    npmx_backend_t * p_backend;            ///< Pointer to backend instance.
+    bool             ship_button_inverted; ///< Flag set when polarity of SHPHLD button is inverted. False by default.
 } npmx_ship_t;
 
 /** @brief Configuration structure for ship hold. */
 typedef struct
 {
     npmx_ship_time_t time;              ///< Time required to exit from the ship or the hibernate mode.
-#if defined(SHPHLD_SHPHLDCONFIG_SHPHLDDISPULLDOWN_Msk) || defined(__NPMX_DOXYGEN__)
-    bool             disable_active_pd; ///< True if the device is to disable active pull-downs on VSYS, VOUT1 and VOUT2, false otherwise.
-#endif
     bool             inverted_polarity; ///< True if the device is to invert the SHPHLD button active status, false otherwise. By default, the button is active in the LOW state.
 } npmx_ship_config_t;
 
@@ -145,7 +111,7 @@ npmx_ship_t * npmx_ship_get(npmx_instance_t * p_pmic, uint8_t idx);
  *
  * @param[in] time_ms Time in milliseconds to be converted into @ref npmx_ship_time_t enumeration.
  *
- * @return Result of conversion. @ref NPMX_SHIP_INVALID if given time is not
+ * @return Result of conversion. @ref NPMX_SHIP_TIME_INVALID if given time is not
  *         represented in enumeration.
  */
 npmx_ship_time_t npmx_ship_time_convert(uint32_t time_ms);
@@ -153,11 +119,13 @@ npmx_ship_time_t npmx_ship_time_convert(uint32_t time_ms);
 /**
  * @brief Function for converting @ref npmx_ship_time_t enumeration to milliseconds.
  *
- * @param[in] enum_value Time defined as @ref npmx_ship_time_t enumeration to be converted into milliseconds.
+ * @param[in]  enum_value Time defined as @ref npmx_ship_time_t enumeration to be converted into milliseconds.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_ship_time_convert_to_ms(npmx_ship_time_t enum_value);
+bool npmx_ship_time_convert_to_ms(npmx_ship_time_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for activating the specified SHIP task.

@@ -31,11 +31,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPMX_CONFIG_NPM1300_ENG_B_H__
-#define NPMX_CONFIG_NPM1300_ENG_B_H__
+#include <npmx.h>
 
-#ifndef NPMX_CONFIG_H__
-    #error "This file should not be included directly. Include npmx_config.h instead."
-#endif
+npmx_error_t npmx_backend_register_write(npmx_backend_t const * p_config,
+                                         uint32_t               register_address,
+                                         uint8_t *              p_data,
+                                         size_t                 num_of_bytes)
+{
+    return p_config->p_write(p_config->p_context, register_address, p_data, num_of_bytes);
+}
 
-#endif // NPMX_CONFIG_NPM1300_ENG_B_H__
+npmx_error_t npmx_backend_register_read(npmx_backend_t const * p_config,
+                                        uint32_t               register_address,
+                                        uint8_t *              p_data,
+                                        size_t                 num_of_bytes)
+{
+    return p_config->p_read(p_config->p_context, register_address, p_data, num_of_bytes);
+}

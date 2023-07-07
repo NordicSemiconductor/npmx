@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPM1300_ENG_B_TYPES_H
-#define NPM1300_ENG_B_TYPES_H
+#ifndef NPM1300_ENG_C_TYPES_H
+#define NPM1300_ENG_C_TYPES_H
 
 #ifdef __cplusplus
     extern "C" {
@@ -120,4 +120,4 @@
 #ifdef __cplusplus
 }
 #endif
-#endif /* NPM1300_ENG_B_TYPES_H */
+#endif /* NPM1300_ENG_C_TYPES_H */

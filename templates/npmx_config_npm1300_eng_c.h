@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023, Nordic Semiconductor ASA
+ * Copyright (c) 2023, Nordic Semiconductor ASA
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -31,31 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <npmx.h>
+#ifndef NPMX_CONFIG_NPM1300_ENG_C_H__
+#define NPMX_CONFIG_NPM1300_ENG_C_H__
 
-void npmx_backend_init(npmx_backend_instance_t * const p_inst,
-                       void *                          p_backend,
-                       uint16_t                        dev_address)
-{
-    NPMX_ASSERT(p_inst);
-    NPMX_ASSERT(p_backend);
+#ifndef NPMX_CONFIG_H__
+    #error "This file should not be included directly. Include npmx_config.h instead."
+#endif
 
-    p_inst->p_backend = p_backend;
-    p_inst->address   = dev_address;
-}
-
-npmx_error_t npmx_backend_register_write(npmx_backend_instance_t const * p_inst,
-                                         uint16_t                        register_address,
-                                         uint8_t *                       p_data,
-                                         size_t                          num_of_bytes)
-{
-    return npmx_backend_i2c_write(p_inst, register_address, p_data, num_of_bytes);
-}
-
-npmx_error_t npmx_backend_register_read(npmx_backend_instance_t const * p_inst,
-                                        uint16_t                        register_address,
-                                        uint8_t *                       p_data,
-                                        size_t                          num_of_bytes)
-{
-    return npmx_backend_i2c_read(p_inst, register_address, p_data, num_of_bytes);
-}
+#endif // NPMX_CONFIG_NPM1300_ENG_C_H__

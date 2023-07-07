@@ -53,20 +53,16 @@ extern "C" {
 /** @brief Possible events groups. */
 typedef enum
 {
-    NPMX_EVENT_GROUP_ADC,             ///< ADC events.
-    NPMX_EVENT_GROUP_BAT_CHAR_TEMP,   ///< Battery Charger temperature events.
-    NPMX_EVENT_GROUP_BAT_CHAR_STATUS, ///< Battery Charger status events.
-    NPMX_EVENT_GROUP_BAT_CHAR_BAT,    ///< Battery Charger battery events.
-    NPMX_EVENT_GROUP_SHIPHOLD,        ///< ShipHold pin events.
-    NPMX_EVENT_GROUP_VBUSIN_VOLTAGE,  ///< VBUSIN voltage detection events.
-    NPMX_EVENT_GROUP_VBUSIN_THERMAL,  ///< VBUSIN Thermal and USB C events.
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_EVENT_GROUP_USB_B,           ///< USB B events.
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_EVENT_GROUP_GPIO,            ///< GPIO events.
-#endif
-    NPMX_EVENT_GROUP_COUNT,           ///< Events groups count.
+    NPMX_EVENT_GROUP_ADC,                               ///< ADC events.
+    NPMX_EVENT_GROUP_BAT_CHAR_TEMP,                     ///< Battery Charger temperature events.
+    NPMX_EVENT_GROUP_BAT_CHAR_STATUS,                   ///< Battery Charger status events.
+    NPMX_EVENT_GROUP_BAT_CHAR_BAT,                      ///< Battery Charger battery events.
+    NPMX_EVENT_GROUP_SHIPHOLD,                          ///< ShipHold pin events.
+    NPMX_EVENT_GROUP_VBUSIN_VOLTAGE,                    ///< VBUSIN voltage detection events.
+    NPMX_EVENT_GROUP_VBUSIN_THERMAL,                    ///< VBUSIN Thermal and USB C events.
+    NPMX_EVENT_GROUP_GPIO,                              ///< GPIO events.
+    NPMX_EVENT_GROUP_COUNT,                             ///< Events groups count.
+    NPMX_EVENT_GROUP_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid events group.
 } npmx_event_group_t;
 
 /** @brief ADC Events fields. */
@@ -118,9 +114,6 @@ typedef enum
     NPMX_EVENT_GROUP_SHIPHOLD_PRESSED_MASK   = MAIN_EVENTSSHPHLDSET_EVENTSHPHLDBTNPRESS_Msk,   ///< Event when Ship-Hold button is pressed.
     NPMX_EVENT_GROUP_SHIPHOLD_RELEASED_MASK  = MAIN_EVENTSSHPHLDSET_EVENTSHPHLDBTNRELEASE_Msk, ///< Event when Ship-Hold button is released.
     NPMX_EVENT_GROUP_SHIPHOLD_HELD_EXIT_MASK = MAIN_EVENTSSHPHLDSET_EVENTSHPHLDEXIT_Msk,       ///< Event when Ship-Hold button held to exit.
-#if defined(MAIN_EVENTSSHPHLDSET_EVENTSHPHLDLONGPRESS_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_EVENT_GROUP_SHIPHOLD_HELD_10_S_MASK = MAIN_EVENTSSHPHLDSET_EVENTSHPHLDLONGPRESS_Msk,  ///< Event when Ship-Hold button held for 10s.
-#endif
     NPMX_EVENT_GROUP_SHIPHOLD_WATCHDOG_MASK  = MAIN_EVENTSSHPHLDSET_EVENTWATCHDOGWARN_Msk,     ///< Event when Watchdog Timeout warning detected.
 } npmx_event_group_shiphold_mask_t;
 
@@ -135,20 +128,10 @@ typedef enum
 
     NPMX_EVENT_GROUP_VBUSIN_OVRVOLT_REMOVED_MASK    =
         MAIN_EVENTSVBUSIN0CLR_EVENTVBUSOVRVOLTREMOVED_Msk,                                         ///< Event VBUS Over Voltage removed.
-#if (defined(MAIN_EVENTSVBUSIN0CLR_EVENTUNDERVOLTDETECTED_Msk) \
-     && defined(MAIN_EVENTSVBUSIN0CLR_EVENTUNDERVOLTREMOVED_Msk)) || defined(__NPMX_DOXYGEN__)
-    NPMX_EVENT_GROUP_VBUSIN_UNDERVOLT_DETECTED_MASK =
-        MAIN_EVENTSVBUSIN0CLR_EVENTUNDERVOLTDETECTED_Msk,                                          ///< Event VBUS Under Voltage detected.
-    NPMX_EVENT_GROUP_VBUSIN_UNDERVOLT_REMOVED_MASK  =
-        MAIN_EVENTSVBUSIN0CLR_EVENTUNDERVOLTREMOVED_Msk,                                           ///< Event VBUS Under Voltage removed.
-#endif
-#if (defined(MAIN_EVENTSVBUSIN0CLR_EVENTVBUSUNDVOLTDETECTED_Msk) \
-     && defined(MAIN_EVENTSVBUSIN0CLR_EVENTVBUSUNDVOLTREMOVED_Msk)) || defined(__NPMX_DOXYGEN__)
     NPMX_EVENT_GROUP_VBUSIN_UNDERVOLT_DETECTED_MASK =
         MAIN_EVENTSVBUSIN0CLR_EVENTVBUSUNDVOLTDETECTED_Msk,                                        ///< Event VBUS Under Voltage detected.
     NPMX_EVENT_GROUP_VBUSIN_UNDERVOLT_REMOVED_MASK  =
         MAIN_EVENTSVBUSIN0CLR_EVENTVBUSUNDVOLTREMOVED_Msk,                                         ///< Event VBUS Under Voltage removed.
-#endif
 } npmx_event_group_vbusin_mask_t;
 
 /** @brief VBUSIN Thermal and USB events fields. */
@@ -168,15 +151,6 @@ typedef enum
         MAIN_EVENTSVBUSIN1SET_EVENTCC2STATECHANGE_Msk,          ///< Event when Voltage on CC2 changes.
 } npmx_event_group_thermal_usb_mask_t;
 
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk) || defined(__NPMX_DOXYGEN__)
-/** @brief USB B Events fields. */
-typedef enum
-{
-    NPMX_EVENT_GROUP_USB_B_DETECTED_MASK = MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk, ///< Event upon USB B DP/DN detection complete.
-} npmx_event_group_usb_b_mask_t;
-#endif
-
-#if(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk) || defined(__NPMX_DOXYGEN__)
 /** @brief GPIO events fields. */
 typedef enum
 {
@@ -186,7 +160,6 @@ typedef enum
     NPMX_EVENT_GROUP_GPIO3_DETECTED_MASK = MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT3_Msk, ///< Event when GPIO input 3 edge is detected.
     NPMX_EVENT_GROUP_GPIO4_DETECTED_MASK = MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT4_Msk, ///< Event when GPIO input 4 edge is detected.
 } npmx_event_group_gpio_mask_t;
-#endif
 
 /** @} */
 

@@ -54,13 +54,15 @@ typedef enum
     NPMX_LED_MODE_CHARGING = LEDDRV_LEDDRV1MODESEL_LEDDRV1MODESEL_CHARGING, ///< Charging indicator (ON during charging).
     NPMX_LED_MODE_HOST     = LEDDRV_LEDDRV1MODESEL_LEDDRV1MODESEL_HOST,     ///< Driven from register LEDDRV_x_SET/CLR.
     NPMX_LED_MODE_NOTUSED  = LEDDRV_LEDDRV1MODESEL_LEDDRV1MODESEL_NOTUSED,  ///< Not used.
+    NPMX_LED_MODE_COUNT,                                                    ///< LED working modes count.
+    NPMX_LED_MODE_INVALID  = NPMX_INVALID_ENUM_VALUE,                       ///< Invalid LED working mode.
 } npmx_led_mode_t;
 
 /** @brief Data structure of the LED driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
-    uint8_t                   hw_index;  ///< Hardware index of LED instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of LED instance.
 } npmx_led_t;
 
 /**

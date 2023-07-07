@@ -44,6 +44,8 @@
 #define NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_MASK  0x0000FFUL
 #define NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_POS   0UL
 
+#define NPMX_TIMER_COUNTER_COMPARE_VALUE_MAX    0xFFFFFFUL
+
 npmx_timer_t * npmx_timer_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
@@ -55,16 +57,14 @@ npmx_timer_t * npmx_timer_get(npmx_instance_t * p_pmic, uint8_t idx)
 npmx_error_t npmx_timer_task_trigger(npmx_timer_t const * p_instance, npmx_timer_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_TIMER_TASK_COUNT);
 
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[] =
+    static const uint16_t task_addr[NPMX_TIMER_TASK_COUNT] =
     {
         [NPMX_TIMER_TASK_ENABLE]  = NPMX_REG_TO_ADDR(NPM_TIMER->TIMERSET),
         [NPMX_TIMER_TASK_DISABLE] = NPMX_REG_TO_ADDR(NPM_TIMER->TIMERCLR),
-#if defined(SHPHLD_TASKENTERWAKEUP_TASKENTERWAKEUP_Msk)
-        [NPMX_TIMER_TASK_WAKEUP]  = NPMX_REG_TO_ADDR(NPM_TIMER->WAKEUPACT),
-#endif
         [NPMX_TIMER_TASK_STROBE]  = NPMX_REG_TO_ADDR(NPM_TIMER->TIMERTARGETSTROBE),
         [NPMX_TIMER_TASK_KICK]    = NPMX_REG_TO_ADDR(NPM_TIMER->WATCHDOGKICK),
     };
@@ -77,6 +77,9 @@ npmx_error_t npmx_timer_config_set(npmx_timer_t const *        p_instance,
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->mode < NPMX_TIMER_MODE_COUNT);
+    NPMX_ASSERT(p_config->prescaler < NPMX_TIMER_PRESCALER_COUNT);
+    NPMX_ASSERT(p_config->compare_value <= NPMX_TIMER_COUNTER_COMPARE_VALUE_MAX);
 
     uint8_t data = ((uint8_t)p_config->mode << TIMER_TIMERCONFIG_TIMERMODESEL_Pos) &
                    TIMER_TIMERCONFIG_TIMERMODESEL_Msk;

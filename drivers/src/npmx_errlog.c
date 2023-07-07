@@ -50,12 +50,12 @@ static npmx_error_t task_trigger(npmx_errlog_t const * p_instance, npmx_errlog_t
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[] =
+    static const uint16_t task_addr[NPMX_ERRLOG_TASK_COUNT] =
     {
         [NPMX_ERRLOG_TASK_CLEAR] = NPMX_REG_TO_ADDR(NPM_ERRLOG->TASKCLRERRLOG),
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        task_addr[task],
                                        &data,
                                        1);
@@ -72,6 +72,7 @@ npmx_errlog_t * npmx_errlog_get(npmx_instance_t * p_pmic, uint8_t idx)
 npmx_error_t npmx_errlog_task_trigger(npmx_errlog_t const * p_instance, npmx_errlog_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_ERRLOG_TASK_COUNT);
 
     return task_trigger(p_instance, task);
 }
@@ -82,7 +83,7 @@ npmx_error_t npmx_errlog_reset_errors_check(npmx_errlog_t const * p_instance)
 
     uint8_t errors[NPMX_PERIPH_ERRLOG_ERR_COUNT];
 
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ERRLOG->RSTCAUSE),
                                                        errors,
                                                        NPMX_PERIPH_ERRLOG_ERR_COUNT);
@@ -135,12 +136,11 @@ npmx_error_t npmx_errlog_scratch_set(npmx_errlog_t const * p_instance,
 
     uint8_t data;
 
-#if defined(ERRLOG_SCRATCH0_BOOTTIMEREN_Msk)
     if (scratch == NPMX_ERRLOG_SCRATCH0)
     {
         NPMX_ASSERT(value <= NPMX_PERIPH_ERRLOG_SCRATCH0_MAX_VAL);
 
-        npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+        npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                            m_scratch_reg_addr[scratch],
                                                            &data,
                                                            1);
@@ -157,11 +157,8 @@ npmx_error_t npmx_errlog_scratch_set(npmx_errlog_t const * p_instance,
     {
         data = value;
     }
-#else
-    data = value;
-#endif
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        m_scratch_reg_addr[scratch],
                                        &data,
                                        1);
@@ -175,11 +172,10 @@ npmx_error_t npmx_errlog_scratch_get(npmx_errlog_t const * p_instance,
     NPMX_ASSERT(scratch < NPMX_ERRLOG_SCRATCH_COUNT);
     NPMX_ASSERT(p_value);
 
-#if defined(ERRLOG_SCRATCH0_SCRATCH0_Msk)
     if (scratch == NPMX_ERRLOG_SCRATCH0)
     {
         uint8_t data;
-        npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+        npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                            m_scratch_reg_addr[scratch],
                                                            &data,
                                                            1);
@@ -192,21 +188,19 @@ npmx_error_t npmx_errlog_scratch_get(npmx_errlog_t const * p_instance,
 
         return NPMX_SUCCESS;
     }
-#endif
 
-    return npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                       m_scratch_reg_addr[scratch],
                                       p_value,
                                       1);
 }
 
-#if defined(ERRLOG_SCRATCH0_BOOTTIMEREN_Msk)
 npmx_error_t npmx_errlog_boot_timer_enable_set(npmx_errlog_t const * p_instance, bool enable)
 {
     NPMX_ASSERT(p_instance);
 
     uint8_t data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        m_scratch_reg_addr[NPMX_ERRLOG_SCRATCH0],
                                                        &data,
                                                        1);
@@ -220,7 +214,7 @@ npmx_error_t npmx_errlog_boot_timer_enable_set(npmx_errlog_t const * p_instance,
     data |= ((enable ? ERRLOG_SCRATCH0_BOOTTIMEREN_BOOTMON : ERRLOG_SCRATCH0_BOOTTIMEREN_NOBOOTMON)
              << ERRLOG_SCRATCH0_BOOTTIMEREN_Pos);
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        m_scratch_reg_addr[NPMX_ERRLOG_SCRATCH0],
                                        &data,
                                        1);
@@ -232,7 +226,7 @@ npmx_error_t npmx_errlog_boot_timer_enable_get(npmx_errlog_t const * p_instance,
     NPMX_ASSERT(p_enable);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        m_scratch_reg_addr[NPMX_ERRLOG_SCRATCH0],
                                                        &data,
                                                        1);
@@ -246,5 +240,3 @@ npmx_error_t npmx_errlog_boot_timer_enable_get(npmx_errlog_t const * p_instance,
 
     return NPMX_SUCCESS;
 }
-
-#endif

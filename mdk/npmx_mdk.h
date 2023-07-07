@@ -38,9 +38,9 @@
 extern "C" {
 #endif
 
-#if defined(NPM1300_ENG_B)
-    #include <mdk/npm1300_eng_b.h> 
-    #include <mdk/npm1300_eng_b_peripherals.h>
+#if defined(NPM1300_ENG_C)
+    #include <mdk/npm1300_eng_c.h> 
+    #include <mdk/npm1300_eng_c_peripherals.h>
 #else
     #error "Unknown device."
 #endif

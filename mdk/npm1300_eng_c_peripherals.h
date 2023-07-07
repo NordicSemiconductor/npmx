@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPM1300_ENG_B_PERIPHERALS_H__
-#define NPM1300_ENG_B_PERIPHERALS_H__
+#ifndef NPM1300_ENG_C_PERIPHERALS_H__
+#define NPM1300_ENG_C_PERIPHERALS_H__
 
 /* ADC */
 #define NPMX_PERIPH_ADC_PRESENT 1
@@ -59,36 +59,38 @@
 #define NPMX_PERIPH_CHARGER_PRESENT 1
 #define NPMX_PERIPH_CHARGER_COUNT   1
 
-#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Msk  0x3UL   ///< Used to work with @ref npmx_charger_module_mask_t, two bytes represent BCHGENABLECLR and BCHGENABLESET register.
-#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Pos  0x0U    ///< Used to work with @ref npmx_charger_module_mask_t, bytes position shift.
+#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Msk   0x3UL   ///< Used to work with @ref npmx_charger_module_mask_t, two bytes represent BCHGENABLECLR and BCHGENABLESET register.
+#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Pos   0x0U    ///< Used to work with @ref npmx_charger_module_mask_t, bytes position shift.
 
-#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Msk  0x3UL   ///< Used to work with @ref npmx_charger_module_mask_t, two bytes represent BCHGDISABLECLR and BCHGDISABLESET register.
-#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Pos  0x2UL   ///< Used to work with @ref npmx_charger_module_mask_t, bytes position shift.
+#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Msk   0x3UL   ///< Used to work with @ref npmx_charger_module_mask_t, two bytes represent BCHGDISABLECLR and BCHGDISABLESET register.
+#define NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Pos   0x2UL   ///< Used to work with @ref npmx_charger_module_mask_t, bytes position shift.
 
-#define NPMX_PERIPH_CHARGER_ERR_COUNT                  2UL     ///< Errlog errors register count.
+#define NPMX_PERIPH_CHARGER_ERR_COUNT                   2UL     ///< Errlog errors register count.
 
-#define NPMX_PERIPH_CHARGER_ADC_BITS_RESOLUTION        1024UL  ///< Bits resolution of 10-bit SAR ADC, from the product specification.
+#define NPMX_PERIPH_CHARGER_ADC_BITS_RESOLUTION         1024UL  ///< Bits resolution of 10-bit SAR ADC, from the product specification.
 
-#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MIN_MA    32UL    ///< Minimum possible charging current in milliamperes, from the product specification.
-#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MAX_MA    800UL   ///< Minimum possible charging current in milliamperes, from the product specification.
-#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_STEP_MA   2UL     ///< Charging current step in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MIN_MA     32UL    ///< Minimum possible charging current in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MAX_MA     800UL   ///< Maximum possible charging current in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_STEP_MA    2UL     ///< Charging current step in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DEFAULT    32UL    ///< Default charging current in milliamperes.
 
-#define NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MIN_MA 270UL   ///< Minimum possible discharging current in milliamperes, from the product specification.
-#define NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MAX_MA 1340UL  ///< Minimum possible discharging current in milliamperes, from the product specification.
-#define NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER     100UL   ///< Magic number used to calculate discharging code as fixed point number.
-#define NPMX_PERIPH_CHARGER_DISCHARGING_CONST          323UL   ///< Magic number used to calculate discharging code.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MIN_MA  270UL   ///< Minimum possible discharging current in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MAX_MA  1340UL  ///< Maximum possible discharging current in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER      100UL   ///< Magic number used to calculate discharging code as fixed point number.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_CONST           323UL   ///< Magic number used to calculate discharging code.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_DEFAULT 1340UL  ///< Default discharging current in milliamperes.
 
-#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_1    39467UL ///< Magic number from "Equation for die temperature limits" in the product specification.
-#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2    317UL   ///< Magic number from "Equation for die temperature limits" in the product specification.
-#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MULTIPLIER 100UL   ///< Magic number used to calculate "Equation for die temperature limits" as fixed point number.
-#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL    1023UL  ///< Max temperature value as it is a 10-bit value.
-#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT  0x2UL   ///< Temperature data from MSB's register needs to be shifted.
+#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_1     39467UL ///< Magic number from "Equation for die temperature limits" in the product specification.
+#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2     317UL   ///< Magic number from "Equation for die temperature limits" in the product specification.
+#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MULTIPLIER  100UL   ///< Magic number used to calculate "Equation for die temperature limits" as fixed point number.
+#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL     1023UL  ///< Max temperature value as it is a 10-bit value.
+#define NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT   0x2UL   ///< Temperature data from MSB's register needs to be shifted.
 
-#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER   2UL     ///< Magic number used to get charging code from current in milliamperes, from the product specification.
-#define NPMX_PERIPH_CHARGER_CHARGING_CODE_MSB_SHIFT    1UL     ///< Shift used to divide charging code value into two bytes.
-#define NPMX_PERIPH_CHARGER_DISCHARGING_CODE_MSB_SHIFT 1UL     ///< Shift used to divide discharging code value into two bytes.
+#define NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER    2UL     ///< Magic number used to get charging code from current in milliamperes, from the product specification.
+#define NPMX_PERIPH_CHARGER_CHARGING_CODE_MSB_SHIFT     1UL     ///< Shift used to divide charging code value into two bytes.
+#define NPMX_PERIPH_CHARGER_DISCHARGING_CODE_MSB_SHIFT  1UL     ///< Shift used to divide discharging code value into two bytes.
 
-#define NPMX_PERIPH_CHARGER_RESISTANCE_MSB_SHIFT       2UL     ///< Shift used to combine two uint8_t registers into one uint16_t variable.
+#define NPMX_PERIPH_CHARGER_RESISTANCE_MSB_SHIFT        2UL     ///< Shift used to combine two uint8_t registers into one uint16_t variable.
 
 /* ERRLOG */
 #define NPMX_PERIPH_ERRLOG_PRESENT          1
@@ -124,4 +126,4 @@
 #define NPMX_PERIPH_VBUSIN_PRESENT 1
 #define NPMX_PERIPH_VBUSIN_COUNT   1
 
-#endif // NPM1300_ENG_B_PERIPHERALS_H__
+#endif // NPM1300_ENG_C_PERIPHERALS_H__

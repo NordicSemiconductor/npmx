@@ -31,15 +31,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPM1300_ENG_B_H
-#define NPM1300_ENG_B_H
+#ifndef NPM1300_ENG_C_H
+#define NPM1300_ENG_C_H
 
 #ifdef __cplusplus
     extern "C" {
 #endif
 
 /* ====================================================== Include types ====================================================== */
-#include "npm1300_eng_b_types.h"
+#include "npm1300_eng_c_types.h"
 
 /* ========================================= Start of section using anonymous unions ========================================= */
 
@@ -4441,4 +4441,4 @@ typedef struct {                                     /*!< ERRLOG Structure      
 #ifdef __cplusplus
 }
 #endif
-#endif /* NPM1300_ENG_B_H */
+#endif /* NPM1300_ENG_C_H */

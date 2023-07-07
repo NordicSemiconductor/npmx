@@ -71,32 +71,53 @@ npmx_pof_threshold_t npmx_pof_threshold_convert(uint32_t millivolts)
     }
 }
 
-uint32_t npmx_pof_threshold_convert_to_mv(npmx_pof_threshold_t enum_value)
+bool npmx_pof_threshold_convert_to_mv(npmx_pof_threshold_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_POF_THRESHOLD_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_POF_THRESHOLD_2V6] = 2600,
-        [NPMX_POF_THRESHOLD_2V7] = 2700,
-        [NPMX_POF_THRESHOLD_2V8] = 2800,
-        [NPMX_POF_THRESHOLD_2V9] = 2900,
-        [NPMX_POF_THRESHOLD_3V0] = 3000,
-        [NPMX_POF_THRESHOLD_3V1] = 3100,
-        [NPMX_POF_THRESHOLD_3V2] = 3200,
-        [NPMX_POF_THRESHOLD_3V3] = 3300,
-        [NPMX_POF_THRESHOLD_3V4] = 3400,
-        [NPMX_POF_THRESHOLD_3V5] = 3500,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_POF_THRESHOLD_2V6:
+            *p_val = 2600;
+            break;
+        case NPMX_POF_THRESHOLD_2V7:
+            *p_val = 2700;
+            break;
+        case NPMX_POF_THRESHOLD_2V8:
+            *p_val = 2800;
+            break;
+        case NPMX_POF_THRESHOLD_2V9:
+            *p_val = 2900;
+            break;
+        case NPMX_POF_THRESHOLD_3V0:
+            *p_val = 3000;
+            break;
+        case NPMX_POF_THRESHOLD_3V1:
+            *p_val = 3100;
+            break;
+        case NPMX_POF_THRESHOLD_3V2:
+            *p_val = 3200;
+            break;
+        case NPMX_POF_THRESHOLD_3V3:
+            *p_val = 3300;
+            break;
+        case NPMX_POF_THRESHOLD_3V4:
+            *p_val = 3400;
+            break;
+        case NPMX_POF_THRESHOLD_3V5:
+            *p_val = 3500;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_error_t npmx_pof_config_set(npmx_pof_t const * p_instance, npmx_pof_config_t const * p_config)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
-    NPMX_ASSERT(p_config->threshold != NPMX_POF_THRESHOLD_INVALID);
+    NPMX_ASSERT(p_config->status < NPMX_POF_STATUS_COUNT);
+    NPMX_ASSERT(p_config->threshold < NPMX_POF_THRESHOLD_COUNT);
+    NPMX_ASSERT(p_config->polarity < NPMX_POF_POLARITY_COUNT);
 
     uint8_t data = (((p_config->status == NPMX_POF_STATUS_ENABLE) ?
                      POF_POFCONFIG_POFENA_ENABLED : POF_POFCONFIG_POFENA_OFF)

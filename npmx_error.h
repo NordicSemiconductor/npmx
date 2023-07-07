@@ -51,6 +51,7 @@ typedef enum
     NPMX_SUCCESS             = (NPMX_ERROR_BASE_NUM + 0), ///< Operation performed successfully.
     NPMX_ERROR_INVALID_PARAM = (NPMX_ERROR_BASE_NUM + 1), ///< Invalid parameter.
     NPMX_ERROR_IO            = (NPMX_ERROR_BASE_NUM + 2), ///< Error using IO bus line.
+    NPMX_ERROR_INVALID_MEAS  = (NPMX_ERROR_BASE_NUM + 3), ///< Invalid measurement.
 } npmx_error_t;
 
 /** @} */

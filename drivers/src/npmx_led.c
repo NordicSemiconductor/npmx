@@ -79,6 +79,7 @@ npmx_led_t * npmx_led_get(npmx_instance_t * p_pmic, uint8_t idx)
 npmx_error_t npmx_led_mode_set(npmx_led_t const * p_instance, npmx_led_mode_t mode)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(mode < NPMX_LED_MODE_COUNT);
 
     uint8_t data = ((uint8_t)mode << LEDDRV_LEDDRV0MODESEL_LEDDRV0MODESEL_Pos) &
                    LEDDRV_LEDDRV0MODESEL_LEDDRV0MODESEL_Msk;

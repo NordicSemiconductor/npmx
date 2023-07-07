@@ -52,25 +52,20 @@ typedef enum
 {
     NPMX_LDSW_TASK_ENABLE,  ///< Enable LDSW.
     NPMX_LDSW_TASK_DISABLE, ///< Disable LDSW.
+    NPMX_LDSW_TASK_COUNT,   ///< LDSW tasks count.
 } npmx_ldsw_task_t;
 
 /** @brief Possible GPIO to be selected with LDSW configurations. */
 typedef enum
 {
-#if defined(LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO0) || defined(__NPMX_DOXYGEN__)
-    NPMX_LDSW_GPIO_NC = LDSW_LDSW1GPISEL_LDSW1GPISEL_NOTUSED1, ///< No GPIO selected.
-    NPMX_LDSW_GPIO_0  = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO0,    ///< GPIO_0 selected.
-    NPMX_LDSW_GPIO_1  = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO1,    ///< GPIO_1 selected.
-    NPMX_LDSW_GPIO_2  = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO2,    ///< GPIO_2 selected.
-    NPMX_LDSW_GPIO_3  = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO3,    ///< GPIO_3 selected.
-    NPMX_LDSW_GPIO_4  = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO4,    ///< GPIO_4 selected.
-#elif defined(LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI0)
-    NPMX_LDSW_GPIO_0 = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI0, ///< GPIO_0 selected.
-    NPMX_LDSW_GPIO_1 = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI1, ///< GPIO_1 selected.
-    NPMX_LDSW_GPIO_2 = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI2, ///< GPIO_2 selected.
-    NPMX_LDSW_GPIO_3 = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI3, ///< GPIO_3 selected.
-    NPMX_LDSW_GPIO_4 = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPI4, ///< GPIO_4 selected.
-#endif
+    NPMX_LDSW_GPIO_NC      = LDSW_LDSW1GPISEL_LDSW1GPISEL_NOTUSED1, ///< No GPIO selected.
+    NPMX_LDSW_GPIO_0       = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO0,    ///< GPIO_0 selected.
+    NPMX_LDSW_GPIO_1       = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO1,    ///< GPIO_1 selected.
+    NPMX_LDSW_GPIO_2       = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO2,    ///< GPIO_2 selected.
+    NPMX_LDSW_GPIO_3       = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO3,    ///< GPIO_3 selected.
+    NPMX_LDSW_GPIO_4       = LDSW_LDSW1GPISEL_LDSW1GPISEL_GPIO4,    ///< GPIO_4 selected.
+    NPMX_LDSW_GPIO_COUNT,                                           ///< GPIOs count.
+    NPMX_LDSW_GPIO_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid GPIO.
 } npmx_ldsw_gpio_t;
 
 /** @brief LDSW status fields. */
@@ -90,12 +85,12 @@ typedef enum
     NPMX_LDSW_SOFT_START_CURRENT_50_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50mA,  ///< LDSW soft start level 50 mA.
     NPMX_LDSW_SOFT_START_CURRENT_75_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_75mA,  ///< LDSW soft start level 75 mA.
     NPMX_LDSW_SOFT_START_CURRENT_100_MA  = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_100mA, ///< LDSW soft start level 100 mA.
+    NPMX_LDSW_SOFT_START_CURRENT_COUNT,                                             ///< Current levels count.
     NPMX_LDSW_SOFT_START_CURRENT_DEFAULT = NPMX_LDSW_SOFT_START_CURRENT_25_MA,      ///< Default LDSW soft start level.
     NPMX_LDSW_SOFT_START_CURRENT_MAX     = NPMX_LDSW_SOFT_START_CURRENT_100_MA,     ///< Maximum LDSW soft start level.
     NPMX_LDSW_SOFT_START_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,                 ///< Invalid LDSW soft start level.
 } npmx_ldsw_soft_start_current_t;
 
-#if defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V) || defined(__NPMX_DOXYGEN__)
 /** @brief Possible LDO output voltages to be set. */
 typedef enum
 {
@@ -123,8 +118,10 @@ typedef enum
     NPMX_LDSW_VOLTAGE_3V1     = LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_3V1, ///< 3.1 V
     NPMX_LDSW_VOLTAGE_3V2     = LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_3V2, ///< 3.2 V
     NPMX_LDSW_VOLTAGE_3V3     = LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_3V3, ///< 3.3 V
-    NPMX_LDSW_VOLTAGE_MAX     = LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_3V3, ///< Maximum voltage.
-    NPMX_LDSW_VOLTAGE_INVALID = NPMX_INVALID_ENUM_VALUE,            ///< Invalid voltage.
+    NPMX_LDSW_VOLTAGE_COUNT,                                        ///< LDO voltages count.
+    NPMX_LDSW_VOLTAGE_DEFAULT = NPMX_LDSW_VOLTAGE_1V0,              ///< Default LDO voltage.
+    NPMX_LDSW_VOLTAGE_MAX     = NPMX_LDSW_VOLTAGE_3V3,              ///< Maximum LDO voltage.
+    NPMX_LDSW_VOLTAGE_INVALID = NPMX_INVALID_ENUM_VALUE,            ///< Invalid LDO voltage.
 } npmx_ldsw_voltage_t;
 
 /** @brief Possible LDSW modes. */
@@ -132,23 +129,22 @@ typedef enum
 {
     NPMX_LDSW_MODE_LOAD_SWITCH = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_LDSW, ///< LDSW configured as load switch.
     NPMX_LDSW_MODE_LDO         = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_LDO,  ///< LDSW configured as LDO.
+    NPMX_LDSW_MODE_COUNT,                                           ///< LDSW modes count.
+    NPMX_LDSW_MODE_INVALID     = NPMX_INVALID_ENUM_VALUE,           ///< Invalid LDSW mode.
 } npmx_ldsw_mode_t;
-#endif
 
 /** @brief Data structure of the LDSW driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
-    uint8_t                   hw_index;  ///< Hardware index of LDSW instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of LDSW instance.
 } npmx_ldsw_t;
 
 /** @brief Configuration structure for GPIO used as input signal for LDSW. */
 typedef struct
 {
     npmx_ldsw_gpio_t gpio;     ///< The GPIO to be used as the signal.
-#if defined(LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk) || defined(__NPMX_DOXYGEN__)
     bool             inverted; ///< If true, the input state will be inverted, and logical low state will activate the signal.
-#endif
 } npmx_ldsw_gpio_config_t;
 
 /** @brief Configuration structure for soft start. */
@@ -168,7 +164,6 @@ typedef struct
  */
 npmx_ldsw_t * npmx_ldsw_get(npmx_instance_t * p_pmic, uint8_t idx);
 
-#if defined(LDSW_LDSW1VOUTSEL_LDSW1VOUTSEL_1V) || defined(__NPMX_DOXYGEN__)
 /**
  * @brief Function for converting millivolts to @ref npmx_ldsw_voltage_t enumeration.
  *
@@ -182,12 +177,13 @@ npmx_ldsw_voltage_t npmx_ldsw_voltage_convert(uint32_t millivolts);
 /**
  * @brief Function for converting @ref npmx_ldsw_voltage_t enumeration to millivolts.
  *
- * @param[in] enum_value Voltage defined as @ref npmx_ldsw_voltage_t enumeration to be converted into millivolts.
+ * @param[in]  enum_value Voltage defined as @ref npmx_ldsw_voltage_t enumeration to be converted into millivolts.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_ldsw_voltage_convert_to_mv(npmx_ldsw_voltage_t enum_value);
-#endif
+bool npmx_ldsw_voltage_convert_to_mv(npmx_ldsw_voltage_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for converting milliamperes to @ref npmx_ldsw_soft_start_current_t enumeration.
@@ -203,12 +199,15 @@ npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t mil
 /**
  * @brief Function for converting @ref npmx_ldsw_soft_start_current_t enumeration to milliamperes.
  *
- * @param[in] enum_value Current defined as @ref npmx_ldsw_soft_start_current_t enumeration to
- *                       be converted into milliamperes.
+ * @param[in]  enum_value Current defined as @ref npmx_ldsw_soft_start_current_t enumeration to
+ *                        be converted into milliamperes.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t enum_value);
+bool npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t enum_value,
+                                                uint32_t *                     p_val);
 
 /**
  * @brief Function for activating the specified LDSW task.
@@ -306,7 +305,6 @@ npmx_error_t npmx_ldsw_active_discharge_enable_set(npmx_ldsw_t const * p_instanc
  */
 npmx_error_t npmx_ldsw_active_discharge_enable_get(npmx_ldsw_t const * p_instance, bool * p_enable);
 
-#if defined(LDSW_LDSW2VOUTSEL_LDSW2VOUTSEL_1V) || defined(__NPMX_DOXYGEN__)
 /**
  * @brief Function for configuring given instance of LDSW to work as LDO or load switch.
  *
@@ -351,8 +349,6 @@ npmx_error_t npmx_ldsw_ldo_voltage_set(npmx_ldsw_t const * p_instance, npmx_ldsw
  */
 npmx_error_t npmx_ldsw_ldo_voltage_get(npmx_ldsw_t const *   p_instance,
                                        npmx_ldsw_voltage_t * p_voltage);
-
-#endif // defined(LDSW_LDSW2VOUTSEL_LDSW2VOUTSEL_1V)
 
 /** @} */
 

@@ -63,8 +63,8 @@ extern "C" {
 /** @brief npmx struct definition. */
 typedef struct npmx_instance
 {
-    void *                  p_user_context;                                  ///< User-defined context data.
-    npmx_backend_instance_t backend_inst;                                    ///< Specified backend instance used by this npmx instance to communicate with npmx device.
+    void *           p_user_context;                                         ///< Pointer to user-defined context data.
+    npmx_backend_t * p_backend;                                              ///< Pointer to specified backend instance used by this npmx instance to communicate with npmx device.
 
 #if NPMX_CHECK(NPMX_PERIPH_ADC_PRESENT) || defined(__NPMX_DOXYGEN__)
     npmx_adc_t adc[NPMX_PERIPH_ADC_COUNT];                                   ///< ADC instances.

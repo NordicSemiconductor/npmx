@@ -52,11 +52,9 @@ typedef enum
 {
     NPMX_TIMER_TASK_ENABLE,  ///< Start timer.
     NPMX_TIMER_TASK_DISABLE, ///< Stop timer.
-#if defined(TIMER_WAKEUPACT_TASKWAKEUPACT_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_TIMER_TASK_WAKEUP,  ///< Change timer to Activate Wakeup mode.
-#endif
     NPMX_TIMER_TASK_STROBE,  ///< Load timer value from 24-bit timer's register.
     NPMX_TIMER_TASK_KICK,    ///< Kick watchdog.
+    NPMX_TIMER_TASK_COUNT,   ///< Timer tasks count.
 } npmx_timer_task_t;
 
 /** @brief Available modes of the timer. */
@@ -66,24 +64,24 @@ typedef enum
     NPMX_TIMER_MODE_WATCHDOG_WARNING = TIMER_TIMERCONFIG_TIMERMODESEL_WATCHDOGWARNING, ///< Watchdog warning.
     NPMX_TIMER_MODE_WATCHDOG_RESET   = TIMER_TIMERCONFIG_TIMERMODESEL_WATCHDOGRESET,   ///< Watchdog reset.
     NPMX_TIMER_MODE_GENERAL_PURPOSE  = TIMER_TIMERCONFIG_TIMERMODESEL_GENPURPOSETIMER, ///< General purpose timer.
-#if defined(TIMER_TIMERCONFIG_TIMERMODESEL_SHIPMODETIMER) || defined(__NPMX_DOXYGEN__)
-    NPMX_TIMER_MODE_WAKEUP         = TIMER_TIMERCONFIG_TIMERMODESEL_SHIPMODETIMER,     ///< Wake-up timer.
-#elif defined(TIMER_TIMERCONFIG_TIMERMODESEL_WAKEUPTIMER)
-    NPMX_TIMER_MODE_WAKEUP         = TIMER_TIMERCONFIG_TIMERMODESEL_WAKEUPTIMER,     
-#endif
+    NPMX_TIMER_MODE_WAKEUP           = TIMER_TIMERCONFIG_TIMERMODESEL_WAKEUPTIMER,     ///< Wake-up timer.
+    NPMX_TIMER_MODE_COUNT,                                                             ///< Timer modes count.
+    NPMX_TIMER_MODE_INVALID          = NPMX_INVALID_ENUM_VALUE,                        ///< Invalid timer mode.
 } npmx_timer_mode_t;
 
 /** @brief Switches between 64 Hz and 512 Hz timer clock . */
 typedef enum
 {
-    NPMX_TIMER_PRESCALER_SLOW = TIMER_TIMERCONFIG_TIMERPRESCALER_SLOW, ///< Timer clock set to 64 Hz.
-    NPMX_TIMER_PRESCALER_FAST = TIMER_TIMERCONFIG_TIMERPRESCALER_FAST, ///< Timer clock set to 512 Hz.
+    NPMX_TIMER_PRESCALER_SLOW    = TIMER_TIMERCONFIG_TIMERPRESCALER_SLOW, ///< Timer clock set to 64 Hz.
+    NPMX_TIMER_PRESCALER_FAST    = TIMER_TIMERCONFIG_TIMERPRESCALER_FAST, ///< Timer clock set to 512 Hz.
+    NPMX_TIMER_PRESCALER_COUNT,                                           ///< Timer prescalers count.
+    NPMX_TIMER_PRESCALER_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid timer prescaler.
 } npmx_timer_prescaler_t;
 
 /** @brief Data structure of the TIMER driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
 } npmx_timer_t;
 
 /** @brief Configuration structure for timer. */

@@ -53,6 +53,7 @@ typedef enum
     NPMX_CHARGER_TASK_RELEASE,      ///< SW release from charger error state.
     NPMX_CHARGER_TASK_CLEAR_ERROR,  ///< Clear registers of BCHGERRREASON and BCHGERRSENSOR.
     NPMX_CHARGER_TASK_CLEAR_TIMERS, ///< Clear TRICKLE and CHARGE safety timers.
+    NPMX_CHARGER_TASK_COUNT,        ///< Charger tasks count.
 } npmx_charger_task_t;
 
 /** @brief Charger modules to be enabled and disabled. */
@@ -91,6 +92,7 @@ typedef enum
     NPMX_CHARGER_VOLTAGE_4V35    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V35, ///< 4.35 V
     NPMX_CHARGER_VOLTAGE_4V40    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V40, ///< 4.40 V
     NPMX_CHARGER_VOLTAGE_4V45    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V45, ///< 4.45 V
+    NPMX_CHARGER_VOLTAGE_COUNT,                                               ///< Possible voltages count.
     NPMX_CHARGER_VOLTAGE_DEFAULT = NPMX_CHARGER_VOLTAGE_3V60,                 ///< Default 3.60 V.
     NPMX_CHARGER_VOLTAGE_MAX     = NPMX_CHARGER_VOLTAGE_4V45,                 ///< Maximum voltage.
     NPMX_CHARGER_VOLTAGE_INVALID = NPMX_INVALID_ENUM_VALUE,                   ///< Invalid voltage.
@@ -114,6 +116,7 @@ typedef enum
 {
     NPMX_CHARGER_TRICKLE_2V9     = BCHARGER_BCHGVTRICKLESEL_BCHGVTRICKLESEL_2V9, ///< Trickle voltage level 2.9 V.
     NPMX_CHARGER_TRICKLE_2V5     = BCHARGER_BCHGVTRICKLESEL_BCHGVTRICKLESEL_2V5, ///< Trickle voltage level 2.5 V.
+    NPMX_CHARGER_TRICKLE_COUNT,                                                  ///< Trickle voltage levels count.
     NPMX_CHARGER_TRICKLE_DEFAULT = NPMX_CHARGER_TRICKLE_2V9,                     ///< Default trickle voltage level 2.9 V.
     NPMX_CHARGER_TRICKLE_MAX     = NPMX_CHARGER_TRICKLE_2V9,                     ///< Maximum trickle voltage.
     NPMX_CHARGER_TRICKLE_INVALID = NPMX_INVALID_ENUM_VALUE,                      ///< Invalid trickle voltage.
@@ -124,6 +127,7 @@ typedef enum
 {
     NPMX_CHARGER_ITERM_10      = BCHARGER_BCHGITERMSEL_BCHGITERMSEL_SEL10, ///< ITERM current set to 10 percent of charging current.
     NPMX_CHARGER_ITERM_20      = BCHARGER_BCHGITERMSEL_BCHGITERMSEL_SEL20, ///< ITERM current set to 20 percent of charging current.
+    NPMX_CHARGER_ITERM_COUNT,                                              ///< ITERM current max count.
     NPMX_CHARGER_ITERM_DEFAULT = NPMX_CHARGER_ITERM_10,                    ///< Default ITERM current set to 10 percent of charging current.
     NPMX_CHARGER_ITERM_MAX     = NPMX_CHARGER_ITERM_20,                    ///< Maximum ITERM current set to 20 percent of charging current.
     NPMX_CHARGER_ITERM_INVALID = NPMX_INVALID_ENUM_VALUE,                  ///< Invalid ITERM current.
@@ -141,7 +145,9 @@ typedef enum
 /** @brief Data structure of the CHARGER driver instance. */
 typedef struct
 {
-    npmx_instance_t * p_pmic; ///< Pointer to the PMIC instance.
+    npmx_instance_t * p_pmic;                 ///< Pointer to the PMIC instance.
+    uint16_t          charging_current_ma;    ///< Charging current in milliamperes.
+    uint16_t          discharging_current_ma; ///< Discharging current in milliamperes.
 } npmx_charger_t;
 
 /**
@@ -167,11 +173,13 @@ npmx_charger_voltage_t npmx_charger_voltage_convert(uint32_t millivolts);
 /**
  * @brief Function for converting @ref npmx_charger_voltage_t enumeration to millivolts.
  *
- * @param[in] enum_value Voltage defined as @ref npmx_charger_voltage_t enumeration to be converted into millivolts.
- *
- * @return Result of conversion.
+ * @param[in]  enum_value Voltage defined as @ref npmx_charger_voltage_t enumeration to be converted into millivolts.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
+ * 
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value);
+bool npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for converting millivolts to @ref npmx_charger_trickle_t enumeration.
@@ -186,11 +194,13 @@ npmx_charger_trickle_t npmx_charger_trickle_convert(uint32_t millivolts);
 /**
  * @brief Function for converting @ref npmx_charger_trickle_t enumeration to millivolts.
  *
- * @param[in] enum_value Voltage defined as @ref npmx_charger_trickle_t enumeration to be converted into millivolts.
- *
- * @return Result of conversion.
+ * @param[in]  enum_value Voltage defined as @ref npmx_charger_trickle_t enumeration to be converted into millivolts.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
+ * 
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_charger_trickle_convert_to_mv(npmx_charger_trickle_t enum_value);
+bool npmx_charger_trickle_convert_to_mv(npmx_charger_trickle_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for converting percentage value of charging current to @ref npmx_charger_iterm_t enumeration.
@@ -206,12 +216,14 @@ npmx_charger_iterm_t npmx_charger_iterm_convert(uint32_t percent);
 /**
  * @brief Function for converting percentage value of charging current to @ref npmx_charger_iterm_t enumeration.
  *
- * @param[in] enum_value Termination current defined as @ref npmx_charger_iterm_t enumeration to be converted
- *                       into a percent of charging current.
- *
- * @return Result of conversion.
+ * @param[in]  enum_value Termination current defined as @ref npmx_charger_iterm_t enumeration to be converted
+ *                        into a percent of charging current.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
+ * 
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_charger_iterm_convert_to_pct(npmx_charger_iterm_t enum_value);
+bool npmx_charger_iterm_convert_to_pct(npmx_charger_iterm_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for activating the specified charger task.
@@ -273,7 +285,7 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance,
  * @retval NPMX_ERROR_INVALID_PARAM Current out of range.
  * @retval NPMX_ERROR_IO            Error using IO bus line.
  */
-npmx_error_t npmx_charger_charging_current_set(npmx_charger_t const * p_instance, uint16_t current);
+npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint16_t current);
 
 /**
  * @brief Function for reading charger current from nPM device. Default value after reset is 32 mA.
@@ -285,8 +297,7 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t const * p_instance
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_charger_charging_current_get(npmx_charger_t const * p_instance,
-                                               uint16_t *             p_current);
+npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint16_t * p_current);
 
 /**
  * @brief Function for setting maximum discharging current of nPM device. Default value after reset is 1000 mA.
@@ -298,8 +309,7 @@ npmx_error_t npmx_charger_charging_current_get(npmx_charger_t const * p_instance
  * @retval NPMX_ERROR_INVALID_PARAM Current out of range.
  * @retval NPMX_ERROR_IO            Error using IO bus line.
  */
-npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t const * p_instance,
-                                                  uint16_t               current);
+npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, uint16_t current);
 
 /**
  * @brief Function for reading maximum discharging current of nPM device. Default value after reset is 1000 mA.
@@ -311,8 +321,8 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t const * p_insta
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t const * p_instance,
-                                                  uint16_t *             p_current);
+npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance,
+                                                  uint16_t *       p_current);
 
 /**
  * @brief Function for setting the normal termination battery voltage.

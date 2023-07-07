@@ -51,6 +51,7 @@ extern "C" {
 typedef enum
 {
     NPMX_VBUSIN_TASK_APPLY_CURRENT_LIMIT, ///< Applying the selected current limit set with @ref npmx_vbusin_current_limit_set().
+    NPMX_VBUSIN_TASK_COUNT,               ///< VBUSIN tasks count.
 } npmx_vbusin_task_t;
 
 /** @brief Available current limits for VBUS. */
@@ -68,6 +69,7 @@ typedef enum
     NPMX_VBUSIN_CURRENT_1300_MA = VBUSIN_VBUSINILIM0_VBUSINILIM0_1300MA, ///< 1300 mA.
     NPMX_VBUSIN_CURRENT_1400_MA = VBUSIN_VBUSINILIM0_VBUSINILIM0_1400MA, ///< 1400 mA.
     NPMX_VBUSIN_CURRENT_1500_MA = VBUSIN_VBUSINILIM0_VBUSINILIM0_1500MA, ///< 1500 mA.
+    NPMX_VBUSIN_CURRENT_COUNT,                                           ///< Available currents count.
     NPMX_VBUSIN_CURRENT_DEFAULT = NPMX_VBUSIN_CURRENT_500_MA,            ///< Default current.
     NPMX_VBUSIN_CURRENT_MAX     = NPMX_VBUSIN_CURRENT_1500_MA,           ///< Maximum current.
     NPMX_VBUSIN_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid current.
@@ -80,6 +82,7 @@ typedef enum
     NPMX_VBUSIN_CC_DEFAULT        = VBUSIN_USBCDETECTSTATUS_VBUSINCC1CMP_DEFAULTUSB,   ///< Default USB 100/500 mA.
     NPMX_VBUSIN_CC_HIGH_POWER_1A5 = VBUSIN_USBCDETECTSTATUS_VBUSINCC1CMP_1A5HIGHPOWER, ///< 1.5 A High Power.
     NPMX_VBUSIN_CC_HIGH_POWER_3A0 = VBUSIN_USBCDETECTSTATUS_VBUSINCC1CMP_3AHIGHPOWER,  ///< 3.0 A High Power.
+    NPMX_VBUSIN_CC_COUNT,                                                              ///< Pins status connections count.
     NPMX_VBUSIN_CC_INVALID        = NPMX_INVALID_ENUM_VALUE,                           ///< Invalid CCx pins status connection.
 } npmx_vbusin_cc_t;
 
@@ -96,7 +99,7 @@ typedef enum
 /** @brief Data structure of the VBUSIN driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
 } npmx_vbusin_t;
 
 /**
@@ -123,12 +126,14 @@ npmx_vbusin_current_t npmx_vbusin_current_convert(uint32_t milliamperes);
 /**
  * @brief Function for converting @ref npmx_vbusin_current_t enumeration to milliamperes.
  *
- * @param[in] enum_value Current defined as @ref npmx_vbusin_current_t enumeration to be
- *                       converted into milliamperes.
+ * @param[in]  enum_value Current defined as @ref npmx_vbusin_current_t enumeration to be
+ *                        converted into milliamperes.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_vbusin_current_convert_to_ma(npmx_vbusin_current_t enum_value);
+bool npmx_vbusin_current_convert_to_ma(npmx_vbusin_current_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for mapping @ref npmx_vbusin_cc_t enumeration values to string.

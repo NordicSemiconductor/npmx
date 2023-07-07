@@ -1,9 +1,0 @@
-/**
-@mainpage Introduction and configuration
-
-npmx is a standalone set of drivers for peripherals present in Nordic
-Semiconductor's PMICs. 
-
-API is not stable and maturity level of SW is evaluation.
-
-*/

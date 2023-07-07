@@ -60,6 +60,8 @@ typedef enum
     NPMX_GPIO_MODE_OUTPUT_PLW         = GPIOS_GPIOMODE0_GPIOMODE_GPOPLW,       ///< GPO PwrLossWarn.
     NPMX_GPIO_MODE_OUTPUT_OVERRIDE_1  = GPIOS_GPIOMODE0_GPIOMODE_GPOLOGIC1,    ///< GPO Logic1.
     NPMX_GPIO_MODE_OUTPUT_OVERRIDE_0  = GPIOS_GPIOMODE0_GPIOMODE_GPOLOGIC0,    ///< GPO Logic0.
+    NPMX_GPIO_MODE_COUNT,                                                      ///< GPIO modes count.
+    NPMX_GPIO_MODE_INVALID            = NPMX_INVALID_ENUM_VALUE,               ///< Invalid GPIO mode.
 } npmx_gpio_mode_t;
 
 /** @brief Configuration for GPIO drive current. */
@@ -67,6 +69,8 @@ typedef enum
 {
     NPMX_GPIO_DRIVE_1_MA    = GPIOS_GPIODRIVE1_GPIODRIVE_1MA, ///< 1 mA.
     NPMX_GPIO_DRIVE_6_MA    = GPIOS_GPIODRIVE1_GPIODRIVE_6MA, ///< 6 mA.
+    NPMX_GPIO_DRIVE_COUNT,                                    ///< GPIO drive currents count.
+    NPMX_GPIO_DRIVE_MIN     = NPMX_GPIO_DRIVE_1_MA,           ///< Minimum current.
     NPMX_GPIO_DRIVE_DEFAULT = NPMX_GPIO_DRIVE_1_MA,           ///< Default current.
     NPMX_GPIO_DRIVE_MAX     = NPMX_GPIO_DRIVE_6_MA,           ///< Maximum current.
     NPMX_GPIO_DRIVE_INVALID = NPMX_INVALID_ENUM_VALUE,        ///< Invalid current.
@@ -75,16 +79,18 @@ typedef enum
 /** @brief Configuration for GPIO pull resistors. By default, all GPIOs are in NPMX_GPIO_PULL_DOWN mode. */
 typedef enum
 {
-    NPMX_GPIO_PULL_DOWN, ///< GPIO pull-down enable.
-    NPMX_GPIO_PULL_UP,   ///< GPIO pull-up enable.
-    NPMX_GPIO_PULL_NONE, ///< GPIO pull-down and pull-up disable.
+    NPMX_GPIO_PULL_DOWN,                              ///< GPIO pull-down enable.
+    NPMX_GPIO_PULL_UP,                                ///< GPIO pull-up enable.
+    NPMX_GPIO_PULL_NONE,                              ///< GPIO pull-down and pull-up disable.
+    NPMX_GPIO_PULL_COUNT,                             ///< GPIO pull configs count.
+    NPMX_GPIO_PULL_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid GPIO pull configuration.
 } npmx_gpio_pull_t;
 
 /** @brief Data structure of the GPIO driver instance. */
 typedef struct
 {
-    npmx_backend_instance_t * p_backend; ///< Pointer to backend instance.
-    uint8_t                   hw_index;  ///< Hardware index of GPIO instance.
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of GPIO instance.
 } npmx_gpio_t;
 
 /** @brief Configuration structure for GPIO. */
@@ -121,12 +127,14 @@ npmx_gpio_drive_t npmx_gpio_drive_convert(uint32_t milliamperes);
 /**
  * @brief Function for converting @ref npmx_gpio_drive_t enumeration to milliamperes.
  *
- * @param[in] enum_value Current defined as @ref npmx_gpio_drive_t enumeration to be
- *                       converted into milliamperes.
+ * @param[in]  enum_value Current defined as @ref npmx_gpio_drive_t enumeration to be
+ *                        converted into milliamperes.
+ * @param[out] p_val      Pointer to the variable that stores the conversion result.
  *
- * @return Result of conversion.
+ * @retval true  Conversion is valid.
+ * @retval false Conversion is invalid - an invalid argument was passed to the function.
  */
-uint32_t npmx_gpio_drive_convert_to_ma(npmx_gpio_drive_t enum_value);
+bool npmx_gpio_drive_convert_to_ma(npmx_gpio_drive_t enum_value, uint32_t * p_val);
 
 /**
  * @brief Function for configuring GPIO.
@@ -173,18 +181,16 @@ npmx_error_t npmx_gpio_mode_set(npmx_gpio_t const * p_instance, npmx_gpio_mode_t
  */
 npmx_error_t npmx_gpio_mode_get(npmx_gpio_t const * p_instance, npmx_gpio_mode_t * p_mode);
 
-#if defined(GPIOS_GPIOSTATUS_GPIO0STATUS_Msk) || defined(__NPMX_DOXYGEN__)
 /**
  * @brief Function for checking GPIO status of specified GPIO pin.
  *
  * @param[in]  p_instance Pointer to the GPIO instance.
  * @param[out] p_status   Pointer to the status of GPIO. True if specified GPIO is in a high state, false otherwise.
- * 
+ *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_gpio_status_check(npmx_gpio_t const * p_instance, bool * p_status);
-#endif
 
 /** @} */
 

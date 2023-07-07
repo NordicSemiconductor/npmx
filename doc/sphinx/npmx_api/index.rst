@@ -1,0 +1,7 @@
+npmx API
+========
+
+.. toctree::
+    :glob:
+
+    *

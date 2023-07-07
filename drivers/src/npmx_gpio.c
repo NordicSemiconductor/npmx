@@ -128,7 +128,6 @@ static const uint16_t m_deb_regreg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODEBOUNCE4),
 };
 
-#if defined(GPIOS_GPIOSTATUS_GPIO0STATUS_Msk)
 static const uint8_t m_gpio_status_pos[NPMX_PERIPH_GPIO_COUNT] =
 {
     [0] = GPIOS_GPIOSTATUS_GPIO0STATUS_Pos,
@@ -146,7 +145,6 @@ static const uint8_t m_gpio_status_msk[NPMX_PERIPH_GPIO_COUNT] =
     [3] = GPIOS_GPIOSTATUS_GPIO3STATUS_Msk,
     [4] = GPIOS_GPIOSTATUS_GPIO4STATUS_Msk,
 };
-#endif
 
 /**
  * @brief Function for setting GPIO mode.
@@ -206,8 +204,6 @@ static npmx_error_t mode_get(npmx_gpio_t const * p_instance, npmx_gpio_mode_t * 
  */
 static npmx_error_t drive_current_set(npmx_gpio_t const * p_instance, npmx_gpio_drive_t drive)
 {
-    NPMX_ASSERT(drive != NPMX_GPIO_DRIVE_INVALID);
-
     uint8_t data = ((uint8_t)drive << GPIOS_GPIODRIVE0_GPIODRIVE_Pos) &
                    GPIOS_GPIODRIVE0_GPIODRIVE_Msk;
 
@@ -546,17 +542,20 @@ npmx_gpio_drive_t npmx_gpio_drive_convert(uint32_t milliamperes)
     }
 }
 
-uint32_t npmx_gpio_drive_convert_to_ma(npmx_gpio_drive_t enum_value)
+bool npmx_gpio_drive_convert_to_ma(npmx_gpio_drive_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_GPIO_DRIVE_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_GPIO_DRIVE_1_MA] = 1,
-        [NPMX_GPIO_DRIVE_6_MA] = 6,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_GPIO_DRIVE_1_MA:
+            *p_val = 1;
+            break;
+        case NPMX_GPIO_DRIVE_6_MA:
+            *p_val = 6;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_error_t npmx_gpio_config_set(npmx_gpio_t const *        p_instance,
@@ -564,6 +563,9 @@ npmx_error_t npmx_gpio_config_set(npmx_gpio_t const *        p_instance,
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_config);
+    NPMX_ASSERT(p_config->drive < NPMX_GPIO_DRIVE_COUNT);
+    NPMX_ASSERT(p_config->pull < NPMX_GPIO_PULL_COUNT);
+    NPMX_ASSERT(p_config->mode < NPMX_GPIO_MODE_COUNT);
 
     npmx_error_t err_code;
 
@@ -641,6 +643,7 @@ npmx_error_t npmx_gpio_config_get(npmx_gpio_t const * p_instance, npmx_gpio_conf
 npmx_error_t npmx_gpio_mode_set(npmx_gpio_t const * p_instance, npmx_gpio_mode_t mode)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(mode < NPMX_GPIO_MODE_COUNT);
 
     return mode_set(p_instance, mode);
 }
@@ -653,7 +656,6 @@ npmx_error_t npmx_gpio_mode_get(npmx_gpio_t const * p_instance, npmx_gpio_mode_t
     return mode_get(p_instance, p_mode);
 }
 
-#if defined(GPIOS_GPIOSTATUS_GPIO0STATUS_Msk)
 npmx_error_t npmx_gpio_status_check(npmx_gpio_t const * p_instance, bool * p_status)
 {
     NPMX_ASSERT(p_instance);
@@ -674,4 +676,3 @@ npmx_error_t npmx_gpio_status_check(npmx_gpio_t const * p_instance, bool * p_sta
 
     return NPMX_SUCCESS;
 }
-#endif

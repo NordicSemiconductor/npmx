@@ -41,30 +41,43 @@
 extern "C" {
 #endif
 
-/** @brief Struct for backend handler and device address. */
-typedef struct
-{
-    uint16_t address;    ///< nPM device address (for example, I2C address).
-    void *   p_backend;  ///< Pointer to nPM backend handler.
-} npmx_backend_instance_t;
+/**
+ * @defgroup npmx_backend Backend
+ * @{
+ * @ingroup npmx
+ * @brief   npmx backend API.
+ */
 
 /**
- * @brief Init function for the chosen transport backend.
+ * @brief Definition of pointer to type of function used to write and read data.
  *
- * @param[in] p_inst      Pointer to backend instance.
- * @param[in] p_backend   Pointer to backend.
- * @param[in] dev_address Device address.
+ * @param[in] p_context        Pointer to user-defined context data.
+ * @param[in] register_address Register address in npmx device to be modified.
+ * @param[in] p_data           Pointer to data.
+ * @param[in] num_of_bytes     Number of bytes of data.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-void npmx_backend_init(npmx_backend_instance_t * const p_inst,
-                       void *                          p_backend,
-                       uint16_t                        dev_address);
+typedef npmx_error_t(*npmx_backend_function_t)(void *    p_context,
+                                               uint32_t  register_address,
+                                               uint8_t * p_data,
+                                               size_t    num_of_bytes);
+
+/** @brief Data structure of backend configuration. */
+typedef struct
+{
+    npmx_backend_function_t p_write;   ///< Pointer to write function.
+    npmx_backend_function_t p_read;    ///< Pointer to read function.
+    void *                  p_context; ///< User-defined context data passed as an argument for write and read functions.
+} npmx_backend_t;
 
 /**
  * @brief Function for sending a message over the chosen transport backend.
  *
  * This function is used by services to write to npmx registers.
  *
- * @param[in] p_inst           Pointer to the backend instance.
+ * @param[in] p_config         Pointer to the backend configuration structure.
  * @param[in] register_address Register address in npmx device to be modified.
  * @param[in] p_data           Pointer to data to write.
  * @param[in] num_of_bytes     Number of bytes of data to write.
@@ -72,17 +85,17 @@ void npmx_backend_init(npmx_backend_instance_t * const p_inst,
  * @return NPMX_SUCCESS  All data written successfully.
  * @return NPMX_ERROR_IO Backend returned IO error during data writing.
  */
-npmx_error_t npmx_backend_register_write(npmx_backend_instance_t const * p_inst,
-                                         uint16_t                        register_address,
-                                         uint8_t *                       p_data,
-                                         size_t                          num_of_bytes);
+npmx_error_t npmx_backend_register_write(npmx_backend_t const * p_config,
+                                         uint32_t               register_address,
+                                         uint8_t *              p_data,
+                                         size_t                 num_of_bytes);
 
 /**
  * @brief Function for reading a message over the chosen transport backend.
  *
  * This function is used by services to read npmx registers.
  *
- * @param[in] p_inst           Pointer to the backend instance.
+ * @param[in] p_config         Pointer to the backend configuration structure.
  * @param[in] register_address Register address in npmx device to be read.
  * @param[in] p_data           Pointer to buffer for read data.
  * @param[in] num_of_bytes     Number of bytes to read.
@@ -90,10 +103,12 @@ npmx_error_t npmx_backend_register_write(npmx_backend_instance_t const * p_inst,
  * @return NPMX_SUCCESS  All data read successfully.
  * @return NPMX_ERROR_IO Backend returned IO error during data reading.
  */
-npmx_error_t npmx_backend_register_read(npmx_backend_instance_t const * p_inst,
-                                        uint16_t                        register_address,
-                                        uint8_t *                       p_data,
-                                        size_t                          num_of_bytes);
+npmx_error_t npmx_backend_register_read(npmx_backend_t const * p_config,
+                                        uint32_t               register_address,
+                                        uint8_t *              p_data,
+                                        size_t                 num_of_bytes);
+
+/** @} */
 
 #ifdef __cplusplus
 }

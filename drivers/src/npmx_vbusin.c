@@ -85,51 +85,77 @@ npmx_vbusin_current_t npmx_vbusin_current_convert(uint32_t milliamperes)
     }
 }
 
-uint32_t npmx_vbusin_current_convert_to_ma(npmx_vbusin_current_t enum_value)
+bool npmx_vbusin_current_convert_to_ma(npmx_vbusin_current_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_VBUSIN_CURRENT_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_VBUSIN_CURRENT_100_MA]  = 100,
-        [NPMX_VBUSIN_CURRENT_500_MA]  = 500,
-        [NPMX_VBUSIN_CURRENT_600_MA]  = 600,
-        [NPMX_VBUSIN_CURRENT_700_MA]  = 700,
-        [NPMX_VBUSIN_CURRENT_800_MA]  = 800,
-        [NPMX_VBUSIN_CURRENT_900_MA]  = 900,
-        [NPMX_VBUSIN_CURRENT_1000_MA] = 1000,
-        [NPMX_VBUSIN_CURRENT_1100_MA] = 1100,
-        [NPMX_VBUSIN_CURRENT_1200_MA] = 1200,
-        [NPMX_VBUSIN_CURRENT_1300_MA] = 1300,
-        [NPMX_VBUSIN_CURRENT_1400_MA] = 1400,
-        [NPMX_VBUSIN_CURRENT_1500_MA] = 1500,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_VBUSIN_CURRENT_100_MA:
+            *p_val = 100;
+            break;
+        case NPMX_VBUSIN_CURRENT_500_MA:
+            *p_val = 500;
+            break;
+        case NPMX_VBUSIN_CURRENT_600_MA:
+            *p_val = 600;
+            break;
+        case NPMX_VBUSIN_CURRENT_700_MA:
+            *p_val = 700;
+            break;
+        case NPMX_VBUSIN_CURRENT_800_MA:
+            *p_val = 800;
+            break;
+        case NPMX_VBUSIN_CURRENT_900_MA:
+            *p_val = 900;
+            break;
+        case NPMX_VBUSIN_CURRENT_1000_MA:
+            *p_val = 1000;
+            break;
+        case NPMX_VBUSIN_CURRENT_1100_MA:
+            *p_val = 1100;
+            break;
+        case NPMX_VBUSIN_CURRENT_1200_MA:
+            *p_val = 1200;
+            break;
+        case NPMX_VBUSIN_CURRENT_1300_MA:
+            *p_val = 1300;
+            break;
+        case NPMX_VBUSIN_CURRENT_1400_MA:
+            *p_val = 1400;
+            break;
+        case NPMX_VBUSIN_CURRENT_1500_MA:
+            *p_val = 1500;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 const char * const npmx_vbusin_cc_status_map_to_string(npmx_vbusin_cc_t enum_value)
 {
-    NPMX_ASSERT(enum_value != NPMX_VBUSIN_CC_INVALID);
-
-    static const char * const mapping_table[] =
+    switch (enum_value)
     {
-        [NPMX_VBUSIN_CC_NOT_CONNECTED]  = "NOT_CONNECTED",
-        [NPMX_VBUSIN_CC_DEFAULT]        = "DEFAULT",
-        [NPMX_VBUSIN_CC_HIGH_POWER_1A5] = "HIGH_POWER_1A5",
-        [NPMX_VBUSIN_CC_HIGH_POWER_3A0] = "HIGH_POWER_3A0",
-    };
-
-    return mapping_table[enum_value];
+        case NPMX_VBUSIN_CC_NOT_CONNECTED:
+            return "NOT_CONNECTED";
+        case NPMX_VBUSIN_CC_DEFAULT:
+            return "DEFAULT";
+        case NPMX_VBUSIN_CC_HIGH_POWER_1A5:
+            return "HIGH_POWER_1A5";
+        case NPMX_VBUSIN_CC_HIGH_POWER_3A0:
+            return "HIGH_POWER_3A0";
+        default:
+            return "INVALID";
+    }
 }
 
 npmx_error_t npmx_vbusin_task_trigger(npmx_vbusin_t const * p_instance, npmx_vbusin_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_VBUSIN_TASK_COUNT);
 
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[] =
+    static const uint16_t task_addr[NPMX_VBUSIN_TASK_COUNT] =
     {
         [NPMX_VBUSIN_TASK_APPLY_CURRENT_LIMIT] = NPMX_REG_TO_ADDR(NPM_VBUSIN->TASKUPDATEILIMSW),
     };
@@ -141,7 +167,7 @@ npmx_error_t npmx_vbusin_current_limit_set(npmx_vbusin_t const * p_instance,
                                            npmx_vbusin_current_t current_limit)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(current_limit != NPMX_VBUSIN_CURRENT_INVALID);
+    NPMX_ASSERT(current_limit < NPMX_VBUSIN_CURRENT_COUNT);
 
     uint8_t data = ((uint8_t)current_limit << VBUSIN_VBUSINILIM0_VBUSINILIM0_Pos) &
                    VBUSIN_VBUSINILIM0_VBUSINILIM0_Msk;

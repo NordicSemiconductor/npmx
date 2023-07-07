@@ -1,0 +1,10 @@
+.vscode
+doc/html
+doc/html_sphinx
+doc/sphinx/drivers/*
+!doc/sphinx/drivers/index.rst
+!doc/sphinx/drivers/instance/*
+doc/xml
+doc/warnings_*.txt
+doc/*.doxyfile.bak
+build

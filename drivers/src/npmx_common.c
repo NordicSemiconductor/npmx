@@ -47,12 +47,7 @@ static const char * callbacks_register_name[NPMX_CALLBACK_TYPE_COUNT] =
     [NPMX_CALLBACK_TYPE_EVENT_SHIPHOLD]           = "SHIPHOLD",
     [NPMX_CALLBACK_TYPE_EVENT_VBUSIN_VOLTAGE]     = "VBUSIN_VOLTAGE",
     [NPMX_CALLBACK_TYPE_EVENT_VBUSIN_THERMAL_USB] = "VBUSIN_THERMAL_USB",
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk)
-    [NPMX_CALLBACK_TYPE_EVENT_USB_B]              = "USB_B",
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk)
     [NPMX_CALLBACK_TYPE_EVENT_EVENTSGPIOSET]      = "GPIO",
-#endif
     [NPMX_CALLBACK_TYPE_RSTCAUSE]                 = "RSTCAUSE",
     [NPMX_CALLBACK_TYPE_CHARGER_ERROR]            = "CHARGER_ERROR",
     [NPMX_CALLBACK_TYPE_SENSOR_ERROR]             = "SENSOR_ERROR",
@@ -89,11 +84,7 @@ static const char * callbacks_bits_names[NPMX_CALLBACK_TYPE_COUNT][NPMX_COMMON_B
     [NPMX_CALLBACK_TYPE_EVENT_SHIPHOLD] =
     {
         [0] = "Pressed",      [1] = "Released",
-        [2] = "Held to Exit",
-#if defined(SHPHLD_LPRESETCONFIG_LONGTIMRESETENA_Msk)
-        [3] = "Held for 10 s",
-#endif
-        "Watchdog Timeout Warn"
+        [2] = "Held to Exit", [3] = "Watchdog Timeout Warn"
     },
     [NPMX_CALLBACK_TYPE_EVENT_VBUSIN_VOLTAGE] =
     {
@@ -107,20 +98,12 @@ static const char * callbacks_bits_names[NPMX_CALLBACK_TYPE_COUNT][NPMX_COMMON_B
         [2] = "Shutdown detected",      [3] = "Shutdown removed",
         [4] = "Voltage on CC1 changes", [5] = "Voltage on CC2 changes"
     },
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk)
-    [NPMX_CALLBACK_TYPE_EVENT_USB_B] =
-    {
-        [0] = "USB-B DP/DN detection"
-    },
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk)
     [NPMX_CALLBACK_TYPE_EVENT_EVENTSGPIOSET] =
     {
         [0] = "GPIO0 input", [1] = "GPIO 1 input",
         [2] = "GPIO2 input", [3] = "GPIO 3 input",
         [4] = "GPIO4 input"
     },
-#endif
     [NPMX_CALLBACK_TYPE_RSTCAUSE] =
     {
         [0] = "Shipmode exit",    [1] = "Boot monitor timeout",

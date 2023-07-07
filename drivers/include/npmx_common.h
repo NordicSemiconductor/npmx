@@ -74,23 +74,19 @@ typedef struct npmx_instance npmx_instance_t;
 /** @brief All possible callback types to be registered. */
 typedef enum
 {
-    NPMX_CALLBACK_TYPE_EVENT_ADC,                ///< Callback run when EVENTSADCSET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_TEMP,      ///< Callback run when EVENTSBCHARGER0SET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_STATUS,    ///< Callback run when EVENTSBCHARGER1SET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_BAT,       ///< Callback run when EVENTSBCHARGER2SET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_SHIPHOLD,           ///< Callback run when EVENTSSHPHLDSET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_VBUSIN_VOLTAGE,     ///< Callback run when EVENTSVBUSIN0SET register is not empty.
-    NPMX_CALLBACK_TYPE_EVENT_VBUSIN_THERMAL_USB, ///< Callback run when EVENTSVBUSIN1SET register is not empty.
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_CALLBACK_TYPE_EVENT_USB_B,              ///< Callback run when EVENTSUSBBSET register is not empty.
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk) || defined(__NPMX_DOXYGEN__)
-    NPMX_CALLBACK_TYPE_EVENT_EVENTSGPIOSET,      ///< Callback run when EVENTSGPIOSET register is not empty.
-#endif
-    NPMX_CALLBACK_TYPE_RSTCAUSE,                 ///< Callback run when RSTCAUSE register is not empty.
-    NPMX_CALLBACK_TYPE_CHARGER_ERROR,            ///< Callback run when CHARGERERRREASON or BCHGERRREASON register is not empty.
-    NPMX_CALLBACK_TYPE_SENSOR_ERROR,             ///< Callback run when CHARGERERRSENSOR or BCHGERRSENSOR register is not empty.
-    NPMX_CALLBACK_TYPE_COUNT,                    ///< Callbacks count.
+    NPMX_CALLBACK_TYPE_EVENT_ADC,                         ///< Callback run when EVENTSADCSET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_TEMP,               ///< Callback run when EVENTSBCHARGER0SET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_STATUS,             ///< Callback run when EVENTSBCHARGER1SET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_BAT,                ///< Callback run when EVENTSBCHARGER2SET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_SHIPHOLD,                    ///< Callback run when EVENTSSHPHLDSET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_VBUSIN_VOLTAGE,              ///< Callback run when EVENTSVBUSIN0SET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_VBUSIN_THERMAL_USB,          ///< Callback run when EVENTSVBUSIN1SET register is not empty.
+    NPMX_CALLBACK_TYPE_EVENT_EVENTSGPIOSET,               ///< Callback run when EVENTSGPIOSET register is not empty.
+    NPMX_CALLBACK_TYPE_RSTCAUSE,                          ///< Callback run when RSTCAUSE register is not empty.
+    NPMX_CALLBACK_TYPE_CHARGER_ERROR,                     ///< Callback run when CHARGERERRREASON or BCHGERRREASON register is not empty.
+    NPMX_CALLBACK_TYPE_SENSOR_ERROR,                      ///< Callback run when CHARGERERRSENSOR or BCHGERRSENSOR register is not empty.
+    NPMX_CALLBACK_TYPE_COUNT,                             ///< Callbacks count.
+    NPMX_CALLBACK_TYPE_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid callback type.
 } npmx_callback_type_t;
 
 /** @brief Callback function declaration. */

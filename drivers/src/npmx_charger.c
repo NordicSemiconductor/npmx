@@ -56,14 +56,14 @@ static npmx_error_t task_trigger(npmx_charger_t const * p_instance, npmx_charger
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[] =
+    static const uint16_t task_addr[NPMX_CHARGER_TASK_COUNT] =
     {
         [NPMX_CHARGER_TASK_RELEASE]      = NPMX_REG_TO_ADDR(NPM_BCHARGER->TASKRELEASEERR),
         [NPMX_CHARGER_TASK_CLEAR_ERROR]  = NPMX_REG_TO_ADDR(NPM_BCHARGER->TASKCLEARCHGERR),
         [NPMX_CHARGER_TASK_CLEAR_TIMERS] = NPMX_REG_TO_ADDR(NPM_BCHARGER->TASKCLEARSAFETYTIMER),
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        task_addr[task],
                                        &data,
                                        1);
@@ -163,7 +163,7 @@ static npmx_error_t resistance_set(npmx_charger_t const * p_instance,
         [1] = (uint8_t)(code & BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk),
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst, reg, data, 2);
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend, reg, data, 2);
 }
 
 /**
@@ -182,7 +182,7 @@ static npmx_error_t resistance_get(npmx_charger_t const * p_instance,
 {
     uint8_t      data[2];
     uint32_t     ntc_resistance;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        reg,
                                                        data,
                                                        2);
@@ -252,29 +252,56 @@ npmx_charger_voltage_t npmx_charger_voltage_convert(uint32_t millivolts)
     }
 }
 
-uint32_t npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value)
+bool npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_CHARGER_VOLTAGE_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_CHARGER_VOLTAGE_3V50] = 3500,
-        [NPMX_CHARGER_VOLTAGE_3V55] = 3550,
-        [NPMX_CHARGER_VOLTAGE_3V60] = 3600,
-        [NPMX_CHARGER_VOLTAGE_3V65] = 3650,
-        [NPMX_CHARGER_VOLTAGE_4V00] = 4000,
-        [NPMX_CHARGER_VOLTAGE_4V05] = 4050,
-        [NPMX_CHARGER_VOLTAGE_4V10] = 4100,
-        [NPMX_CHARGER_VOLTAGE_4V15] = 4150,
-        [NPMX_CHARGER_VOLTAGE_4V20] = 4200,
-        [NPMX_CHARGER_VOLTAGE_4V25] = 4250,
-        [NPMX_CHARGER_VOLTAGE_4V30] = 4300,
-        [NPMX_CHARGER_VOLTAGE_4V35] = 4350,
-        [NPMX_CHARGER_VOLTAGE_4V40] = 4400,
-        [NPMX_CHARGER_VOLTAGE_4V45] = 4450,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_CHARGER_VOLTAGE_3V50:
+            *p_val = 3500;
+            break;
+        case NPMX_CHARGER_VOLTAGE_3V55:
+            *p_val = 3550;
+            break;
+        case NPMX_CHARGER_VOLTAGE_3V60:
+            *p_val = 3600;
+            break;
+        case NPMX_CHARGER_VOLTAGE_3V65:
+            *p_val = 3650;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V00:
+            *p_val = 4000;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V05:
+            *p_val = 4050;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V10:
+            *p_val = 4100;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V15:
+            *p_val = 4150;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V20:
+            *p_val = 4200;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V25:
+            *p_val = 4250;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V30:
+            *p_val = 4300;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V35:
+            *p_val = 4350;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V40:
+            *p_val = 4400;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V45:
+            *p_val = 4450;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_charger_trickle_t npmx_charger_trickle_convert(uint32_t millivolts)
@@ -290,17 +317,20 @@ npmx_charger_trickle_t npmx_charger_trickle_convert(uint32_t millivolts)
     }
 }
 
-uint32_t npmx_charger_trickle_convert_to_mv(npmx_charger_trickle_t enum_value)
+bool npmx_charger_trickle_convert_to_mv(npmx_charger_trickle_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_CHARGER_TRICKLE_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_CHARGER_TRICKLE_2V5] = 2500,
-        [NPMX_CHARGER_TRICKLE_2V9] = 2900,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_CHARGER_TRICKLE_2V5:
+            *p_val = 2500;
+            break;
+        case NPMX_CHARGER_TRICKLE_2V9:
+            *p_val = 2900;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_charger_iterm_t npmx_charger_iterm_convert(uint32_t percent)
@@ -316,22 +346,26 @@ npmx_charger_iterm_t npmx_charger_iterm_convert(uint32_t percent)
     }
 }
 
-uint32_t npmx_charger_iterm_convert_to_pct(npmx_charger_iterm_t enum_value)
+bool npmx_charger_iterm_convert_to_pct(npmx_charger_iterm_t enum_value, uint32_t * p_val)
 {
-    NPMX_ASSERT(enum_value != NPMX_CHARGER_ITERM_INVALID);
-
-    static const uint32_t convert_table[] =
+    switch (enum_value)
     {
-        [NPMX_CHARGER_ITERM_10] = 10,
-        [NPMX_CHARGER_ITERM_20] = 20,
-    };
-
-    return convert_table[enum_value];
+        case NPMX_CHARGER_ITERM_10:
+            *p_val = 10;
+            break;
+        case NPMX_CHARGER_ITERM_20:
+            *p_val = 20;
+            break;
+        default:
+            return false;
+    }
+    return true;
 }
 
 npmx_error_t npmx_charger_task_trigger(npmx_charger_t const * p_instance, npmx_charger_task_t task)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_CHARGER_TASK_COUNT);
 
     return task_trigger(p_instance, task);
 }
@@ -350,7 +384,7 @@ npmx_error_t npmx_charger_module_enable_set(npmx_charger_t const * p_instance, u
 
     if (data_enable_register > 0)
     {
-        err_code = npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+        err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                                NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGENABLESET),
                                                &data_enable_register,
                                                1);
@@ -362,7 +396,7 @@ npmx_error_t npmx_charger_module_enable_set(npmx_charger_t const * p_instance, u
 
     if (data_disable_register > 0)
     {
-        err_code = npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+        err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                                NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGDISABLECLR),
                                                &data_disable_register,
                                                1);
@@ -390,7 +424,7 @@ npmx_error_t npmx_charger_module_disable_set(npmx_charger_t const * p_instance,
 
     if (data_disable_register > 0)
     {
-        err_code = npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+        err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                                NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGENABLECLR),
                                                &data_disable_register,
                                                1);
@@ -402,7 +436,7 @@ npmx_error_t npmx_charger_module_disable_set(npmx_charger_t const * p_instance,
 
     if (data_enable_register > 0)
     {
-        err_code = npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+        err_code = npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                                NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGDISABLESET),
                                                &data_enable_register,
                                                1);
@@ -422,7 +456,7 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance, uint32_t
 
     uint8_t ret_data[3];
     /* Only first and third bytes are used, but reading three bytes in a row is faster. */
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->BCHGENABLESET),
                                                        ret_data,
@@ -441,7 +475,7 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance, uint32_t
     return NPMX_SUCCESS;
 }
 
-npmx_error_t npmx_charger_charging_current_set(npmx_charger_t const * p_instance, uint16_t current)
+npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint16_t current)
 {
     NPMX_ASSERT(p_instance);
 
@@ -456,6 +490,8 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t const * p_instance
         return NPMX_ERROR_INVALID_PARAM;
     }
 
+    p_instance->charging_current_ma = current;
+
     uint16_t code = current / NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER;
 
     uint8_t data[2] =
@@ -464,21 +500,20 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t const * p_instance
         [1] = (uint8_t)(code & 1U)
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETMSB),
                                        data,
                                        2);
 }
 
-npmx_error_t npmx_charger_charging_current_get(npmx_charger_t const * p_instance,
-                                               uint16_t *             p_current)
+npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint16_t * p_current)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_current);
 
     uint8_t      data[2];
     uint16_t     code;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETMSB),
                                                        data,
                                                        2);
@@ -495,11 +530,12 @@ npmx_error_t npmx_charger_charging_current_get(npmx_charger_t const * p_instance
 
     *p_current = (uint16_t)(code * NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER);
 
+    p_instance->charging_current_ma = *p_current;
+
     return NPMX_SUCCESS;
 }
 
-npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t const * p_instance,
-                                                  uint16_t               current)
+npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, uint16_t current)
 {
     NPMX_ASSERT(p_instance);
 
@@ -508,6 +544,8 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t const * p_insta
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
+
+    p_instance->discharging_current_ma = current;
 
     uint32_t code = (uint32_t)current * NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER;
     uint32_t mod  = code % NPMX_PERIPH_CHARGER_DISCHARGING_CONST;
@@ -525,21 +563,20 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t const * p_insta
         [1] = (uint8_t)(code & 1UL)
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETDISCHARGEMSB),
                                        data,
                                        2);
 }
 
-npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t const * p_instance,
-                                                  uint16_t *             p_current)
+npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, uint16_t * p_current)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_current);
 
     uint8_t      data[2];
     uint16_t     code;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->
                                                                         BCHGISETDISCHARGEMSB),
                                                        data,
@@ -558,6 +595,8 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t const * p_insta
     *p_current = (uint16_t)(((uint32_t)code * NPMX_PERIPH_CHARGER_DISCHARGING_CONST) /
                             NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER);
 
+    p_instance->charging_current_ma = *p_current;
+
     return NPMX_SUCCESS;
 }
 
@@ -565,12 +604,12 @@ npmx_error_t npmx_charger_termination_normal_voltage_set(npmx_charger_t const * 
                                                          npmx_charger_voltage_t voltage)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(voltage <= NPMX_CHARGER_VOLTAGE_4V45);
+    NPMX_ASSERT(voltage < NPMX_CHARGER_VOLTAGE_COUNT);
 
     uint8_t data = ((uint8_t)voltage << BCHARGER_BCHGVTERM_BCHGVTERMNORM_Pos) &
                    BCHARGER_BCHGVTERM_BCHGVTERMNORM_Msk;
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERM),
                                        &data,
                                        1);
@@ -583,7 +622,7 @@ npmx_error_t npmx_charger_termination_normal_voltage_get(npmx_charger_t const * 
     NPMX_ASSERT(p_voltage);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERM),
                                                        &data,
                                                        1);
@@ -602,12 +641,12 @@ npmx_error_t npmx_charger_termination_warm_voltage_set(npmx_charger_t const * p_
                                                        npmx_charger_voltage_t voltage)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(voltage <= NPMX_CHARGER_VOLTAGE_4V45);
+    NPMX_ASSERT(voltage < NPMX_CHARGER_VOLTAGE_COUNT);
 
     uint8_t data = ((uint8_t)voltage << BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_Pos) &
                    BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_Msk;
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERMR),
                                        &data,
                                        1);
@@ -620,7 +659,7 @@ npmx_error_t npmx_charger_termination_warm_voltage_get(npmx_charger_t const *   
     NPMX_ASSERT(p_voltage);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERMR),
                                                        &data,
                                                        1);
@@ -639,12 +678,12 @@ npmx_error_t npmx_charger_trickle_voltage_set(npmx_charger_t const * p_instance,
                                               npmx_charger_trickle_t trickle)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(trickle != NPMX_CHARGER_TRICKLE_INVALID);
+    NPMX_ASSERT(trickle < NPMX_CHARGER_TRICKLE_COUNT);
 
     uint8_t data = ((uint8_t)trickle << BCHARGER_BCHGVTRICKLESEL_BCHGVTRICKLESEL_Pos) &
                    BCHARGER_BCHGVTRICKLESEL_BCHGVTRICKLESEL_Msk;
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTRICKLESEL),
                                        &data,
                                        1);
@@ -657,7 +696,7 @@ npmx_error_t npmx_charger_trickle_voltage_get(npmx_charger_t const *   p_instanc
     NPMX_ASSERT(p_trickle);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->
                                                                         BCHGVTRICKLESEL),
                                                        &data,
@@ -677,11 +716,12 @@ npmx_error_t npmx_charger_termination_current_set(npmx_charger_t const * p_insta
                                                   npmx_charger_iterm_t   iterm)
 {
     NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(iterm < NPMX_CHARGER_ITERM_COUNT);
 
     uint8_t data = ((uint8_t)iterm << BCHARGER_BCHGITERMSEL_BCHGITERMSEL_Pos) &
                    BCHARGER_BCHGITERMSEL_BCHGITERMSEL_Msk;
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGITERMSEL),
                                        &data,
                                        1);
@@ -694,7 +734,7 @@ npmx_error_t npmx_charger_termination_current_get(npmx_charger_t const * p_insta
     NPMX_ASSERT(p_iterm);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGITERMSEL),
                                                        &data,
                                                        1);
@@ -785,7 +825,6 @@ npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, u
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(temperature <= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL);
 
-#if defined(BCHARGER_DIETEMPSTOPLSB_DIETEMPSTOPCHGLSB_Msk)
     uint16_t code = die_temperature_to_code(temperature);
 
     uint8_t data[2] =
@@ -800,18 +839,10 @@ npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, u
               >> BCHARGER_DIETEMPSTOPLSB_DIETEMPSTOPCHGLSB_Pos
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPSTOP),
                                        data,
                                        2);
-#else
-    uint8_t code = (uint8_t)die_temperature_to_code(temperature);
-
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
-                                       NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPSTOP),
-                                       &code,
-                                       1);
-#endif
 }
 
 npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
@@ -820,9 +851,8 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_temperature);
 
-#if defined(BCHARGER_DIETEMPSTOPLSB_DIETEMPSTOPCHGLSB_Msk)
     uint8_t      data[2];
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPSTOP),
                                                        data,
                                                        2);
@@ -839,19 +869,6 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
 
     /* Transform code to value. */
     *p_temperature = die_code_to_temperature(code);
-#else
-    uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
-                                                       NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPSTOP),
-                                                       &data,
-                                                       1);
-    if (err_code != NPMX_SUCCESS)
-    {
-        return err_code;
-    }
-
-    *p_temperature = die_code_to_temperature(data);
-#endif
 
     return NPMX_SUCCESS;
 }
@@ -862,7 +879,6 @@ npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(temperature <= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL);
 
-#if defined(BCHARGER_DIETEMPRESUMELSB_DIETEMPRESUMECHGLSB_Msk)
     uint16_t code = die_temperature_to_code(temperature);
 
     uint8_t data[2] =
@@ -874,18 +890,10 @@ npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
               >> BCHARGER_DIETEMPRESUMELSB_DIETEMPRESUMECHGLSB_Pos
     };
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPRESUME),
                                        data,
                                        2);
-#else
-    uint8_t code = (uint8_t)die_temperature_to_code(temperature);
-
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
-                                       NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPRESUME),
-                                       &code,
-                                       1);
-#endif
 }
 
 npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
@@ -894,9 +902,8 @@ npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_temperature);
 
-#if defined(BCHARGER_DIETEMPRESUMELSB_DIETEMPRESUMECHGLSB_Msk)
     uint8_t      data[2];
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->DIETEMPRESUME),
                                                        data,
@@ -914,20 +921,6 @@ npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
 
     /* Transform code to value. */
     *p_temperature = die_code_to_temperature(code);
-#else
-    uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
-                                                       NPMX_REG_TO_ADDR(
-                                                           NPM_BCHARGER->DIETEMPRESUME),
-                                                       &data,
-                                                       1);
-    if (err_code != NPMX_SUCCESS)
-    {
-        return err_code;
-    }
-
-    *p_temperature = die_code_to_temperature(data);
-#endif
 
     return NPMX_SUCCESS;
 }
@@ -939,7 +932,7 @@ npmx_error_t npmx_charger_current_limiter_get(npmx_charger_t const * p_instance,
     NPMX_ASSERT(p_current_lim_status);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->BCHGILIMSTATUS),
                                                        &data,
@@ -959,7 +952,7 @@ npmx_error_t npmx_charger_ntc_status_get(npmx_charger_t const * p_instance, uint
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_ntc_status);
 
-    return npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                       NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCSTATUS),
                                       p_ntc_status,
                                       1);
@@ -972,7 +965,7 @@ npmx_error_t npmx_charger_die_temp_status_get(npmx_charger_t const * p_instance,
     NPMX_ASSERT(p_die_temp_status);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->DIETEMPSTATUS),
                                                        &data,
@@ -992,7 +985,7 @@ npmx_error_t npmx_charger_status_get(npmx_charger_t const * p_instance, uint8_t 
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_status_mask);
 
-    return npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                       NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGCHARGESTATUS),
                                       p_status_mask,
                                       1);
@@ -1005,7 +998,7 @@ npmx_error_t npmx_charger_errors_check(npmx_charger_t const * p_instance)
     npmx_instance_t * p_pmic = p_instance->p_pmic;
     uint8_t           errors[NPMX_PERIPH_CHARGER_ERR_COUNT];
 
-    npmx_error_t err_code = npmx_backend_register_read(&p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->BCHGERRREASON),
                                                        errors,
@@ -1061,7 +1054,7 @@ npmx_error_t npmx_charger_warm_disable_set(npmx_charger_t const * p_instance, bo
                     << BCHARGER_BCHGCONFIG_DISABLECHARGEWARM_Pos) &
                    BCHARGER_BCHGCONFIG_DISABLECHARGEWARM_Msk;
 
-    return npmx_backend_register_write(&p_instance->p_pmic->backend_inst,
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGCONFIG),
                                        &data,
                                        1);
@@ -1073,7 +1066,7 @@ npmx_error_t npmx_charger_warm_disable_get(npmx_charger_t const * p_instance, bo
     NPMX_ASSERT(p_disable);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(&p_instance->p_pmic->backend_inst,
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGCONFIG),
                                                        &data,
                                                        1);

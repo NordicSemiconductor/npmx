@@ -1,6 +1,31 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [0.7.0] - 2023-07-07
+### Added
+ - Added a GitHub workflow containing the `publish-documentation.yml` file. The file generates a HTML page with documentation that is linked on the GitHub repository page.
+ - Added doxygen support for the npmx backend API files.
+ - Added Sphinx documentation build system with HTML output.
+ - Added the `generic_callback` initialization to the `npmx_core_init` function.
+ - Added the battery current measurement support to the npmx ADC driver.
+ - Added `charging_current_ma` and `discharging_current_ma` fields to the `npmx_charger_t` structure.
+ - Added the `burst` field to the `npmx_adc_t` structure.
+
+### Changed
+ - Changed the doxygen main page to `README.md`.
+ - Changed the `npmx_backend_t` structure to contain pointers to write and read functions.
+ - Changed implementation of the `npmx_core_task_trigger()` function to the generic one.
+ - Changed ADC measurements results type from `uint16_t` to `int32_t`.
+ - Reworked validation of input parameters passed to functions in all drivers.
+ - Reworked convert functions to use the switch case statement and to return a bool conversion status variable in all drivers.
+ - Renamed the `NPMX_SHIP_INVALID` enumeration to `NPMX_SHIP_TIME_INVALID`.
+ - Renamed the `NPMX_ADC_MEAS_VBAT2` enumeration to `NPMX_ADC_MEAS_VBAT2_IBAT`.
+ - Renamed the `NPMX_ADC_MEAS_VBAT3` enumeration to `NPMX_ADC_MEAS_VBAT3_VBUS`.
+
+### Removed
+ - Removed support for all leftover MDK symbols.
+ - Removed the `main_page.dox` file.
+
 ## [0.6.0] - 2023-05-11
 ### Added
  - Added functions that convert enumerations to integers.
@@ -40,10 +65,10 @@ All notable changes to this project are documented in this file.
 ## [0.5.0] - 2023-04-21
 ### Fixed
  - Fixed an issue in MDK where reserved registers were using the `uint32_t` type. All registers are using the `uint8_t` type now.
- - Fixed an issue in MDK where POF polarity had incorrect values for nPM1300 Engineering B.
+ - Fixed an issue in MDK where POF polarity had incorrect values for nPM1300 Engineering C.
 
 ### Removed
- - Removed the long press string for the SHIPHOLD event for nPM1300 Engineering B.
+ - Removed the long press string for the SHIPHOLD event for nPM1300 Engineering C.
 
 ## [0.4.0] - 2023-04-19
 ### Added

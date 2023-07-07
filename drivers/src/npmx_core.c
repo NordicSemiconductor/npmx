@@ -50,7 +50,7 @@
  */
 static npmx_callback_type_t event_callback_get(npmx_event_group_t event)
 {
-    static const npmx_callback_type_t callbacks_tab[] =
+    static const npmx_callback_type_t callbacks_tab[NPMX_EVENT_GROUP_COUNT] =
     {
         [NPMX_EVENT_GROUP_ADC]             = NPMX_CALLBACK_TYPE_EVENT_ADC,
         [NPMX_EVENT_GROUP_BAT_CHAR_TEMP]   = NPMX_CALLBACK_TYPE_EVENT_BAT_CHAR_TEMP,
@@ -59,12 +59,7 @@ static npmx_callback_type_t event_callback_get(npmx_event_group_t event)
         [NPMX_EVENT_GROUP_SHIPHOLD]        = NPMX_CALLBACK_TYPE_EVENT_SHIPHOLD,
         [NPMX_EVENT_GROUP_VBUSIN_VOLTAGE]  = NPMX_CALLBACK_TYPE_EVENT_VBUSIN_VOLTAGE,
         [NPMX_EVENT_GROUP_VBUSIN_THERMAL]  = NPMX_CALLBACK_TYPE_EVENT_VBUSIN_THERMAL_USB,
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk)
-        [NPMX_EVENT_GROUP_USB_B]           = NPMX_CALLBACK_TYPE_EVENT_USB_B,
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk)
         [NPMX_EVENT_GROUP_GPIO]            = NPMX_CALLBACK_TYPE_EVENT_EVENTSGPIOSET,
-#endif
     };
 
     return callbacks_tab[event];
@@ -79,7 +74,7 @@ static npmx_callback_type_t event_callback_get(npmx_event_group_t event)
  */
 static uint16_t event_set_register_get(npmx_event_group_t event)
 {
-    static const uint16_t registers_tab[] =
+    static const uint16_t registers_tab[NPMX_EVENT_GROUP_COUNT] =
     {
         [NPMX_EVENT_GROUP_ADC]             = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSADCSET),
         [NPMX_EVENT_GROUP_BAT_CHAR_TEMP]   = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSBCHARGER0SET),
@@ -88,12 +83,7 @@ static uint16_t event_set_register_get(npmx_event_group_t event)
         [NPMX_EVENT_GROUP_SHIPHOLD]        = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSSHPHLDSET),
         [NPMX_EVENT_GROUP_VBUSIN_VOLTAGE]  = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSVBUSIN0SET),
         [NPMX_EVENT_GROUP_VBUSIN_THERMAL]  = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSVBUSIN1SET),
-#if defined(MAIN_EVENTSUSBBSET_EVENTUSBBDETECT_Msk)
-        [NPMX_EVENT_GROUP_USB_B]           = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSUSBBSET),
-#endif
-#if defined(MAIN_EVENTSGPIOSET_EVENTGPIOEDGEDETECT0_Msk)
         [NPMX_EVENT_GROUP_GPIO]            = NPMX_REG_TO_ADDR(NPM_MAIN->EVENTSGPIOSET),
-#endif
     };
 
     return registers_tab[event];
@@ -149,7 +139,7 @@ static npmx_error_t event_get(npmx_instance_t *  p_pm,
                               npmx_event_group_t event,
                               uint8_t *          p_flags_mask)
 {
-    return npmx_backend_register_read(&p_pm->backend_inst,
+    return npmx_backend_register_read(p_pm->p_backend,
                                       event_set_register_get(event),
                                       p_flags_mask,
                                       1);
@@ -170,7 +160,7 @@ static npmx_error_t event_clear(npmx_instance_t *  p_pm,
 {
     uint16_t reg = event_clear_register_get(event);
 
-    return npmx_backend_register_write(&p_pm->backend_inst, reg, &flags_mask, 1);
+    return npmx_backend_register_write(p_pm->p_backend, reg, &flags_mask, 1);
 }
 
 /**
@@ -227,27 +217,35 @@ npmx_error_t npmx_core_task_trigger(npmx_instance_t const * p_pm, npmx_core_task
 
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    return npmx_backend_register_write(&p_pm->backend_inst,
-                                       (uint16_t)((uint32_t)(NPM_MAIN) + (uint32_t)task),
-                                       &data,
-                                       1);
+    static const uint16_t task_addr[] =
+    {
+        [NPMX_CORE_TASK_RESET] = NPMX_REG_TO_ADDR(NPM_MAIN->TASKSWRESET),
+    };
+
+    return npmx_backend_register_write(p_pm->p_backend, task_addr[task], &data, 1);
 }
 
-npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
+npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
+                            npmx_backend_t *  p_backend,
+                            npmx_callback_t   generic_callback)
 {
     NPMX_ASSERT(p_pm);
+    NPMX_ASSERT(p_backend);
+
+    p_pm->p_backend = p_backend;
 
 #if NPMX_CHECK(NPMX_PERIPH_ADC_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_ADC_COUNT; i++)
     {
-        p_pm->adc[i].p_backend      = &p_pm->backend_inst;
+        p_pm->adc[i].p_pmic = p_pm;
+        p_pm->adc[i].burst  = false;
     }
 #endif
 
 #if NPMX_CHECK(NPMX_PERIPH_BUCK_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_BUCK_COUNT; i++)
     {
-        p_pm->buck[i].p_backend = &p_pm->backend_inst;
+        p_pm->buck[i].p_backend = p_backend;
         p_pm->buck[i].hw_index  = i;
     }
 #endif
@@ -262,7 +260,7 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
 #if NPMX_CHECK(NPMX_PERIPH_GPIO_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_GPIO_COUNT; i++)
     {
-        p_pm->gpio[i].p_backend = &p_pm->backend_inst;
+        p_pm->gpio[i].p_backend = p_backend;
         p_pm->gpio[i].hw_index  = i;
     }
 #endif
@@ -270,7 +268,7 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
 #if NPMX_CHECK(NPMX_PERIPH_LDSW_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_LDSW_COUNT; i++)
     {
-        p_pm->ldsw[i].p_backend = &p_pm->backend_inst;
+        p_pm->ldsw[i].p_backend = p_backend;
         p_pm->ldsw[i].hw_index  = i;
     }
 #endif
@@ -278,7 +276,7 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
 #if NPMX_CHECK(NPMX_PERIPH_LED_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_LED_COUNT; i++)
     {
-        p_pm->led[i].p_backend = &p_pm->backend_inst;
+        p_pm->led[i].p_backend = p_backend;
         p_pm->led[i].hw_index  = i;
     }
 #endif
@@ -286,14 +284,14 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
 #if NPMX_CHECK(NPMX_PERIPH_POF_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_POF_COUNT; i++)
     {
-        p_pm->pof[i].p_backend = &p_pm->backend_inst;
+        p_pm->pof[i].p_backend = p_backend;
     }
 #endif
 
 #if NPMX_CHECK(NPMX_PERIPH_SHIP_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_SHIP_COUNT; i++)
     {
-        p_pm->ship[i].p_backend            = &p_pm->backend_inst;
+        p_pm->ship[i].p_backend            = p_backend;
         p_pm->ship[i].ship_button_inverted = false;
     }
 #endif
@@ -301,32 +299,32 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm)
 #if NPMX_CHECK(NPMX_PERIPH_TIMER_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_TIMER_COUNT; i++)
     {
-        p_pm->timer[i].p_backend = &p_pm->backend_inst;
+        p_pm->timer[i].p_backend = p_backend;
     }
 #endif
 
 #if NPMX_CHECK(NPMX_PERIPH_VBUSIN_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_VBUSIN_COUNT; i++)
     {
-        p_pm->vbusin[i].p_backend = &p_pm->backend_inst;
+        p_pm->vbusin[i].p_backend = p_backend;
     }
 #endif
 
 #if NPMX_CHECK(NPMX_PERIPH_CHARGER_PRESENT)
     for (uint8_t i = 0; i < NPMX_PERIPH_CHARGER_COUNT; i++)
     {
-        p_pm->charger[i].p_pmic = p_pm;
+        p_pm->charger[i].p_pmic                 = p_pm;
+        p_pm->charger[i].charging_current_ma    = NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DEFAULT;
+        p_pm->charger[i].discharging_current_ma = NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_DEFAULT;
     }
 #endif
 
-    p_pm->interrupt                    = false;
-    
-    if (p_pm->generic_cb)
+    p_pm->interrupt  = false;
+    p_pm->generic_cb = generic_callback;
+
+    for (uint32_t i = 0; i < NPMX_CALLBACK_TYPE_COUNT; i++)
     {
-        for (uint32_t i = 0; i < NPMX_CALLBACK_TYPE_COUNT; i++)
-        {
-            p_pm->registered_cb[i] = p_pm->generic_cb;
-        }
+        p_pm->registered_cb[i] = generic_callback;
     }
 
     p_pm->p_user_context = NULL;
@@ -338,6 +336,7 @@ void npmx_core_register_cb(npmx_instance_t * p_pm, npmx_callback_t cb, npmx_call
 {
     NPMX_ASSERT(p_pm);
     NPMX_ASSERT(cb);
+    NPMX_ASSERT(type < NPMX_CALLBACK_TYPE_COUNT);
 
     p_pm->registered_cb[type] = cb;
 }
@@ -373,6 +372,7 @@ npmx_error_t npmx_core_event_interrupt_enable(npmx_instance_t *  p_pm,
                                               uint8_t            flags_mask)
 {
     NPMX_ASSERT(p_pm);
+    NPMX_ASSERT(event < NPMX_EVENT_GROUP_COUNT);
 
     npmx_error_t err_code = event_clear(p_pm, event, flags_mask);
     if (err_code != NPMX_SUCCESS)
@@ -383,7 +383,7 @@ npmx_error_t npmx_core_event_interrupt_enable(npmx_instance_t *  p_pm,
     p_pm->event_group_enable_mask[event] = flags_mask;
     uint16_t reg = event_irq_enable_register_get(event);
 
-    return npmx_backend_register_write(&p_pm->backend_inst, reg, &flags_mask, 1);
+    return npmx_backend_register_write(p_pm->p_backend, reg, &flags_mask, 1);
 }
 
 npmx_error_t npmx_core_event_interrupt_disable(npmx_instance_t *  p_pm,
@@ -391,11 +391,12 @@ npmx_error_t npmx_core_event_interrupt_disable(npmx_instance_t *  p_pm,
                                                uint8_t            flags_mask)
 {
     NPMX_ASSERT(p_pm);
+    NPMX_ASSERT(event < NPMX_EVENT_GROUP_COUNT);
 
     p_pm->event_group_enable_mask[event] &= ~flags_mask;
     uint16_t reg = event_irq_disable_register_get(event);
 
-    npmx_error_t err_code = npmx_backend_register_write(&p_pm->backend_inst, reg, &flags_mask, 1);
+    npmx_error_t err_code = npmx_backend_register_write(p_pm->p_backend, reg, &flags_mask, 1);
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -407,6 +408,7 @@ npmx_error_t npmx_core_event_interrupt_disable(npmx_instance_t *  p_pm,
 void npmx_core_context_set(npmx_instance_t * p_pm, void * p_context)
 {
     NPMX_ASSERT(p_pm);
+    NPMX_ASSERT(p_context);
 
     p_pm->p_user_context = p_context;
 }
