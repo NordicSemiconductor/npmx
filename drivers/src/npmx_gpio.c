@@ -74,7 +74,7 @@ NPMX_STATIC_ASSERT(GPIOS_GPIODEBOUNCE0_GPIODEBOUNCE_Msk == GPIOS_GPIODEBOUNCE2_G
 NPMX_STATIC_ASSERT(GPIOS_GPIODEBOUNCE0_GPIODEBOUNCE_Msk == GPIOS_GPIODEBOUNCE3_GPIODEBOUNCE_Msk);
 NPMX_STATIC_ASSERT(GPIOS_GPIODEBOUNCE0_GPIODEBOUNCE_Msk == GPIOS_GPIODEBOUNCE4_GPIODEBOUNCE_Msk);
 
-static const uint16_t m_mode_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_mode_reg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOMODE0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOMODE1),
@@ -83,7 +83,7 @@ static const uint16_t m_mode_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOMODE4),
 };
 
-static const uint16_t m_drive_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_drive_reg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODRIVE0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODRIVE1),
@@ -92,7 +92,7 @@ static const uint16_t m_drive_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODRIVE4),
 };
 
-static const uint16_t m_pull_up_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_pull_up_reg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPUEN0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPUEN1),
@@ -101,7 +101,7 @@ static const uint16_t m_pull_up_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPUEN4),
 };
 
-static const uint16_t m_pull_down_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_pull_down_reg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPDEN0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPDEN1),
@@ -110,7 +110,7 @@ static const uint16_t m_pull_down_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOPDEN4),
 };
 
-static const uint16_t m_open_drain_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_open_drain_reg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOOPENDRAIN0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOOPENDRAIN1),
@@ -119,7 +119,7 @@ static const uint16_t m_open_drain_reg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIOOPENDRAIN4),
 };
 
-static const uint16_t m_deb_regreg_addr[NPMX_PERIPH_GPIO_COUNT] =
+static const uint16_t m_deb_regreg_addr[NPM_GPIOS_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODEBOUNCE0),
     [1] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODEBOUNCE1),
@@ -128,7 +128,7 @@ static const uint16_t m_deb_regreg_addr[NPMX_PERIPH_GPIO_COUNT] =
     [4] = NPMX_REG_TO_ADDR(NPM_GPIOS->GPIODEBOUNCE4),
 };
 
-static const uint8_t m_gpio_status_pos[NPMX_PERIPH_GPIO_COUNT] =
+static const uint8_t m_gpio_status_pos[NPM_GPIOS_COUNT] =
 {
     [0] = GPIOS_GPIOSTATUS_GPIO0STATUS_Pos,
     [1] = GPIOS_GPIOSTATUS_GPIO1STATUS_Pos,
@@ -137,7 +137,7 @@ static const uint8_t m_gpio_status_pos[NPMX_PERIPH_GPIO_COUNT] =
     [4] = GPIOS_GPIOSTATUS_GPIO4STATUS_Pos,
 };
 
-static const uint8_t m_gpio_status_msk[NPMX_PERIPH_GPIO_COUNT] =
+static const uint8_t m_gpio_status_msk[NPM_GPIOS_COUNT] =
 {
     [0] = GPIOS_GPIOSTATUS_GPIO0STATUS_Msk,
     [1] = GPIOS_GPIOSTATUS_GPIO1STATUS_Msk,
@@ -345,8 +345,8 @@ static npmx_error_t pull_down_enable_get(npmx_gpio_t const * p_instance, bool * 
  * @param[in] p_instance Pointer to the GPIO instance.
  * @param[in] pull       Pull-down, pull-up or no pull.
  *
- * @retval NPMX_SUCCESS             Operation performed successfully.
- * @retval NPMX_ERROR_IO            Error using IO bus line.
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 static npmx_error_t pull_set(npmx_gpio_t const * p_instance, npmx_gpio_pull_t pull)
 {
@@ -524,7 +524,7 @@ static npmx_error_t debounce_get(npmx_gpio_t const * p_instance, bool * p_enable
 npmx_gpio_t * npmx_gpio_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_GPIO_COUNT);
+    NPMX_ASSERT(idx < NPM_GPIOS_COUNT);
 
     return &p_pmic->gpio[idx];
 }

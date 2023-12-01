@@ -103,6 +103,9 @@ npmx_error_t npmx_errlog_reset_errors_check(npmx_errlog_t const * p_instance);
 /**
  * @brief Function for setting scratch value for specified scratch register.
  *
+ * @note This function must not be used after calling @ref npmx_core_init function
+ *       with the restore_values parameter selected as true.
+ *
  * @param[in] p_instance Pointer to the instance of error log.
  * @param[in] scratch    Selected scratch register.
  * @param[in] value      Scratch register value to be saved.

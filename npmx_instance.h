@@ -66,54 +66,55 @@ typedef struct npmx_instance
     void *           p_user_context;                                         ///< Pointer to user-defined context data.
     npmx_backend_t * p_backend;                                              ///< Pointer to specified backend instance used by this npmx instance to communicate with npmx device.
 
-#if NPMX_CHECK(NPMX_PERIPH_ADC_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_adc_t adc[NPMX_PERIPH_ADC_COUNT];                                   ///< ADC instances.
+#if NPMX_CHECK(NPM_ADC_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_adc_t adc[NPM_ADC_COUNT];                                   ///< ADC instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_BUCK_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_buck_t buck[NPMX_PERIPH_BUCK_COUNT];                                ///< BUCK instances.
+#if NPMX_CHECK(NPM_BUCK_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_buck_t buck[NPM_BUCK_COUNT];                                ///< BUCK instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_ERRLOG_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_errlog_t errlog[NPMX_PERIPH_ERRLOG_COUNT];                          ///< Error log instances.
+#if NPMX_CHECK(NPM_ERRLOG_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_errlog_t errlog[NPM_ERRLOG_COUNT];                          ///< Error log instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_GPIO_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_gpio_t gpio[NPMX_PERIPH_GPIO_COUNT];                                ///< GPIO instances.
+#if NPMX_CHECK(NPM_GPIOS_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_gpio_t gpio[NPM_GPIOS_COUNT];                               ///< GPIO instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_LDSW_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_ldsw_t ldsw[NPMX_PERIPH_LDSW_COUNT];                                ///< LDSW instances.
+#if NPMX_CHECK(NPM_LDSW_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_ldsw_t ldsw[NPM_LDSW_COUNT];                                ///< LDSW instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_LED_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_led_t led[NPMX_PERIPH_LED_COUNT];                                   ///< LED instances.
+#if NPMX_CHECK(NPM_LEDDRV_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_led_t led[NPM_LEDDRV_COUNT];                                ///< LED instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_POF_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_pof_t pof[NPMX_PERIPH_POF_COUNT];                                   ///< POF instances.
+#if NPMX_CHECK(NPM_POF_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_pof_t pof[NPM_POF_COUNT];                                   ///< POF instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_SHIP_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_ship_t ship[NPMX_PERIPH_SHIP_COUNT];                                ///< SHIP instances.
+#if NPMX_CHECK(NPM_SHPHLD_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_ship_t ship[NPM_SHPHLD_COUNT];                              ///< SHIP instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_TIMER_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_timer_t timer[NPMX_PERIPH_TIMER_COUNT];                             ///< TIMER instances.
+#if NPMX_CHECK(NPM_TIMER_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_timer_t timer[NPM_TIMER_COUNT];                             ///< TIMER instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_VBUSIN_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_vbusin_t vbusin[NPMX_PERIPH_VBUSIN_COUNT];                          ///< VBUSIN instances.
+#if NPMX_CHECK(NPM_VBUSIN_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_vbusin_t vbusin[NPM_VBUSIN_COUNT];                          ///< VBUSIN instances.
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_CHARGER_PRESENT) || defined(__NPMX_DOXYGEN__)
-    npmx_charger_t charger[NPMX_PERIPH_CHARGER_COUNT];                       ///< CHARGER instances.
+#if NPMX_CHECK(NPM_BCHARGER_PRESENT) || defined(__NPMX_DOXYGEN__)
+    npmx_charger_t charger[NPM_BCHARGER_COUNT];                      ///< CHARGER instances.
 #endif
 
     npmx_callback_t         generic_cb;                                      ///< Function used when @ref registered_cb for @ref npmx_callback_type_t is not set.
     npmx_callback_t         registered_cb[NPMX_CALLBACK_TYPE_COUNT];         ///< Table of registered callbacks.
     uint8_t                 event_group_enable_mask[NPMX_EVENT_GROUP_COUNT]; ///< Enabled events in specified events group, see npmx_event_group_xxx_t for selected event.
     bool                    interrupt;                                       ///< Flag set in interrupt to inform npmx_proc about incoming GPIO interrupt.
+    bool                    restore_values;                                  ///< True for reading initial values from nPM device, false for setting default values.
 } npmx_instance_t;
 
 /** @} */

@@ -47,6 +47,12 @@ extern "C" {
  * @brief   TIMER peripheral driver.
  */
 
+/** @brief Data structure of the TIMER driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+} npmx_timer_t;
+
 /** @brief TIMER tasks. */
 typedef enum
 {
@@ -77,12 +83,6 @@ typedef enum
     NPMX_TIMER_PRESCALER_COUNT,                                           ///< Timer prescalers count.
     NPMX_TIMER_PRESCALER_INVALID = NPMX_INVALID_ENUM_VALUE,               ///< Invalid timer prescaler.
 } npmx_timer_prescaler_t;
-
-/** @brief Data structure of the TIMER driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend; ///< Pointer to backend instance.
-} npmx_timer_t;
 
 /** @brief Configuration structure for timer. */
 typedef struct
@@ -122,8 +122,6 @@ npmx_error_t npmx_timer_task_trigger(npmx_timer_t const * p_instance, npmx_timer
 
 /**
  * @brief Function for setting timer's configuration with mode, prescaler, and compare value.
- *
- * @note To apply compare value, call @ref npmx_timer_task_trigger() with @ref NPMX_TIMER_TASK_STROBE argument.
  *
  * @param[in] p_instance Pointer to the TIMER instance.
  * @param[in] p_config   Pointer to the configuration of the TIMER to apply.

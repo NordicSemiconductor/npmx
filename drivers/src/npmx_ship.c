@@ -61,7 +61,7 @@ static npmx_error_t task_trigger(npmx_ship_t const * p_instance, npmx_ship_task_
 npmx_ship_t * npmx_ship_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_SHIP_COUNT);
+    NPMX_ASSERT(idx < NPM_SHPHLD_COUNT);
 
     return &p_pmic->ship[idx];
 }
@@ -238,7 +238,7 @@ npmx_error_t npmx_ship_reset_config_set(npmx_ship_t const *              p_insta
         return err_code;
     }
 
-    return task_trigger(p_instance, NPMX_SHIP_TASK_CONFIG_RESET);
+    return task_trigger(p_instance, NPMX_SHIP_TASK_CONFIG_SHIPHOLD);
 }
 
 npmx_error_t npmx_ship_reset_config_get(npmx_ship_t const *        p_instance,

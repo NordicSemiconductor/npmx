@@ -64,7 +64,7 @@ static npmx_error_t task_trigger(npmx_errlog_t const * p_instance, npmx_errlog_t
 npmx_errlog_t * npmx_errlog_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_ERRLOG_COUNT);
+    NPMX_ASSERT(idx < NPM_ERRLOG_COUNT);
 
     return &p_pmic->errlog[idx];
 }
@@ -81,19 +81,19 @@ npmx_error_t npmx_errlog_reset_errors_check(npmx_errlog_t const * p_instance)
 {
     NPMX_ASSERT(p_instance);
 
-    uint8_t errors[NPMX_PERIPH_ERRLOG_ERR_COUNT];
+    uint8_t errors[NPM_ERRLOG_ERR_COUNT];
 
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(NPM_ERRLOG->RSTCAUSE),
                                                        errors,
-                                                       NPMX_PERIPH_ERRLOG_ERR_COUNT);
+                                                       NPM_ERRLOG_ERR_COUNT);
 
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
-    for (uint8_t i = 0; i < NPMX_PERIPH_ERRLOG_ERR_COUNT; i++)
+    for (uint8_t i = 0; i < NPM_ERRLOG_ERR_COUNT; i++)
     {
         if (errors[i] != 0)
         {
@@ -107,14 +107,14 @@ npmx_error_t npmx_errlog_reset_errors_check(npmx_errlog_t const * p_instance)
         }
     }
 
-    static const npmx_callback_type_t m_id_to_callback[NPMX_PERIPH_ERRLOG_ERR_COUNT] =
+    static const npmx_callback_type_t m_id_to_callback[NPM_ERRLOG_ERR_COUNT] =
     {
         NPMX_CALLBACK_TYPE_RSTCAUSE,
         NPMX_CALLBACK_TYPE_CHARGER_ERROR,
         NPMX_CALLBACK_TYPE_SENSOR_ERROR
     };
 
-    for (uint8_t i = 0; i < NPMX_PERIPH_ERRLOG_ERR_COUNT; i++)
+    for (uint8_t i = 0; i < NPM_ERRLOG_ERR_COUNT; i++)
     {
         if ((errors[i] != 0) && (p_instance->p_pmic->registered_cb[m_id_to_callback[i]] != NULL))
         {
@@ -138,7 +138,7 @@ npmx_error_t npmx_errlog_scratch_set(npmx_errlog_t const * p_instance,
 
     if (scratch == NPMX_ERRLOG_SCRATCH0)
     {
-        NPMX_ASSERT(value <= NPMX_PERIPH_ERRLOG_SCRATCH0_MAX_VAL);
+        NPMX_ASSERT(value <= NPM_ERRLOG_SCRATCH0_MAX_VAL);
 
         npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                            m_scratch_reg_addr[scratch],

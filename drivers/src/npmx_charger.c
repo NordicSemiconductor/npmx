@@ -43,6 +43,21 @@ NPMX_STATIC_ASSERT(BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk == BCHARGER_NTCHOTLSB_N
 NPMX_STATIC_ASSERT((offsetof(NPM_BCHARGER_Type, BCHGERRSENSOR) -
                     offsetof(NPM_BCHARGER_Type, BCHGERRREASON)) == 1);
 
+/** @brief Minimum possible value of NTC temperature threshold. */
+#define CHARGER_NTC_TEMPERATURE_MIN -20L
+
+/** @brief Maximum possible value of NTC temperature threshold. */
+#define CHARGER_NTC_TEMPERATURE_MAX 60L
+
+/** @brief The difference in centigrade scale between 0 degrees Celsius to absolute zero temperature. */
+#define ABSOLUTE_ZERO_DIFFERENCE 273.15f
+
+/**
+ * @brief All thermistors values are defined for 25 degrees Celsius.
+ *        For calculations, values must be converted into degrees Kelvin.
+ */
+#define THERMISTOR_NOMINAL_TEMPERATURE (25.0f + ABSOLUTE_ZERO_DIFFERENCE)
+
 /**
  * @brief Function for activating the specified charger task.
  *
@@ -79,7 +94,7 @@ static npmx_error_t task_trigger(npmx_charger_t const * p_instance, npmx_charger
  */
 static uint16_t ntc_code_get(uint64_t desired_resistance, uint64_t nominal_resistance)
 {
-    uint64_t code = NPMX_PERIPH_CHARGER_ADC_BITS_RESOLUTION;
+    uint64_t code = NPM_BCHARGER_ADC_BITS_RESOLUTION;
 
     code *= desired_resistance;
     code /= (desired_resistance + nominal_resistance);
@@ -95,19 +110,13 @@ static uint16_t ntc_code_get(uint64_t desired_resistance, uint64_t nominal_resis
  *
  * @return The code value.
  */
-static uint16_t die_temperature_to_code(uint16_t temperature)
+static uint16_t die_temperature_to_code(int16_t temperature)
 {
-    uint16_t code = NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_1 -
-                    (temperature * NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MULTIPLIER);
-    uint16_t mod = code % NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2;
+    uint32_t code = (uint32_t)((int32_t)NPM_BCHARGER_DIE_TEMPERATURE_CONST_1 -
+                               (int32_t)((int32_t)temperature *
+                                         (int32_t)NPM_BCHARGER_DIE_TEMPERATURE_MULTIPLIER));
 
-    code /= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2;
-    if (mod > (NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2 / 2))
-    {
-        code++;
-    }
-
-    return code;
+    return (uint16_t)npmx_common_div_round_closest(code, NPM_BCHARGER_DIE_TEMPERATURE_CONST_2);
 }
 
 /**
@@ -121,14 +130,13 @@ static uint16_t die_temperature_to_code(uint16_t temperature)
  *
  * @return The temperature value.
  */
-static uint16_t die_code_to_temperature(uint16_t code)
+static int16_t die_code_to_temperature(uint16_t code)
 {
-    uint16_t temperature = NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_1 -
-                           (code * NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_CONST_2);
+    int32_t temperature = (int32_t)NPM_BCHARGER_DIE_TEMPERATURE_CONST_1 -
+                          (int32_t)((uint32_t)code * NPM_BCHARGER_DIE_TEMPERATURE_CONST_2);
 
-    temperature /= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MULTIPLIER;
-
-    return temperature;
+    return (int16_t)npmx_common_div_round_closest(temperature,
+                                                  (int32_t)NPM_BCHARGER_DIE_TEMPERATURE_MULTIPLIER);
 }
 
 /**
@@ -159,7 +167,7 @@ static npmx_error_t resistance_set(npmx_charger_t const * p_instance,
     uint16_t code    = ntc_code_get(resistance, ntc_resistance);
     uint8_t  data[2] =
     {
-        [0] = (uint8_t)(code >> NPMX_PERIPH_CHARGER_RESISTANCE_MSB_SHIFT),
+        [0] = (uint8_t)(code >> NPM_BCHARGER_RESISTANCE_MSB_SHIFT),
         [1] = (uint8_t)(code & BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk),
     };
 
@@ -199,10 +207,106 @@ static npmx_error_t resistance_get(npmx_charger_t const * p_instance,
         return err_code;
     }
 
-    uint32_t code = ((uint16_t)data[0] << NPMX_PERIPH_CHARGER_RESISTANCE_MSB_SHIFT) |
+    uint32_t code = ((uint16_t)data[0] << NPM_BCHARGER_RESISTANCE_MSB_SHIFT) |
                     (uint16_t)(data[1] & BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk);
 
-    *p_resistance = (code * ntc_resistance) / (NPMX_PERIPH_CHARGER_ADC_BITS_RESOLUTION - code);
+    *p_resistance = (code * ntc_resistance) / (NPM_BCHARGER_ADC_BITS_RESOLUTION - code);
+
+    return NPMX_SUCCESS;
+}
+
+/**
+ * @brief Function for setting the NTC temperature threshold.
+ *
+ * @note Resistance value should be read from NTC characteristic for selected temperature.
+ *
+ * @param[in] p_instance  Pointer to the CHARGER instance.
+ * @param[in] reg         Start MSB register address, can be address to: NTCCOLD, NTCCOOL, NTCWARM, NTCHOT.
+ * @param[in] temperature Temperature threshold in Celsius, value should be in range [-20,60].
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+static npmx_error_t temperature_set(npmx_charger_t const * p_instance,
+                                    uint16_t               reg,
+                                    int16_t                temperature)
+{
+    npmx_adc_ntc_config_t ntc_config;
+    npmx_error_t          err_code = npmx_adc_ntc_config_get(npmx_adc_get(p_instance->p_pmic, 0),
+                                                             &ntc_config);
+
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    float target_temperature = ((float)temperature + ABSOLUTE_ZERO_DIFFERENCE);
+    float exp_val            =
+        ((1.0f / THERMISTOR_NOMINAL_TEMPERATURE) - (1.0f / target_temperature)) *
+        (float)ntc_config.beta;
+    float code_float = NPM_BCHARGER_ADC_BITS_RESOLUTION / (npmx_common_exp_get(exp_val) + 1);
+
+    uint16_t code    = (uint16_t)npmx_common_round_get(code_float);
+    uint8_t  data[2] =
+    {
+        [0] = (uint8_t)(code >> NPM_BCHARGER_RESISTANCE_MSB_SHIFT),
+        [1] = (uint8_t)(code & BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk),
+    };
+
+    return npmx_backend_register_write(p_instance->p_pmic->p_backend, reg, data, 2);
+}
+
+/**
+ * @brief Function for reading the temperature from specified MSB start register.
+ *
+ * @param[in]  p_instance    Pointer to the CHARGER instance.
+ * @param[in]  reg           Start MSB register address, can be address to: NTCCOLD, NTCCOOL, NTCWARM, NTCHOT.
+ * @param[out] p_temperature Pointer to the temperature variable, in Celsius.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+static npmx_error_t temperature_get(npmx_charger_t const * p_instance,
+                                    uint16_t               reg,
+                                    int16_t *              p_temperature)
+{
+    uint8_t      data[2];
+    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
+                                                       reg,
+                                                       data,
+                                                       2);
+
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    npmx_adc_ntc_config_t ntc_config;
+
+    err_code = npmx_adc_ntc_config_get(npmx_adc_get(p_instance->p_pmic, 0),
+                                       &ntc_config);
+
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    uint32_t code = ((uint16_t)data[0] << NPM_BCHARGER_RESISTANCE_MSB_SHIFT) |
+                    (uint16_t)(data[1] & BCHARGER_NTCCOLDLSB_NTCCOLDLVLLSB_Msk);
+
+    float numerator = THERMISTOR_NOMINAL_TEMPERATURE * (float)ntc_config.beta;
+    float ln_value  = npmx_common_ln_get((float)NPM_BCHARGER_ADC_BITS_RESOLUTION /
+                                         (float)code - 1.0f);
+    float   denominator = (float)ntc_config.beta - (THERMISTOR_NOMINAL_TEMPERATURE * ln_value);
+    int32_t temperature = npmx_common_round_get((numerator / denominator) -
+                                                ABSOLUTE_ZERO_DIFFERENCE);
+
+    *p_temperature = (int16_t)(temperature <= CHARGER_NTC_TEMPERATURE_MAX ?
+                               (temperature >=
+                                CHARGER_NTC_TEMPERATURE_MIN ? temperature :
+                                                              CHARGER_NTC_TEMPERATURE_MIN)
+    :
+                                                              CHARGER_NTC_TEMPERATURE_MAX);
 
     return NPMX_SUCCESS;
 }
@@ -210,7 +314,7 @@ static npmx_error_t resistance_get(npmx_charger_t const * p_instance,
 npmx_charger_t * npmx_charger_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_CHARGER_COUNT);
+    NPMX_ASSERT(idx < NPM_BCHARGER_COUNT);
 
     return &p_pmic->charger[idx];
 }
@@ -376,11 +480,11 @@ npmx_error_t npmx_charger_module_enable_set(npmx_charger_t const * p_instance, u
 
     npmx_error_t err_code;
 
-    uint8_t data_enable_register = (module_mask >> NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
-                                   NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Msk;
+    uint8_t data_enable_register = (module_mask >> NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
+                                   NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Msk;
 
-    uint8_t data_disable_register = (module_mask >> NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Pos) &
-                                    NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Msk;
+    uint8_t data_disable_register = (module_mask >> NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Pos) &
+                                    NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Msk;
 
     if (data_enable_register > 0)
     {
@@ -416,11 +520,11 @@ npmx_error_t npmx_charger_module_disable_set(npmx_charger_t const * p_instance,
 
     npmx_error_t err_code;
 
-    uint8_t data_disable_register = (module_mask >> NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
-                                    NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Msk;
+    uint8_t data_disable_register = (module_mask >> NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
+                                    NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Msk;
 
-    uint8_t data_enable_register = (module_mask >> NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Pos) &
-                                   NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Msk;
+    uint8_t data_enable_register = (module_mask >> NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Pos) &
+                                   NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Msk;
 
     if (data_disable_register > 0)
     {
@@ -461,16 +565,17 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance, uint32_t
                                                            NPM_BCHARGER->BCHGENABLESET),
                                                        ret_data,
                                                        3);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
-    *p_module_mask = (ret_data[0] << NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
-                     NPMX_PERIPH_CHARGER_ENABLE_LOGIC_POSITIVE_Msk;
+    *p_module_mask = (ret_data[0] << NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Pos) &
+                     NPM_BCHARGER_ENABLE_LOGIC_POSITIVE_Msk;
 
-    *p_module_mask |= ((~ret_data[2]) & NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Msk)
-                      << NPMX_PERIPH_CHARGER_ENABLE_LOGIC_NEGATIVE_Pos;
+    *p_module_mask |= ((~ret_data[2]) & NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Msk)
+                      << NPM_BCHARGER_ENABLE_LOGIC_NEGATIVE_Pos;
 
     return NPMX_SUCCESS;
 }
@@ -479,24 +584,22 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint
 {
     NPMX_ASSERT(p_instance);
 
-    if ((current < NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MIN_MA) ||
-        (current > NPMX_PERIPH_CHARGER_CHARGING_CURRENT_MAX_MA))
+    if ((current < NPM_BCHARGER_CHARGING_CURRENT_MIN_MA) ||
+        (current > NPM_BCHARGER_CHARGING_CURRENT_MAX_MA))
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
 
-    if (current % NPMX_PERIPH_CHARGER_CHARGING_CURRENT_STEP_MA)
+    if (current % NPM_BCHARGER_CHARGING_CURRENT_STEP_MA)
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
 
-    p_instance->charging_current_ma = current;
-
-    uint16_t code = current / NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER;
+    uint16_t code = current / NPM_BCHARGER_CHARGING_CURRENT_DIVIDER;
 
     uint8_t data[2] =
     {
-        [0] = (uint8_t)(code >> NPMX_PERIPH_CHARGER_CHARGING_CODE_MSB_SHIFT),
+        [0] = (uint8_t)(code >> NPM_BCHARGER_CHARGING_CODE_MSB_SHIFT),
         [1] = (uint8_t)(code & 1U)
     };
 
@@ -517,18 +620,19 @@ npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETMSB),
                                                        data,
                                                        2);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
     /* Get MSB code data. */
-    code = (uint16_t)data[0] << NPMX_PERIPH_CHARGER_CHARGING_CODE_MSB_SHIFT;
+    code = (uint16_t)data[0] << NPM_BCHARGER_CHARGING_CODE_MSB_SHIFT;
 
     /* Get LSB code data. */
     code += data[1];
 
-    *p_current = (uint16_t)(code * NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DIVIDER);
+    *p_current = (uint16_t)(code * NPM_BCHARGER_CHARGING_CURRENT_DIVIDER);
 
     p_instance->charging_current_ma = *p_current;
 
@@ -539,27 +643,25 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
 {
     NPMX_ASSERT(p_instance);
 
-    if ((current < NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MIN_MA) ||
-        (current > NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_MAX_MA))
+    if ((current < NPM_BCHARGER_DISCHARGING_CURRENT_MIN_MA) ||
+        (current > NPM_BCHARGER_DISCHARGING_CURRENT_MAX_MA))
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
 
-    p_instance->discharging_current_ma = current;
+    uint32_t code = (uint32_t)current * NPM_BCHARGER_DISCHARGING_MULTIPLIER;
+    uint32_t mod  = code % NPM_BCHARGER_DISCHARGING_CONST;
 
-    uint32_t code = (uint32_t)current * NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER;
-    uint32_t mod  = code % NPMX_PERIPH_CHARGER_DISCHARGING_CONST;
+    code /= NPM_BCHARGER_DISCHARGING_CONST;
 
-    code /= NPMX_PERIPH_CHARGER_DISCHARGING_CONST;
-
-    if (mod > (NPMX_PERIPH_CHARGER_DISCHARGING_CONST / 2UL))
+    if (mod > (NPM_BCHARGER_DISCHARGING_CONST / 2UL))
     {
         code++;
     }
 
     uint8_t data[2] =
     {
-        [0] = (uint8_t)(code >> NPMX_PERIPH_CHARGER_DISCHARGING_CODE_MSB_SHIFT),
+        [0] = (uint8_t)(code >> NPM_BCHARGER_DISCHARGING_CODE_MSB_SHIFT),
         [1] = (uint8_t)(code & 1UL)
     };
 
@@ -581,19 +683,20 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
                                                                         BCHGISETDISCHARGEMSB),
                                                        data,
                                                        2);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
     /* Get MSB current data. */
-    code = (uint16_t)data[0] << NPMX_PERIPH_CHARGER_DISCHARGING_CODE_MSB_SHIFT;
+    code = (uint16_t)data[0] << NPM_BCHARGER_DISCHARGING_CODE_MSB_SHIFT;
 
     /* Get LSB current data. */
     code += data[1];
 
-    *p_current = (uint16_t)(((uint32_t)code * NPMX_PERIPH_CHARGER_DISCHARGING_CONST) /
-                            NPMX_PERIPH_CHARGER_DISCHARGING_MULTIPLIER);
+    *p_current = (uint16_t)(((uint32_t)code * NPM_BCHARGER_DISCHARGING_CONST) /
+                            NPM_BCHARGER_DISCHARGING_MULTIPLIER);
 
     p_instance->charging_current_ma = *p_current;
 
@@ -626,6 +729,7 @@ npmx_error_t npmx_charger_termination_normal_voltage_get(npmx_charger_t const * 
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERM),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -663,6 +767,7 @@ npmx_error_t npmx_charger_termination_warm_voltage_get(npmx_charger_t const *   
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGVTERMR),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -701,6 +806,7 @@ npmx_error_t npmx_charger_trickle_voltage_get(npmx_charger_t const *   p_instanc
                                                                         BCHGVTRICKLESEL),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -738,6 +844,7 @@ npmx_error_t npmx_charger_termination_current_get(npmx_charger_t const * p_insta
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGITERMSEL),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -820,10 +927,87 @@ npmx_error_t npmx_charger_hot_resistance_get(npmx_charger_t const * p_instance,
     return resistance_get(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCHOT), p_resistance);
 }
 
-npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, uint16_t temperature)
+npmx_error_t npmx_charger_cold_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(temperature <= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL);
+    NPMX_ASSERT(temperature >= CHARGER_NTC_TEMPERATURE_MIN);
+    NPMX_ASSERT(temperature <= CHARGER_NTC_TEMPERATURE_MAX);
+
+    return temperature_set(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCCOLD), temperature);
+}
+
+npmx_error_t npmx_charger_cold_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_temperature);
+
+    return temperature_get(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCCOLD), p_temperature);
+}
+
+npmx_error_t npmx_charger_cool_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(temperature >= CHARGER_NTC_TEMPERATURE_MIN);
+    NPMX_ASSERT(temperature <= CHARGER_NTC_TEMPERATURE_MAX);
+
+    return temperature_set(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCCOOL), temperature);
+}
+
+npmx_error_t npmx_charger_cool_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_temperature);
+
+    return temperature_get(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCCOOL), p_temperature);
+}
+
+npmx_error_t npmx_charger_warm_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(temperature >= CHARGER_NTC_TEMPERATURE_MIN);
+    NPMX_ASSERT(temperature <= CHARGER_NTC_TEMPERATURE_MAX);
+
+    return temperature_set(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCWARM), temperature);
+}
+
+npmx_error_t npmx_charger_warm_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_temperature);
+
+    return temperature_get(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCWARM), p_temperature);
+}
+
+npmx_error_t npmx_charger_hot_temperature_set(npmx_charger_t const * p_instance,
+                                              int16_t                temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(temperature >= CHARGER_NTC_TEMPERATURE_MIN);
+    NPMX_ASSERT(temperature <= CHARGER_NTC_TEMPERATURE_MAX);
+
+    return temperature_set(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCHOT), temperature);
+}
+
+npmx_error_t npmx_charger_hot_temperature_get(npmx_charger_t const * p_instance,
+                                              int16_t *              p_temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(p_temperature);
+
+    return temperature_get(p_instance, NPMX_REG_TO_ADDR(NPM_BCHARGER->NTCHOT), p_temperature);
+}
+
+npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, int16_t temperature)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(temperature <= NPM_BCHARGER_DIE_TEMPERATURE_MAX_VAL);
+    NPMX_ASSERT(temperature >= NPM_BCHARGER_DIE_TEMPERATURE_MIN_VAL);
 
     uint16_t code = die_temperature_to_code(temperature);
 
@@ -831,7 +1015,7 @@ npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, u
     {
         /* To properly align 10 bit value some bit shifting is needed.
          * Data for MSB stored as data[0].*/
-        [0] = (uint8_t)(((code >> NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT) &
+        [0] = (uint8_t)(((code >> NPM_BCHARGER_DIE_TEMPERATURE_MSB_SHIFT) &
                          BCHARGER_DIETEMPSTOP_DIETEMPSTOPCHG_Msk)
                         >> BCHARGER_DIETEMPSTOP_DIETEMPSTOPCHG_Pos),
         /* Data for LSB stored as data[1]. */
@@ -846,7 +1030,7 @@ npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, u
 }
 
 npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
-                                            uint16_t *             p_temperature)
+                                            int16_t *              p_temperature)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_temperature);
@@ -856,6 +1040,7 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->DIETEMPSTOP),
                                                        data,
                                                        2);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -865,7 +1050,7 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
     uint16_t code = (uint16_t)data[1];
 
     /* Get MSB data. */
-    code |= ((uint16_t)data[0] << NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT);
+    code |= ((uint16_t)data[0] << NPM_BCHARGER_DIE_TEMPERATURE_MSB_SHIFT);
 
     /* Transform code to value. */
     *p_temperature = die_code_to_temperature(code);
@@ -874,16 +1059,17 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
 }
 
 npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
-                                              uint16_t               temperature)
+                                              int16_t                temperature)
 {
     NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(temperature <= NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MAX_VAL);
+    NPMX_ASSERT(temperature <= NPM_BCHARGER_DIE_TEMPERATURE_MAX_VAL);
+    NPMX_ASSERT(temperature >= NPM_BCHARGER_DIE_TEMPERATURE_MIN_VAL);
 
     uint16_t code = die_temperature_to_code(temperature);
 
     uint8_t data[2] =
     {
-        [0] = (uint8_t)(((code >> NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT) &
+        [0] = (uint8_t)(((code >> NPM_BCHARGER_DIE_TEMPERATURE_MSB_SHIFT) &
                          BCHARGER_DIETEMPRESUME_DIETEMPRESUMECHG_Msk)
                         >> BCHARGER_DIETEMPRESUME_DIETEMPRESUMECHG_Pos),
         [1] = (uint8_t)(code & BCHARGER_DIETEMPRESUMELSB_DIETEMPRESUMECHGLSB_Msk)
@@ -897,7 +1083,7 @@ npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
 }
 
 npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
-                                              uint16_t *             p_temperature)
+                                              int16_t *              p_temperature)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_temperature);
@@ -908,6 +1094,7 @@ npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
                                                            NPM_BCHARGER->DIETEMPRESUME),
                                                        data,
                                                        2);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -917,7 +1104,7 @@ npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
     uint16_t code = (uint16_t)data[1];
 
     /* Get MSB data. */
-    code |= ((uint16_t)data[0] << NPMX_PERIPH_CHARGER_DIE_TEMPERATURE_MSB_SHIFT);
+    code |= ((uint16_t)data[0] << NPM_BCHARGER_DIE_TEMPERATURE_MSB_SHIFT);
 
     /* Transform code to value. */
     *p_temperature = die_code_to_temperature(code);
@@ -937,6 +1124,7 @@ npmx_error_t npmx_charger_current_limiter_get(npmx_charger_t const * p_instance,
                                                            NPM_BCHARGER->BCHGILIMSTATUS),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -970,6 +1158,7 @@ npmx_error_t npmx_charger_die_temp_status_get(npmx_charger_t const * p_instance,
                                                            NPM_BCHARGER->DIETEMPSTATUS),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
@@ -996,19 +1185,20 @@ npmx_error_t npmx_charger_errors_check(npmx_charger_t const * p_instance)
     NPMX_ASSERT(p_instance);
 
     npmx_instance_t * p_pmic = p_instance->p_pmic;
-    uint8_t           errors[NPMX_PERIPH_CHARGER_ERR_COUNT];
+    uint8_t           errors[NPM_BCHARGER_ERR_COUNT];
 
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        NPMX_REG_TO_ADDR(
                                                            NPM_BCHARGER->BCHGERRREASON),
                                                        errors,
-                                                       NPMX_PERIPH_CHARGER_ERR_COUNT);
+                                                       NPM_BCHARGER_ERR_COUNT);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
-    for (uint8_t i = 0; i < NPMX_PERIPH_CHARGER_ERR_COUNT; i++)
+    for (uint8_t i = 0; i < NPM_BCHARGER_ERR_COUNT; i++)
     {
         if (errors[i] != 0)
         {
@@ -1028,13 +1218,13 @@ npmx_error_t npmx_charger_errors_check(npmx_charger_t const * p_instance)
         }
     }
 
-    const static npmx_callback_type_t m_id_to_callback[NPMX_PERIPH_CHARGER_ERR_COUNT] =
+    const static npmx_callback_type_t m_id_to_callback[NPM_BCHARGER_ERR_COUNT] =
     {
         NPMX_CALLBACK_TYPE_CHARGER_ERROR,
         NPMX_CALLBACK_TYPE_SENSOR_ERROR
     };
 
-    for (uint8_t i = 0; i < NPMX_PERIPH_CHARGER_ERR_COUNT; i++)
+    for (uint8_t i = 0; i < NPM_BCHARGER_ERR_COUNT; i++)
     {
         if ((errors[i] != 0) && (p_pmic->registered_cb[m_id_to_callback[i]] != NULL))
         {
@@ -1070,6 +1260,7 @@ npmx_error_t npmx_charger_warm_disable_get(npmx_charger_t const * p_instance, bo
                                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGCONFIG),
                                                        &data,
                                                        1);
+
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;

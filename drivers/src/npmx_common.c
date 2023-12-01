@@ -33,8 +33,6 @@
 
 #include <npmx_common.h>
 
-#ifdef NPMX_DEBUG
-
 #define NPMX_COMMON_BITS_COUNT 8U ///< Bits count in event registers.
 
 /** @brief All possible callback names. */
@@ -113,9 +111,10 @@ static const char * callbacks_bits_names[NPMX_CALLBACK_TYPE_COUNT][NPMX_COMMON_B
     },
     [NPMX_CALLBACK_TYPE_CHARGER_ERROR] =
     {
-        [0] = "NTC sensor error",     [1] = "VBAT Sensor Error",
-        [2] = "VBAT Low Error",       [3] = "Measurement Timeout Error",
-        [4] = "Charge Timeout Error", [5] = "Trickle Timeout Error"
+        [0] = "NTC sensor error",          [1] = "VBAT Sensor Error",
+        [2] = "VBAT Low Error",            [3] = "Vtrickle Error",
+        [4] = "Measurement Timeout Error", [5] = "Charge Timeout Error",
+        [6] = "Trickle Timeout Error"
     },
     [NPMX_CALLBACK_TYPE_SENSOR_ERROR] =
     {
@@ -126,25 +125,78 @@ static const char * callbacks_bits_names[NPMX_CALLBACK_TYPE_COUNT][NPMX_COMMON_B
     },
 };
 
-#endif /* NPMX_DEBUG */
-
 const char * npmx_callback_to_str(npmx_callback_type_t type)
 {
-#ifdef NPMX_DEBUG
     NPMX_ASSERT(type < NPMX_CALLBACK_TYPE_COUNT);
     return callbacks_register_name[type];
-#else
-    return NULL;
-#endif /* NPMX_DEBUG */
 }
 
 const char * npmx_callback_bit_to_str(npmx_callback_type_t type, uint8_t bit)
 {
-#ifdef NPMX_DEBUG
     NPMX_ASSERT(type < NPMX_CALLBACK_TYPE_COUNT);
-    NPMX_ASSERT(bit < 8);
+    NPMX_ASSERT(bit < NPMX_COMMON_BITS_COUNT);
     return callbacks_bits_names[type][bit];
-#else
-    return NULL;
-#endif /* NPMX_DEBUG */
+}
+
+int32_t npmx_common_div_round_closest(int32_t number, int32_t divisor)
+{
+    return ((number < 0) == (divisor < 0)) ?
+           ((number + divisor / 2) / divisor) :
+           ((number - divisor / 2) / divisor);
+}
+
+int32_t npmx_common_round_get(float variable)
+{
+    int32_t rounding = (int32_t)variable;
+
+    float frac = variable - rounding;
+
+    if (frac >= 0.5f)
+    {
+        return variable + 1;
+    }
+    else if (frac <= -0.5f)
+    {
+        return variable - 1;
+    }
+    else
+    {
+        return variable;
+    }
+}
+
+float npmx_common_fabs_get(float variable)
+{
+    if (variable >= 0)
+    {
+        return variable;
+    }
+    else
+    {
+        return variable * (-1);
+    }
+}
+
+float npmx_common_exp_get(float variable)
+{
+    double a = 1.0, e = a;
+
+    for (int n = 1; npmx_common_fabs_get(a) > 0.0001; ++n)
+    {
+        a = a * variable / n;
+        e = e + a;
+    }
+    return e;
+}
+
+float npmx_common_ln_get(float variable)
+{
+    unsigned int bx = *(unsigned int *)(&variable);
+    unsigned int ex = bx >> 23;
+    signed int   t  = (signed int)ex - (signed int)127;
+
+    bx       = 1065353216 | (bx & 8388607);
+    variable = *(float *)(&bx);
+    return -1.49278 + ((2.11263 + (-0.729104 + 0.10969 * variable) * variable) * variable) +
+           0.6931471806 * t;
 }

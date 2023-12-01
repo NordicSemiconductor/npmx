@@ -47,6 +47,13 @@ extern "C" {
  * @brief   LED peripheral driver.
  */
 
+/** @brief Data structure of the LED driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of LED instance.
+} npmx_led_t;
+
 /** @brief Possible LED working modes. */
 typedef enum
 {
@@ -57,13 +64,6 @@ typedef enum
     NPMX_LED_MODE_COUNT,                                                    ///< LED working modes count.
     NPMX_LED_MODE_INVALID  = NPMX_INVALID_ENUM_VALUE,                       ///< Invalid LED working mode.
 } npmx_led_mode_t;
-
-/** @brief Data structure of the LED driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend; ///< Pointer to backend instance.
-    uint8_t          hw_index;  ///< Hardware index of LED instance.
-} npmx_led_t;
 
 /**
  * @brief Function for returning LED instance based on index.

@@ -37,7 +37,7 @@
 npmx_pof_t * npmx_pof_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_POF_COUNT);
+    NPMX_ASSERT(idx < NPM_POF_COUNT);
 
     return &p_pmic->pof[idx];
 }

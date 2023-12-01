@@ -73,13 +73,16 @@ npmx_error_t npmx_core_task_trigger(npmx_instance_t const * p_pm, npmx_core_task
  * @param[in] p_pm             Pointer to the instance of nPM device.
  * @param[in] p_backend        Pointer to the initialized backend instance.
  * @param[in] generic_callback Function callback pointer to be registered as generic callback.
- * 
+ * @param[in] restore_values   True if initial values are to be restored from nPM device, false for setting default values.
+ *                             If true, scratch registers are used to store state and cannot be used by application.
+ *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
                             npmx_backend_t *  p_backend,
-                            npmx_callback_t   generic_callback);
+                            npmx_callback_t   generic_callback,
+                            bool              restore_values);
 
 /**
  * @brief Function for registering callback handler to specified callback type event/error.

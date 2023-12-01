@@ -67,8 +67,8 @@ typedef enum
 /** @brief Possible converter modes of each buck. */
 typedef enum
 {
-    NPMX_BUCK_MODE_AUTO = BUCK_BUCKSTATUS_BUCK1MODE_AUTOMODE, ///< AUTO converter mode, PWM or PFM.
-    NPMX_BUCK_MODE_PFM  = BUCK_BUCKSTATUS_BUCK1MODE_PFMMODE,  ///< Force PFM converter mode.
+    NPMX_BUCK_MODE_AUTO = BUCK_BUCKSTATUS_BUCK1MODE_AUTOMODE, ///< AUTO converter mode, PWM or hysteretic (PFM).
+    NPMX_BUCK_MODE_PFM  = BUCK_BUCKSTATUS_BUCK1MODE_PFMMODE,  ///< Force hysteretic (PFM) converter mode.
     NPMX_BUCK_MODE_PWM  = BUCK_BUCKSTATUS_BUCK1MODE_PWMMODE,  ///< Force PWM converter mode.
     NPMX_BUCK_MODE_COUNT,                                     ///< Buck modes count.
     NPMX_BUCK_MODE_INVALID = NPMX_INVALID_ENUM_VALUE,         ///< Invalid buck mode.
@@ -190,10 +190,10 @@ bool npmx_buck_voltage_convert_to_mv(npmx_buck_voltage_t enum_value, uint32_t * 
 npmx_error_t npmx_buck_task_trigger(npmx_buck_t const * p_instance, npmx_buck_task_t task);
 
 /**
- * @brief Function for setting the buck converter mode to either PWM, PFM or AUTO (PFM & PWM).
+ * @brief Function for setting the buck converter mode to either PWM, hysteretic (PFM) or AUTO (PWM & PFM).
  *
  * @param[in] p_instance Pointer to the buck instance.
- * @param[in] mode       PWM, PFM or AUTO mode.
+ * @param[in] mode       PWM, hysteretic (PFM) or AUTO mode.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
@@ -201,10 +201,11 @@ npmx_error_t npmx_buck_task_trigger(npmx_buck_t const * p_instance, npmx_buck_ta
 npmx_error_t npmx_buck_converter_mode_set(npmx_buck_t const * p_instance, npmx_buck_mode_t mode);
 
 /**
- * @brief Function for reading the PFM mode of the buck converter.
+ * @brief Function for checking whether the hysteretic (PFM) mode of the buck converter is enabled.
  *
  * @param[in]  p_instance Pointer to the buck instance.
- * @param[out] p_enable   Pointer to enable PWM mode variable.
+ * @param[out] p_enable   Pointer to variable to be filled with hysteretic (PFM) mode.
+ *                        True if mode is enabled, false otherwise.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.

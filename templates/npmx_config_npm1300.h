@@ -31,11 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPMX_CONFIG_NPM1300_ENG_C_H__
-#define NPMX_CONFIG_NPM1300_ENG_C_H__
+#ifndef NPMX_CONFIG_NPM1300_H__
+#define NPMX_CONFIG_NPM1300_H__
 
 #ifndef NPMX_CONFIG_H__
     #error "This file should not be included directly. Include npmx_config.h instead."
 #endif
 
-#endif // NPMX_CONFIG_NPM1300_ENG_C_H__
+#endif // NPMX_CONFIG_NPM1300_H__

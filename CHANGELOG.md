@@ -1,6 +1,33 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.0.0] - 2023-12-01
+### Added
+ - Added ADK v1.4.0.
+ - Added the `npmx_adc_ntc_config_t` structure to the ADC driver. The structure contains a thermistor type and NTC beta value.
+ - Added `npmx_charger_*_temperature_*` functions for getting and setting NTC temperature threshold using temperature in degrees Celsius.
+ - Added the `restore_values` initialization parameter to the `npmx_core_init` function. Now, the following values can be restored from a PMIC device during its initialization: ADC burst mode enable, NTC beta value, charging current, discharging current, and ship button inversion status.
+ - Added mathematical functions used in npmx to `npmx_common`.
+
+### Changed
+ - Changed the temperature type in the `npmx_charger_die_temp_*` functions. Now they accept negative values.
+ - Changed a function for setting and reading the NTC type in the ADC driver. Now the `npmx_adc_ntc_config_t` configuration structure is passed as an argument to `npmx_adc_ntc_config_*` functions.
+ - Changed the NTC resistance calculation to the battery temperature calculation in the ADC driver. The `NPMX_ADC_MEAS_NTC` enumeration which used to return measurement in Ohms has been replaced by `NPMX_ADC_MEAS_BAT_TEMP` which returns temperature in millidegrees Celsius.
+ - Changed a behavior of the `npmx_timer_config_set` function. Now it triggers the `NPMX_TIMER_TASK_STROBE` task after setting the configuration.
+ - Changed a compilation define that should be used when building for nPM1300 from `NPM1300_ENG_C` to `NPM1300`.
+ - Changed the template file name for nPM1300 from `templates/npmx_config_npm1300_eng_c.h` to `templates/npmx_config_npm1300.h`.
+ - Changed the behavior of the `npmx_callback_to_str` and `npmx_callback_bit_to_str` functions. Now, strings will be returned instead of a NULL pointer when building with `NPMX_DEBUG` defined.
+ - Changed values in the `npmx_ldsw_soft_start_current_t`.
+
+### Fixed
+ - Fixed an issue in the `npmx_ldsw_soft_start_config_get` function that caused an incorrect enable state.
+ - Fixed an issue in the `npmx_charger_die_temp_*` functions that caused incorrect temperature calculations in the charger driver.
+ - Fixed an issue with the `NPMX_ADC_MEAS_BAT_TEMP` parameter in the `npmx_adc_meas_get` function. The issue caused an inaccurate die temperature calculation in the charger driver.
+ - Fixed an issue in the `npmx_adc_meas_get` and `npmx_adc_meas_all_get` functions that caused an incorrect value to be returned.
+ - Fixed an issue in the `npmx_callback_bit_to_str` function that caused an incorrect string description to be returned.
+ - Fixed an issue in the `npmx_ship_reset_config_set` function that caused an incorrect task to be called.
+ - Fixed minor issues in documentation.
+
 ## [0.7.0] - 2023-07-07
 ### Added
  - Added a GitHub workflow containing the `publish-documentation.yml` file. The file generates a HTML page with documentation that is linked on the GitHub repository page.

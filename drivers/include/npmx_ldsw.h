@@ -47,6 +47,13 @@ extern "C" {
  * @brief   Load switch (LDSW) peripheral driver.
  */
 
+/** @brief Data structure of the LDSW driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+    uint8_t          hw_index;  ///< Hardware index of LDSW instance.
+} npmx_ldsw_t;
+
 /** @brief LDSW tasks. */
 typedef enum
 {
@@ -81,14 +88,14 @@ typedef enum
 /** @brief Possible LDSW soft start current levels. */
 typedef enum
 {
-    NPMX_LDSW_SOFT_START_CURRENT_25_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_25mA,  ///< LDSW soft start level 25 mA.
-    NPMX_LDSW_SOFT_START_CURRENT_50_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50mA,  ///< LDSW soft start level 50 mA.
-    NPMX_LDSW_SOFT_START_CURRENT_75_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_75mA,  ///< LDSW soft start level 75 mA.
-    NPMX_LDSW_SOFT_START_CURRENT_100_MA  = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_100mA, ///< LDSW soft start level 100 mA.
-    NPMX_LDSW_SOFT_START_CURRENT_COUNT,                                             ///< Current levels count.
-    NPMX_LDSW_SOFT_START_CURRENT_DEFAULT = NPMX_LDSW_SOFT_START_CURRENT_25_MA,      ///< Default LDSW soft start level.
-    NPMX_LDSW_SOFT_START_CURRENT_MAX     = NPMX_LDSW_SOFT_START_CURRENT_100_MA,     ///< Maximum LDSW soft start level.
-    NPMX_LDSW_SOFT_START_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,                 ///< Invalid LDSW soft start level.
+    NPMX_LDSW_SOFT_START_CURRENT_10_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_10MA, ///< LDSW soft start level 10 mA.
+    NPMX_LDSW_SOFT_START_CURRENT_20_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_20MA, ///< LDSW soft start level 20 mA.
+    NPMX_LDSW_SOFT_START_CURRENT_35_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_35MA, ///< LDSW soft start level 35 mA.
+    NPMX_LDSW_SOFT_START_CURRENT_50_MA   = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50MA, ///< LDSW soft start level 50 mA.
+    NPMX_LDSW_SOFT_START_CURRENT_COUNT,                                            ///< Current levels count.
+    NPMX_LDSW_SOFT_START_CURRENT_DEFAULT = NPMX_LDSW_SOFT_START_CURRENT_10_MA,     ///< Default LDSW soft start level.
+    NPMX_LDSW_SOFT_START_CURRENT_MAX     = NPMX_LDSW_SOFT_START_CURRENT_50_MA,     ///< Maximum LDSW soft start level.
+    NPMX_LDSW_SOFT_START_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,                ///< Invalid LDSW soft start level.
 } npmx_ldsw_soft_start_current_t;
 
 /** @brief Possible LDO output voltages to be set. */
@@ -132,13 +139,6 @@ typedef enum
     NPMX_LDSW_MODE_COUNT,                                           ///< LDSW modes count.
     NPMX_LDSW_MODE_INVALID     = NPMX_INVALID_ENUM_VALUE,           ///< Invalid LDSW mode.
 } npmx_ldsw_mode_t;
-
-/** @brief Data structure of the LDSW driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend; ///< Pointer to backend instance.
-    uint8_t          hw_index;  ///< Hardware index of LDSW instance.
-} npmx_ldsw_t;
 
 /** @brief Configuration structure for GPIO used as input signal for LDSW. */
 typedef struct

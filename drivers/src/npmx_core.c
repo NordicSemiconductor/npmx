@@ -227,95 +227,149 @@ npmx_error_t npmx_core_task_trigger(npmx_instance_t const * p_pm, npmx_core_task
 
 npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
                             npmx_backend_t *  p_backend,
-                            npmx_callback_t   generic_callback)
+                            npmx_callback_t   generic_callback,
+                            bool              restore_values)
 {
     NPMX_ASSERT(p_pm);
     NPMX_ASSERT(p_backend);
 
     p_pm->p_backend = p_backend;
 
-#if NPMX_CHECK(NPMX_PERIPH_ADC_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_ADC_COUNT; i++)
+#if NPMX_CHECK(NPM_ADC_PRESENT)
+    for (uint8_t i = 0; i < NPM_ADC_COUNT; i++)
     {
         p_pm->adc[i].p_pmic = p_pm;
-        p_pm->adc[i].burst  = false;
+        if (restore_values)
+        {
+            npmx_adc_t * adc = npmx_adc_get(p_pm, i);
+            npmx_adc_config_t adc_config;
+            npmx_error_t ret = npmx_adc_config_get(adc, &adc_config);
+            if (ret != NPMX_SUCCESS)
+            {
+                return ret;
+            }
+
+            npmx_adc_ntc_config_t ntc_config;
+            ret = npmx_adc_ntc_config_get(adc, &ntc_config);
+            if (ret != NPMX_SUCCESS)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            p_pm->adc[i].burst    = false;
+            p_pm->adc[i].ntc_beta = 3380;
+        }
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_BUCK_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_BUCK_COUNT; i++)
+#if NPMX_CHECK(NPM_BUCK_PRESENT)
+    for (uint8_t i = 0; i < NPM_BUCK_COUNT; i++)
     {
         p_pm->buck[i].p_backend = p_backend;
         p_pm->buck[i].hw_index  = i;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_ERRLOG_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_ERRLOG_COUNT; i++)
+#if NPMX_CHECK(NPM_BCHARGER_PRESENT)
+    for (uint8_t i = 0; i < NPM_BCHARGER_COUNT; i++)
+    {
+        p_pm->charger[i].p_pmic = p_pm;
+        if (restore_values)
+        {
+            uint16_t current;
+            npmx_charger_t * charger = npmx_charger_get(p_pm, i);
+            npmx_error_t ret = npmx_charger_charging_current_get(charger, &current);
+            if (ret != NPMX_SUCCESS)
+            {
+                return ret;
+            }
+
+            ret = npmx_charger_discharging_current_get(charger, &current);
+            if (ret != NPMX_SUCCESS)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            p_pm->charger[i].charging_current_ma    = NPM_BCHARGER_CHARGING_CURRENT_DEFAULT;
+            p_pm->charger[i].discharging_current_ma = NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT;
+        }
+    }
+#endif
+
+#if NPMX_CHECK(NPM_ERRLOG_PRESENT)
+    for (uint8_t i = 0; i < NPM_ERRLOG_COUNT; i++)
     {
         p_pm->errlog[i].p_pmic = p_pm;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_GPIO_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_GPIO_COUNT; i++)
+#if NPMX_CHECK(NPM_GPIOS_PRESENT)
+    for (uint8_t i = 0; i < NPM_GPIOS_COUNT; i++)
     {
         p_pm->gpio[i].p_backend = p_backend;
         p_pm->gpio[i].hw_index  = i;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_LDSW_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_LDSW_COUNT; i++)
+#if NPMX_CHECK(NPM_LDSW_PRESENT)
+    for (uint8_t i = 0; i < NPM_LDSW_COUNT; i++)
     {
         p_pm->ldsw[i].p_backend = p_backend;
         p_pm->ldsw[i].hw_index  = i;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_LED_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_LED_COUNT; i++)
+#if NPMX_CHECK(NPM_LEDDRV_PRESENT)
+    for (uint8_t i = 0; i < NPM_LEDDRV_COUNT; i++)
     {
         p_pm->led[i].p_backend = p_backend;
         p_pm->led[i].hw_index  = i;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_POF_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_POF_COUNT; i++)
+#if NPMX_CHECK(NPM_POF_PRESENT)
+    for (uint8_t i = 0; i < NPM_POF_COUNT; i++)
     {
         p_pm->pof[i].p_backend = p_backend;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_SHIP_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_SHIP_COUNT; i++)
+#if NPMX_CHECK(NPM_SHPHLD_PRESENT)
+    for (uint8_t i = 0; i < NPM_SHPHLD_COUNT; i++)
     {
-        p_pm->ship[i].p_backend            = p_backend;
-        p_pm->ship[i].ship_button_inverted = false;
+        p_pm->ship[i].p_backend = p_backend;
+        if (restore_values)
+        {
+            npmx_ship_t * ship = npmx_ship_get(p_pm, i);
+            npmx_ship_config_t ship_config;
+            npmx_error_t ret = npmx_ship_config_get(ship, &ship_config);
+            if (ret != NPMX_SUCCESS)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            p_pm->ship[i].ship_button_inverted = false;
+        }
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_TIMER_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_TIMER_COUNT; i++)
+#if NPMX_CHECK(NPM_TIMER_PRESENT)
+    for (uint8_t i = 0; i < NPM_TIMER_COUNT; i++)
     {
         p_pm->timer[i].p_backend = p_backend;
     }
 #endif
 
-#if NPMX_CHECK(NPMX_PERIPH_VBUSIN_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_VBUSIN_COUNT; i++)
+#if NPMX_CHECK(NPM_VBUSIN_PRESENT)
+    for (uint8_t i = 0; i < NPM_VBUSIN_COUNT; i++)
     {
         p_pm->vbusin[i].p_backend = p_backend;
-    }
-#endif
-
-#if NPMX_CHECK(NPMX_PERIPH_CHARGER_PRESENT)
-    for (uint8_t i = 0; i < NPMX_PERIPH_CHARGER_COUNT; i++)
-    {
-        p_pm->charger[i].p_pmic                 = p_pm;
-        p_pm->charger[i].charging_current_ma    = NPMX_PERIPH_CHARGER_CHARGING_CURRENT_DEFAULT;
-        p_pm->charger[i].discharging_current_ma = NPMX_PERIPH_CHARGER_DISCHARGING_CURRENT_DEFAULT;
     }
 #endif
 
@@ -328,6 +382,7 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
     }
 
     p_pm->p_user_context = NULL;
+    p_pm->restore_values = restore_values;
 
     return NPMX_SUCCESS;
 }

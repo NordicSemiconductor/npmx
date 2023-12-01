@@ -50,8 +50,9 @@ extern "C" {
 /** @brief Data structure of the Analog-to-Digital Converter (ADC) driver instance. */
 typedef struct
 {
-    npmx_instance_t * p_pmic; ///< Pointer to the PMIC instance.
-    bool              burst;  ///< True if burst measurement is enabled, false otherwise.
+    npmx_instance_t * p_pmic;   ///< Pointer to the PMIC instance.
+    bool              burst;    ///< True if burst measurement is enabled, false otherwise.
+    uint32_t          ntc_beta; ///< Battery NTC beta value.
 } npmx_adc_t;
 
 /** @brief ADC tasks. */
@@ -71,7 +72,7 @@ typedef enum
 typedef enum
 {
     NPMX_ADC_MEAS_VBAT,                              ///< VBAT measurement (in millivolts).
-    NPMX_ADC_MEAS_NTC,                               ///< Battery NTC measurement (in ohms).
+    NPMX_ADC_MEAS_BAT_TEMP,                          ///< Battery temperature (in millidegrees Celsius). For proper temperature calculations, a thermistor type and NTC beta value should be set with the @ref npmx_adc_config_set function.
     NPMX_ADC_MEAS_DIE_TEMP,                          ///< Internal die temperature measurement (in millidegrees Celsius).
     NPMX_ADC_MEAS_VSYS,                              ///< VSYS voltage measurement (in millivolts).
     NPMX_ADC_MEAS_VBUS,                              ///< VBUS (7 Volt range) measurement (in millivolts).
@@ -152,6 +153,13 @@ typedef struct
     npmx_adc_ibat_meas_current_t charge_current; ///< Charging current type.
     bool                         charging;       ///< True if battery is being charged, false if battery is discharging.
 } npmx_adc_ibat_meas_status_t;
+
+/** @brief Configuration structure for battery NTC thermistor. */
+typedef struct
+{
+    npmx_adc_ntc_type_t type; ///< Battery NTC type.
+    uint32_t            beta; ///< Battery NTC beta value.
+} npmx_adc_ntc_config_t;
 
 /**
  * @brief Function for returning ADC instance based on index.
@@ -274,29 +282,30 @@ npmx_error_t npmx_adc_config_set(npmx_adc_t * p_instance, npmx_adc_config_t cons
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_adc_config_get(npmx_adc_t const * p_instance, npmx_adc_config_t * p_config);
+npmx_error_t npmx_adc_config_get(npmx_adc_t * p_instance, npmx_adc_config_t * p_config);
 
 /**
- * @brief Function for configuring ADC with battery NTC type.
+ * @brief Function for configuring a battery NTC thermistor.
  *
  * @param[in] p_instance  Pointer to the ADC instance.
- * @param[in] battery_ntc Type of the NTC battery thermistor.
+ * @param[in] p_config    Pointer to the battery NTC thermistor configuration structure.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_adc_ntc_set(npmx_adc_t * p_instance, npmx_adc_ntc_type_t battery_ntc);
+npmx_error_t npmx_adc_ntc_config_set(npmx_adc_t *                  p_instance,
+                                     npmx_adc_ntc_config_t const * p_config);
 
 /**
- * @brief Function for getting configured battery NTC type in ADC.
+ * @brief Function for getting a configuration of the battery NTC thermistor.
  *
  * @param[in]  p_instance Pointer to the ADC instance.
- * @param[out] p_ntc      Pointer to type of the NTC battery thermistor variable.
+ * @param[out] p_config   Pointer to the battery NTC thermistor configuration structure.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_adc_ntc_get(npmx_adc_t * p_instance, npmx_adc_ntc_type_t * p_ntc);
+npmx_error_t npmx_adc_ntc_config_get(npmx_adc_t * p_instance, npmx_adc_ntc_config_t * p_config);
 
 /**
  * @brief Function for getting the nominal NTC resistance.
@@ -332,8 +341,10 @@ npmx_error_t npmx_adc_meas_check(npmx_adc_t const * p_instance,
  * @param[in]  meas       Measurement value to be read.
  * @param[out] p_value    Pointer to variable for read value.
  *
- * @retval NPMX_SUCCESS  Operation performed successfully.
- * @retval NPMX_ERROR_IO Error using IO bus line.
+ * @retval NPMX_SUCCESS             Operation performed successfully.
+ * @retval NPMX_ERROR_INVALID_PARAM Not possible to calculate value for given npmx_adc_meas_t.
+ * @retval NPMX_ERROR_IO            Error using IO bus line.
+ * @retval NPMX_ERROR_INVALID_MEAS  Invalid measurement for given npmx_adc_meas_t.
  */
 npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
                                npmx_adc_meas_t    meas,

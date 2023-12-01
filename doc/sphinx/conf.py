@@ -39,6 +39,8 @@ for header_path in driver_headers:
 {"".join(len(name)*["="])}
 
 .. doxygengroup:: {defgroup}
+    :project: npmx_drivers
+    :members:
 """)
             f.close()
 
@@ -60,13 +62,13 @@ exclude_patterns = ["theme"]
 # Options for HTML output ------------------------------------------------------
 
 html_theme = "sphinx_ncs_theme"
-html_static_path = [str(CONF_DIR / "_static")]
 html_last_updated_fmt = "%b %d, %Y"
 html_show_sphinx = False
-
+html_theme_options = html_theme_options = {"standalone": True}
 # Options for Breathe ----------------------------------------------------------
 
-breathe_projects = {"npmx": str(CONF_DIR.parent / "html_sphinx" / "xml")}
+breathe_projects = {"npmx": str(CONF_DIR.parent / "html_sphinx" / "xml"),
+                    "npmx_drivers": str(CONF_DIR.parent / "html_sphinx" / "xml")}
 breathe_default_project = "npmx"
 breathe_domain_by_extension = {"h": "c", "c": "c"}
 breathe_separate_member_pages = True

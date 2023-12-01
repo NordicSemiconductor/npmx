@@ -26,9 +26,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    container:
-      image: nordicplayground/nrfconnect-sdk:main
-      options: --cpus 2
 
     steps:
       - name: Checkout
@@ -38,7 +35,7 @@ jobs:
         uses: actions/configure-pages@v3
 
       - name: Install doxygen
-        run: apt-get -y install doxygen
+        run: sudo apt-get -y install doxygen
 
       - name: Install requirements
         run: python3 -m pip install -r doc/sphinx/requirements.txt

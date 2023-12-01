@@ -47,21 +47,21 @@ NPMX_STATIC_ASSERT(
 NPMX_STATIC_ASSERT(
     LEDDRV_LEDDRV0MODESEL_LEDDRV0MODESEL_Msk == LEDDRV_LEDDRV2MODESEL_LEDDRV2MODESEL_Msk);
 
-static const uint16_t m_led_mode_reg_addr[NPMX_PERIPH_LED_COUNT] =
+static const uint16_t m_led_mode_reg_addr[NPM_LEDDRV_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV0MODESEL),
     [1] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV1MODESEL),
     [2] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV2MODESEL),
 };
 
-static const uint16_t m_led_set_reg_addr[NPMX_PERIPH_LED_COUNT] =
+static const uint16_t m_led_set_reg_addr[NPM_LEDDRV_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV0SET),
     [1] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV1SET),
     [2] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV2SET),
 };
 
-static const uint16_t m_led_clr_reg_addr[NPMX_PERIPH_LED_COUNT] =
+static const uint16_t m_led_clr_reg_addr[NPM_LEDDRV_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV0CLR),
     [1] = NPMX_REG_TO_ADDR(NPM_LEDDRV->LEDDRV1CLR),
@@ -71,7 +71,7 @@ static const uint16_t m_led_clr_reg_addr[NPMX_PERIPH_LED_COUNT] =
 npmx_led_t * npmx_led_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_LED_COUNT);
+    NPMX_ASSERT(idx < NPM_LEDDRV_COUNT);
 
     return &p_pmic->led[idx];
 }

@@ -43,108 +43,101 @@
 #define LDSW_VOLTAGE_DIFF 100UL
 #endif
 
-/**
- * @brief Symbols used in @ref npmx_ldsw_soft_start_current_convert_to_ma function
- *        in the conversion from enumeration to millivolts.
- */
-#define LDSW_SOFT_START_CURRENT_BASE 25UL
-#define LDSW_SOFT_START_CURRENT_DIFF 25UL
-
 /* A static assert of LDSW Soft Start Levels. */
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_25mA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_25mA);
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50mA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_50mA);
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_75mA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_75mA);
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_100mA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_100mA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_10MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_10MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_20MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_20MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_35MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_35MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_50MA);
 
-static const uint8_t m_en_gpio_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_en_gpio_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1GPISEL_LDSW1GPISEL_Pos,
     [1] = LDSW_LDSW2GPISEL_LDSW2GPISEL_Pos,
 };
 
-static const uint8_t m_en_gpio_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_en_gpio_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1GPISEL_LDSW1GPISEL_Msk,
     [1] = LDSW_LDSW2GPISEL_LDSW2GPISEL_Msk,
 };
 
-static const uint8_t m_inv_gpio_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_inv_gpio_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1GPISEL_LDSW1GPIINV_Pos,
     [1] = LDSW_LDSW2GPISEL_LDSW2GPIINV_Pos,
 };
 
-static const uint8_t m_inv_gpio_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_inv_gpio_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1GPISEL_LDSW1GPIINV_Msk,
     [1] = LDSW_LDSW2GPISEL_LDSW2GPIINV_Msk,
 };
 
-static const uint16_t m_en_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
+static const uint16_t m_en_reg_addr[NPM_LDSW_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW1GPISEL),
     [1] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW2GPISEL),
 };
 
-static const uint8_t m_soft_start_current_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_soft_start_current_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_Pos,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_Pos,
 };
 
-static const uint8_t m_soft_start_current_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_soft_start_current_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_Msk,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_Msk,
 };
 
-static const uint8_t m_soft_start_en_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_soft_start_en_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Pos,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_Pos,
 };
 
-static const uint8_t m_soft_start_en_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_soft_start_en_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1SOFTSTARTDISABLE_Msk,
     [1] = LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_Msk,
 };
 
-static const uint8_t m_en_dis_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_en_dis_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1ACTIVEDISCHARGE_Pos,
     [1] = LDSW_LDSWCONFIG_LDSW2ACTIVEDISCHARGE_Pos,
 };
 
-static const uint8_t m_en_dis_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_en_dis_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSWCONFIG_LDSW1ACTIVEDISCHARGE_Msk,
     [1] = LDSW_LDSWCONFIG_LDSW2ACTIVEDISCHARGE_Msk,
 };
 
-static const uint16_t m_ldo_sel_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
+static const uint16_t m_ldo_sel_reg_addr[NPM_LDSW_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW1LDOSEL),
     [1] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW2LDOSEL),
 };
 
-static const uint8_t m_ldo_sel_pos[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_ldo_sel_pos[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_Pos,
     [1] = LDSW_LDSW2LDOSEL_LDSW2LDOSEL_Pos,
 };
 
-static const uint8_t m_ldo_sel_mask[NPMX_PERIPH_LDSW_COUNT] =
+static const uint8_t m_ldo_sel_mask[NPM_LDSW_COUNT] =
 {
     [0] = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_Msk,
     [1] = LDSW_LDSW2LDOSEL_LDSW2LDOSEL_Msk,
 };
 
-static const uint16_t m_vout_sel_reg_addr[NPMX_PERIPH_LDSW_COUNT] =
+static const uint16_t m_vout_sel_reg_addr[NPM_LDSW_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW1VOUTSEL),
     [1] = NPMX_REG_TO_ADDR(NPM_LDSW->LDSW2VOUTSEL),
@@ -163,7 +156,7 @@ static npmx_error_t task_trigger(npmx_ldsw_t const * p_instance, npmx_ldsw_task_
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[NPMX_LDSW_TASK_COUNT][NPMX_PERIPH_LDSW_COUNT] =
+    static const uint16_t task_addr[NPMX_LDSW_TASK_COUNT][NPM_LDSW_COUNT] =
     {
         [NPMX_LDSW_TASK_ENABLE] =
         {
@@ -185,7 +178,7 @@ static npmx_error_t task_trigger(npmx_ldsw_t const * p_instance, npmx_ldsw_task_
 npmx_ldsw_t * npmx_ldsw_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_LDSW_COUNT);
+    NPMX_ASSERT(idx < NPM_LDSW_COUNT);
 
     return &p_pmic->ldsw[idx];
 }
@@ -264,14 +257,14 @@ npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t mil
 {
     switch (milliamperes)
     {
-        case 25:
-            return NPMX_LDSW_SOFT_START_CURRENT_25_MA;
+        case 10:
+            return NPMX_LDSW_SOFT_START_CURRENT_10_MA;
+        case 20:
+            return NPMX_LDSW_SOFT_START_CURRENT_20_MA;
+        case 35:
+            return NPMX_LDSW_SOFT_START_CURRENT_35_MA;
         case 50:
             return NPMX_LDSW_SOFT_START_CURRENT_50_MA;
-        case 75:
-            return NPMX_LDSW_SOFT_START_CURRENT_75_MA;
-        case 100:
-            return NPMX_LDSW_SOFT_START_CURRENT_100_MA;
         default:
             return NPMX_LDSW_SOFT_START_CURRENT_INVALID;
     }
@@ -280,14 +273,22 @@ npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t mil
 bool npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t enum_value,
                                                 uint32_t *                     p_val)
 {
-    if (enum_value < NPMX_LDSW_SOFT_START_CURRENT_COUNT)
+    switch (enum_value)
     {
-        *p_val = LDSW_SOFT_START_CURRENT_BASE + (uint32_t)enum_value * LDSW_SOFT_START_CURRENT_DIFF;
-        return true;
-    }
-    else
-    {
-        return false;
+        case NPMX_LDSW_SOFT_START_CURRENT_10_MA:
+            *p_val = 10;
+            return true;
+        case NPMX_LDSW_SOFT_START_CURRENT_20_MA:
+            *p_val = 20;
+            return true;
+        case NPMX_LDSW_SOFT_START_CURRENT_35_MA:
+            *p_val = 35;
+            return true;
+        case NPMX_LDSW_SOFT_START_CURRENT_50_MA:
+            *p_val = 50;
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -418,7 +419,7 @@ npmx_error_t npmx_ldsw_soft_start_config_get(npmx_ldsw_t const *             p_i
                                          >> m_soft_start_current_pos[p_instance->hw_index]);
     p_config->enable = ((data & m_soft_start_en_mask[p_instance->hw_index])
                         >> m_soft_start_en_pos[p_instance->hw_index]) ==
-                       LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_NOSOFTSTART;
+                       LDSW_LDSWCONFIG_LDSW2SOFTSTARTDISABLE_NOEFFECT;
 
     return NPMX_SUCCESS;
 }

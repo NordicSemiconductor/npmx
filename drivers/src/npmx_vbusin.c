@@ -47,7 +47,7 @@ NPMX_STATIC_ASSERT(VBUSIN_USBCDETECTSTATUS_VBUSINCC1CMP_3AHIGHPOWER ==
 npmx_vbusin_t * npmx_vbusin_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_VBUSIN_COUNT);
+    NPMX_ASSERT(idx < NPM_VBUSIN_COUNT);
 
     return &p_pmic->vbusin[idx];
 }

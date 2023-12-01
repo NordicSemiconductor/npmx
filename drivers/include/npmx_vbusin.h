@@ -47,6 +47,12 @@ extern "C" {
  * @brief   VBUS input (VBUSIN) peripheral driver.
  */
 
+/** @brief Data structure of the VBUSIN driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+} npmx_vbusin_t;
+
 /** @brief VBUSIN tasks. */
 typedef enum
 {
@@ -95,12 +101,6 @@ typedef enum
     NPMX_VBUSIN_STATUS_UNDER_VOLTAGE_MASK = VBUSIN_VBUSINSTATUS_VBUSINUNDERVOLTAGE_Msk,      ///< VBUS under voltage detected.
     NPMX_VBUSIN_STATUS_SUSPEND_MODE_MASK  = VBUSIN_VBUSINSTATUS_VBUSINSUSPENDMODEACTIVE_Msk, ///< VBUS suspended.
 } npmx_vbusin_status_mask_t;
-
-/** @brief Data structure of the VBUSIN driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend; ///< Pointer to backend instance.
-} npmx_vbusin_t;
 
 /**
  * @brief Function for returning VBUSIN instance based on index.

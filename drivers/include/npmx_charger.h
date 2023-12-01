@@ -47,6 +47,14 @@ extern "C" {
  * @brief   Battery charger peripheral driver.
  */
 
+/** @brief Data structure of the CHARGER driver instance. */
+typedef struct
+{
+    npmx_instance_t * p_pmic;                 ///< Pointer to the PMIC instance.
+    uint16_t          charging_current_ma;    ///< Charging current in milliamperes.
+    uint16_t          discharging_current_ma; ///< Discharging current in milliamperes.
+} npmx_charger_t;
+
 /** @brief Charger tasks. */
 typedef enum
 {
@@ -141,14 +149,6 @@ typedef enum
     NPMX_CHARGER_NTC_STATUS_WARM_MASK = BCHARGER_NTCSTATUS_NTCWARM_Msk, ///< NTC temperature is warm.
     NPMX_CHARGER_NTC_STATUS_HOT_MASK  = BCHARGER_NTCSTATUS_NTCHOT_Msk,  ///< NTC temperature is hot.
 } npmx_charger_ntc_status_mask_t;
-
-/** @brief Data structure of the CHARGER driver instance. */
-typedef struct
-{
-    npmx_instance_t * p_pmic;                 ///< Pointer to the PMIC instance.
-    uint16_t          charging_current_ma;    ///< Charging current in milliamperes.
-    uint16_t          discharging_current_ma; ///< Discharging current in milliamperes.
-} npmx_charger_t;
 
 /**
  * @brief Function for returning CHARGER instance based on index.
@@ -535,6 +535,102 @@ npmx_error_t npmx_charger_hot_resistance_get(npmx_charger_t const * p_instance,
                                              uint32_t *             p_resistance);
 
 /**
+ * @brief Function for setting the NTC cold temperature threshold.
+ *
+ * @param[in] p_instance  Pointer to the CHARGER instance.
+ * @param[in] temperature Temperature threshold in degrees Celsius. The value should be in the range between -20 and 60 degrees.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_cold_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature);
+
+/**
+ * @brief Function for reading the NTC cold temperature threshold.
+ *
+ * @param[in]  p_instance    Pointer to the CHARGER instance.
+ * @param[out] p_temperature Pointer to the temperature variable in degrees Celsius.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_cold_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature);
+
+/**
+ * @brief Function for setting the NTC cool temperature threshold.
+ *
+ * @param[in] p_instance  Pointer to the CHARGER instance.
+ * @param[in] temperature Temperature threshold in degrees Celsius. The value should be in the range between -20 and 60 degrees.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_cool_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature);
+
+/**
+ * @brief Function for reading the NTC cool temperature threshold.
+ *
+ * @param[in]  p_instance    Pointer to the CHARGER instance.
+ * @param[out] p_temperature Pointer to the temperature variable in degrees Celsius.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_cool_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature);
+
+/**
+ * @brief Function for setting the NTC warm temperature threshold.
+ *
+ * @param[in] p_instance  Pointer to the CHARGER instance.
+ * @param[in] temperature Temperature threshold in degrees Celsius. The value should be in the range between -20 and 60 degrees.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_warm_temperature_set(npmx_charger_t const * p_instance,
+                                               int16_t                temperature);
+
+/**
+ * @brief Function for reading the NTC warm temperature threshold.
+ *
+ * @param[in]  p_instance    Pointer to the CHARGER instance.
+ * @param[out] p_temperature Pointer to the temperature variable in degrees Celsius.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_warm_temperature_get(npmx_charger_t const * p_instance,
+                                               int16_t *              p_temperature);
+
+/**
+ * @brief Function for setting the NTC hot temperature threshold.
+ *
+ * @param[in] p_instance  Pointer to the CHARGER instance.
+ * @param[in] temperature Temperature threshold in degrees Celsius. The value should be in the range between -20 and 60 degrees.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_hot_temperature_set(npmx_charger_t const * p_instance,
+                                              int16_t                temperature);
+
+/**
+ * @brief Function for reading the NTC hot temperature threshold.
+ *
+ * @param[in]  p_instance    Pointer to the CHARGER instance.
+ * @param[out] p_temperature Pointer to the temperature variable in degrees Celsius.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_charger_hot_temperature_get(npmx_charger_t const * p_instance,
+                                              int16_t *              p_temperature);
+
+/**
  * @brief Function for setting die temperature value when charging needs to be stopped.
  *
  * @param[in] p_instance  Pointer to the CHARGER instance.
@@ -543,8 +639,7 @@ npmx_error_t npmx_charger_hot_resistance_get(npmx_charger_t const * p_instance,
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance,
-                                            uint16_t               temperature);
+npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance, int16_t temperature);
 
 /**
  * @brief Function for reading die temperature value when charging needs to be stopped.
@@ -556,7 +651,7 @@ npmx_error_t npmx_charger_die_temp_stop_set(npmx_charger_t const * p_instance,
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
-                                            uint16_t *             p_temperature);
+                                            int16_t *              p_temperature);
 
 /**
  * @brief Function for setting die temperature value when charging needs to be resumed.
@@ -568,7 +663,7 @@ npmx_error_t npmx_charger_die_temp_stop_get(npmx_charger_t const * p_instance,
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
-                                              uint16_t               temperature);
+                                              int16_t                temperature);
 
 /**
  * @brief Function for reading die temperature value when charging needs to be resumed.
@@ -580,7 +675,7 @@ npmx_error_t npmx_charger_die_temp_resume_set(npmx_charger_t const * p_instance,
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
 npmx_error_t npmx_charger_die_temp_resume_get(npmx_charger_t const * p_instance,
-                                              uint16_t *             p_temperature);
+                                              int16_t *              p_temperature);
 
 /**
  * @brief Function for reading the status of a NTC comparator.

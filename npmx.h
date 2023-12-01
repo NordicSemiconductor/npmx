@@ -40,8 +40,7 @@
 #include <limits.h>
 
 #include <npmx_config.h>
-#include <mdk/npmx_mdk.h>
-#include <npmx_fixups.h>
+#include <adk/adk.h>
 
 #include <npmx_error.h>
 #include <npmx_common.h>

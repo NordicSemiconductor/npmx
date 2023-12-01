@@ -56,73 +56,73 @@ typedef enum
     NPMX_BUCK_GPIO_TYPE_PWM,
 } npmx_buck_gpio_type_t;
 
-static const uint16_t m_reten_vol_addr[NPMX_PERIPH_BUCK_COUNT] =
+static const uint16_t m_reten_vol_addr[NPM_BUCK_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_BUCK->BUCK1RETVOUT),
     [1] = NPMX_REG_TO_ADDR(NPM_BUCK->BUCK2RETVOUT),
 };
 
-static const uint8_t m_ctrl_pos[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_ctrl_pos[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSWCTRLSEL_BUCK1SWCTRLSEL_Pos,
     [1] = BUCK_BUCKSWCTRLSEL_BUCK2SWCTRLSEL_Pos,
 };
 
-static const uint8_t m_ctrl_msk[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_ctrl_msk[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSWCTRLSEL_BUCK1SWCTRLSEL_Msk,
     [1] = BUCK_BUCKSWCTRLSEL_BUCK2SWCTRLSEL_Msk,
 };
 
-static const uint8_t m_pull_down_pos[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_pull_down_pos[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKCTRL0_BUCK1ENPULLDOWN_Pos,
     [1] = BUCK_BUCKCTRL0_BUCK2ENPULLDOWN_Pos,
 };
 
-static const uint8_t m_pull_down_msk[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_pull_down_msk[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKCTRL0_BUCK1ENPULLDOWN_Msk,
     [1] = BUCK_BUCKCTRL0_BUCK2ENPULLDOWN_Msk,
 };
 
-static const uint16_t m_norm_vol_addr[NPMX_PERIPH_BUCK_COUNT] =
+static const uint16_t m_norm_vol_addr[NPM_BUCK_COUNT] =
 {
     [0] = NPMX_REG_TO_ADDR(NPM_BUCK->BUCK1NORMVOUT),
     [1] = NPMX_REG_TO_ADDR(NPM_BUCK->BUCK2NORMVOUT),
 };
 
-static const uint8_t m_status_mode_msk[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_mode_msk[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1MODE_Msk,
     [1] = BUCK_BUCKSTATUS_BUCK2MODE_Msk,
 };
 
-static const uint8_t m_status_mode_pos[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_mode_pos[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1MODE_Pos,
     [1] = BUCK_BUCKSTATUS_BUCK2MODE_Pos,
 };
 
-static const uint8_t m_status_pwrgood_msk[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_pwrgood_msk[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1PWRGOOD_Msk,
     [1] = BUCK_BUCKSTATUS_BUCK2PWRGOOD_Msk,
 };
 
-static const uint8_t m_status_pwrgood_pos[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_pwrgood_pos[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1PWRGOOD_Pos,
     [1] = BUCK_BUCKSTATUS_BUCK2PWRGOOD_Pos,
 };
 
-static const uint8_t m_status_pwmok_msk[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_pwmok_msk[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1PWMOK_Msk,
     [1] = BUCK_BUCKSTATUS_BUCK2PWMOK_Msk,
 };
 
-static const uint8_t m_status_pwmok_pos[NPMX_PERIPH_BUCK_COUNT] =
+static const uint8_t m_status_pwmok_pos[NPM_BUCK_COUNT] =
 {
     [0] = BUCK_BUCKSTATUS_BUCK1PWMOK_Pos,
     [1] = BUCK_BUCKSTATUS_BUCK2PWMOK_Pos,
@@ -141,7 +141,7 @@ static npmx_error_t task_trigger(npmx_buck_t const * p_instance, npmx_buck_task_
 {
     uint8_t data = NPMX_TASK_TRIGGER;
 
-    static const uint16_t task_addr[NPMX_BUCK_TASK_COUNT][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint16_t task_addr[NPMX_BUCK_TASK_COUNT][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_TASK_ENABLE] =
         {
@@ -244,7 +244,7 @@ static uint16_t gpio_config_addr_get(npmx_buck_gpio_type_t type)
 
 static uint8_t gpio_config_pin_mask_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t pin_mask[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t pin_mask[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -268,7 +268,7 @@ static uint8_t gpio_config_pin_mask_get(npmx_buck_t const * p_instance, npmx_buc
 
 static uint8_t gpio_config_pin_pos_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t pos_mask[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t pos_mask[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -292,7 +292,7 @@ static uint8_t gpio_config_pin_pos_get(npmx_buck_t const * p_instance, npmx_buck
 
 static uint8_t gpio_config_inv_mask_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t inv_mask[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t inv_mask[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -316,7 +316,7 @@ static uint8_t gpio_config_inv_mask_get(npmx_buck_t const * p_instance, npmx_buc
 
 static uint8_t gpio_config_inv_pos_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t inv_pos[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t inv_pos[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -340,7 +340,7 @@ static uint8_t gpio_config_inv_pos_get(npmx_buck_t const * p_instance, npmx_buck
 
 static uint8_t gpio_config_normal_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t normal[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t normal[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -364,7 +364,7 @@ static uint8_t gpio_config_normal_get(npmx_buck_t const * p_instance, npmx_buck_
 
 static uint8_t gpio_config_inverted_get(npmx_buck_t const * p_instance, npmx_buck_gpio_type_t type)
 {
-    static const uint8_t inverted[][NPMX_PERIPH_BUCK_COUNT] =
+    static const uint8_t inverted[][NPM_BUCK_COUNT] =
     {
         [NPMX_BUCK_GPIO_TYPE_ENABLE] =
         {
@@ -450,7 +450,7 @@ static npmx_error_t gpio_config_get(npmx_buck_t const *       p_instance,
 npmx_buck_t * npmx_buck_get(npmx_instance_t * p_pmic, uint8_t idx)
 {
     NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_BUCK_COUNT);
+    NPMX_ASSERT(idx < NPM_BUCK_COUNT);
 
     return &p_pmic->buck[idx];
 }

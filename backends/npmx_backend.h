@@ -82,8 +82,8 @@ typedef struct
  * @param[in] p_data           Pointer to data to write.
  * @param[in] num_of_bytes     Number of bytes of data to write.
  *
- * @return NPMX_SUCCESS  All data written successfully.
- * @return NPMX_ERROR_IO Backend returned IO error during data writing.
+ * @retval NPMX_SUCCESS  All data written successfully.
+ * @retval NPMX_ERROR_IO Backend returned IO error during data writing.
  */
 npmx_error_t npmx_backend_register_write(npmx_backend_t const * p_config,
                                          uint32_t               register_address,
@@ -100,8 +100,8 @@ npmx_error_t npmx_backend_register_write(npmx_backend_t const * p_config,
  * @param[in] p_data           Pointer to buffer for read data.
  * @param[in] num_of_bytes     Number of bytes to read.
  *
- * @return NPMX_SUCCESS  All data read successfully.
- * @return NPMX_ERROR_IO Backend returned IO error during data reading.
+ * @retval NPMX_SUCCESS  All data read successfully.
+ * @retval NPMX_ERROR_IO Backend returned IO error during data reading.
  */
 npmx_error_t npmx_backend_register_read(npmx_backend_t const * p_config,
                                         uint32_t               register_address,

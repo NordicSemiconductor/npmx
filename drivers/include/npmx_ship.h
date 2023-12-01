@@ -47,6 +47,13 @@ extern "C" {
  * @brief   Ship and hibernate modes peripheral driver.
  */
 
+/** @brief Data structure of the SHIP driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend;            ///< Pointer to backend instance.
+    bool             ship_button_inverted; ///< Flag set when polarity of SHPHLD button is inverted. False by default.
+} npmx_ship_t;
+
 /** @brief Ship and hibernate tasks. */
 typedef enum
 {
@@ -74,13 +81,6 @@ typedef enum
     NPMX_SHIP_TIME_MAX     = NPMX_SHIP_TIME_3008_MS,               ///< Maximum time.
     NPMX_SHIP_TIME_INVALID = NPMX_INVALID_ENUM_VALUE,              ///< Invalid time.
 } npmx_ship_time_t;
-
-/** @brief Data structure of the SHIP driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend;            ///< Pointer to backend instance.
-    bool             ship_button_inverted; ///< Flag set when polarity of SHPHLD button is inverted. False by default.
-} npmx_ship_t;
 
 /** @brief Configuration structure for ship hold. */
 typedef struct

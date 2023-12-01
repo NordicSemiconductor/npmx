@@ -47,6 +47,12 @@ extern "C" {
  * @brief   Power fail (POF) comparator peripheral driver.
  */
 
+/** @brief Data structure of the POF driver instance. */
+typedef struct
+{
+    npmx_backend_t * p_backend; ///< Pointer to backend instance.
+} npmx_pof_t;
+
 /** @brief POF warning status. */
 typedef enum
 {
@@ -83,12 +89,6 @@ typedef enum
     NPMX_POF_THRESHOLD_MAX     = NPMX_POF_THRESHOLD_3V5,             ///< Maximum voltage.
     NPMX_POF_THRESHOLD_INVALID = NPMX_INVALID_ENUM_VALUE,            ///< Invalid voltage.
 } npmx_pof_threshold_t;
-
-/** @brief Data structure of the POF driver instance. */
-typedef struct
-{
-    npmx_backend_t * p_backend; ///< Pointer to backend instance.
-} npmx_pof_t;
 
 /** @brief Configuration structure for POF comparator. */
 typedef struct

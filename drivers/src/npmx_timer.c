@@ -44,21 +44,8 @@
 #define NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_MASK  0x0000FFUL
 #define NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_POS   0UL
 
-#define NPMX_TIMER_COUNTER_COMPARE_VALUE_MAX    0xFFFFFFUL
-
-npmx_timer_t * npmx_timer_get(npmx_instance_t * p_pmic, uint8_t idx)
+static npmx_error_t task_trigger(npmx_timer_t const * p_instance, npmx_timer_task_t task)
 {
-    NPMX_ASSERT(p_pmic);
-    NPMX_ASSERT(idx < NPMX_PERIPH_TIMER_COUNT);
-
-    return &p_pmic->timer[idx];
-}
-
-npmx_error_t npmx_timer_task_trigger(npmx_timer_t const * p_instance, npmx_timer_task_t task)
-{
-    NPMX_ASSERT(p_instance);
-    NPMX_ASSERT(task < NPMX_TIMER_TASK_COUNT);
-
     uint8_t data = NPMX_TASK_TRIGGER;
 
     static const uint16_t task_addr[NPMX_TIMER_TASK_COUNT] =
@@ -72,6 +59,22 @@ npmx_error_t npmx_timer_task_trigger(npmx_timer_t const * p_instance, npmx_timer
     return npmx_backend_register_write(p_instance->p_backend, task_addr[task], &data, 1);
 }
 
+npmx_timer_t * npmx_timer_get(npmx_instance_t * p_pmic, uint8_t idx)
+{
+    NPMX_ASSERT(p_pmic);
+    NPMX_ASSERT(idx < NPM_TIMER_COUNT);
+
+    return &p_pmic->timer[idx];
+}
+
+npmx_error_t npmx_timer_task_trigger(npmx_timer_t const * p_instance, npmx_timer_task_t task)
+{
+    NPMX_ASSERT(p_instance);
+    NPMX_ASSERT(task < NPMX_TIMER_TASK_COUNT);
+
+    return task_trigger(p_instance, task);
+}
+
 npmx_error_t npmx_timer_config_set(npmx_timer_t const *        p_instance,
                                    npmx_timer_config_t const * p_config)
 {
@@ -79,7 +82,7 @@ npmx_error_t npmx_timer_config_set(npmx_timer_t const *        p_instance,
     NPMX_ASSERT(p_config);
     NPMX_ASSERT(p_config->mode < NPMX_TIMER_MODE_COUNT);
     NPMX_ASSERT(p_config->prescaler < NPMX_TIMER_PRESCALER_COUNT);
-    NPMX_ASSERT(p_config->compare_value <= NPMX_TIMER_COUNTER_COMPARE_VALUE_MAX);
+    NPMX_ASSERT(p_config->compare_value <= NPM_TIMER_COUNTER_COMPARE_VALUE_MAX);
 
     uint8_t data = ((uint8_t)p_config->mode << TIMER_TIMERCONFIG_TIMERMODESEL_Pos) &
                    TIMER_TIMERCONFIG_TIMERMODESEL_Msk;
@@ -105,10 +108,16 @@ npmx_error_t npmx_timer_config_set(npmx_timer_t const *        p_instance,
     period_data[2] = (uint8_t)((p_config->compare_value & NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_MASK)
                                >> NPMX_TIMER_COUNTER_PERIOD_LO_BYTE_POS);
 
-    return npmx_backend_register_write(p_instance->p_backend,
-                                       NPMX_REG_TO_ADDR(NPM_TIMER->TIMERHIBYTE),
-                                       period_data,
-                                       3);
+    err_code = npmx_backend_register_write(p_instance->p_backend,
+                                           NPMX_REG_TO_ADDR(NPM_TIMER->TIMERHIBYTE),
+                                           period_data,
+                                           3);
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    return task_trigger(p_instance, NPMX_TIMER_TASK_STROBE);
 }
 
 npmx_error_t npmx_timer_config_get(npmx_timer_t const * p_instance, npmx_timer_config_t * p_config)

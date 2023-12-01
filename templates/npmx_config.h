@@ -34,8 +34,8 @@
 #ifndef NPMX_CONFIG_H__
 #define NPMX_CONFIG_H__
 
-#if defined(NPM1300_ENG_C)
-    #include <npmx_config_npm1300_eng_c.h>
+#if defined(NPM1300)
+    #include <npmx_config_npm1300.h>
 #else
     #error "Unknown device."
 #endif
