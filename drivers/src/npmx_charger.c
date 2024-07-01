@@ -603,6 +603,8 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint
         [1] = (uint8_t)(code & 1U)
     };
 
+    p_instance->charging_current_ma = current;
+
     return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETMSB),
                                        data,
@@ -665,6 +667,8 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
         [1] = (uint8_t)(code & 1UL)
     };
 
+    p_instance->discharging_current_ma = current;
+
     return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETDISCHARGEMSB),
                                        data,
@@ -698,7 +702,7 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
     *p_current = (uint16_t)(((uint32_t)code * NPM_BCHARGER_DISCHARGING_CONST) /
                             NPM_BCHARGER_DISCHARGING_MULTIPLIER);
 
-    p_instance->charging_current_ma = *p_current;
+    p_instance->discharging_current_ma = *p_current;
 
     return NPMX_SUCCESS;
 }
