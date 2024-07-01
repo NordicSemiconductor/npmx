@@ -438,7 +438,7 @@ static npmx_error_t code_to_ibat(npmx_adc_t const * p_instance, uint16_t code, i
     }
     else
     {
-        current_val = p_instance->p_pmic->charger->discharging_current_ma;
+        current_val = (int32_t)(p_instance->p_pmic->charger->discharging_current_ma * 1000) / 1196;
 
         full_scale_ma = (int32_t)(current_val * code);
     }
