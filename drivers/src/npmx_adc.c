@@ -409,41 +409,16 @@ static npmx_error_t code_to_ibat(npmx_adc_t const * p_instance, uint16_t code, i
 
     int32_t full_scale_ma = 0;
 
-    uint16_t current_val;
-
     if (ibat_meas_status.charging)
     {
-        current_val = p_instance->p_pmic->charger->charging_current_ma;
-
-        switch (ibat_meas_status.charge_current)
-        {
-            case NPMX_ADC_IBAT_MEAS_CURRENT_TRICKLE:
-                /* FALLTHROUGH */
-            case NPMX_ADC_IBAT_MEAS_CURRENT_RFU:
-                full_scale_ma = (-1) * (int32_t)(current_val * code) / 10;
-                break;
-
-            case NPMX_ADC_IBAT_MEAS_CURRENT_LOWTEMP:
-                full_scale_ma = (-1) * (int32_t)(current_val * code) / 2;
-                break;
-
-            case NPMX_ADC_IBAT_MEAS_CURRENT_FAST:
-                full_scale_ma = (-1) * (int32_t)(current_val * code);
-                break;
-
-            default:
-                full_scale_ma = 0;
-                break;
-        }
+        full_scale_ma = (int32_t)(p_instance->p_pmic->charger->charging_current_ma * 1250) / -1000;
     }
     else
     {
-        current_val = (int32_t)(p_instance->p_pmic->charger->discharging_current_ma * 1000) / 1196;
-
-        full_scale_ma = (int32_t)(current_val * code);
+        full_scale_ma = (int32_t)(p_instance->p_pmic->charger->discharging_current_ma * 1000) / 1196;
     }
 
-    *p_val = full_scale_ma / (int32_t)NPM_ADC_BITS_RESOLUTION;
+    *p_val = (int32_t)(full_scale_ma * code) / (int32_t)NPM_ADC_BITS_RESOLUTION;
 
     return NPMX_SUCCESS;
 }
