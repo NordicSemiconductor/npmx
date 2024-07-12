@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.0.1] - 2024-07-12
+### Fixed
+ - Corrected discharge fullscale current.
+ - Corrected charge fullscale current.
+ - Update current limit on set.
+
 ## [1.0.0] - 2023-12-01
 ### Added
  - Added ADK v1.4.0.
