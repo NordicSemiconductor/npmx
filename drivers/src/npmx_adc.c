@@ -119,7 +119,6 @@ static uint16_t msb_register_address_get(npmx_adc_meas_t meas)
         [NPMX_ADC_MEAS_BAT_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
         [NPMX_ADC_MEAS_DIE_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
         [NPMX_ADC_MEAS_VSYS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
-        [NPMX_ADC_MEAS_VBUS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
         [NPMX_ADC_MEAS_VBAT0]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
         [NPMX_ADC_MEAS_VBAT1]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
         [NPMX_ADC_MEAS_VBAT2_IBAT] = NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
@@ -130,37 +129,51 @@ static uint16_t msb_register_address_get(npmx_adc_meas_t meas)
 }
 
 /**
- * @brief Function for getting difference in MSB and LSB registers' addresses.
+ * @brief Function for getting MSB registers' offset.
+ *
+ * @param[in] meas Measurement for which MSB register's offset should be returned.
+ *
+ * @return Offset of MSB register relative to ADCVBATRESULTMSB for the given measurement.
+ */
+static uint16_t msb_register_offset_get(npmx_adc_meas_t meas)
+{
+    return msb_register_address_get(meas) - NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB);
+}
+
+/**
+ * @brief Function for getting LSB registers' addresses.
+ *
+ * @param[in] meas Measurement for which LSB register's address should be returned.
+ *
+ * @return Address of LSB register for given measurement.
+ */
+static uint16_t lsb_register_address_get(npmx_adc_meas_t meas)
+{
+    static const uint16_t lsb_addresses[] =
+    {
+        [NPMX_ADC_MEAS_VBAT]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS),
+        [NPMX_ADC_MEAS_BAT_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS),
+        [NPMX_ADC_MEAS_DIE_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS),
+        [NPMX_ADC_MEAS_VSYS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS),
+        [NPMX_ADC_MEAS_VBAT0]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS),
+        [NPMX_ADC_MEAS_VBAT1]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS),
+        [NPMX_ADC_MEAS_VBAT2_IBAT] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS),
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS),
+    };
+
+    return lsb_addresses[meas];
+}
+
+/**
+ * @brief Function for getting offset of the register containing LSB.
  *
  * @param[in] meas Measurement for which offset should be returned.
  *
- * @return Delta of MSB and LSB registers addresses for a given measurement.
+ * @return Offset of LSB register relative to ADCVBATRESULTMSB for a given measurement.
  */
 static uint16_t lsb_register_offset_get(npmx_adc_meas_t meas)
 {
-    static const uint16_t lsb_registers[NPMX_ADC_MEAS_COUNT] =
-    {
-        [NPMX_ADC_MEAS_VBAT]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB),
-        [NPMX_ADC_MEAS_BAT_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCNTCRESULTMSB),
-        [NPMX_ADC_MEAS_DIE_TEMP]   = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCTEMPRESULTMSB),
-        [NPMX_ADC_MEAS_VSYS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP0RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVSYSRESULTMSB),
-        [NPMX_ADC_MEAS_VBUS]       = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT0]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT0RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT1]      = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT1RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT2_IBAT] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT2RESULTMSB),
-        [NPMX_ADC_MEAS_VBAT3_VBUS] = NPMX_REG_TO_ADDR(NPM_ADC->ADCGP1RESULTLSBS) -
-                                     NPMX_REG_TO_ADDR(NPM_ADC->ADCVBAT3RESULTMSB),
-    };
-
-    return lsb_registers[meas];
+    return lsb_register_address_get(meas) - NPMX_REG_TO_ADDR(NPM_ADC->ADCVBATRESULTMSB);
 }
 
 /**
@@ -178,7 +191,6 @@ static uint16_t lsb_mask_get(npmx_adc_meas_t meas)
         [NPMX_ADC_MEAS_BAT_TEMP]   = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Msk,
         [NPMX_ADC_MEAS_DIE_TEMP]   = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Msk,
         [NPMX_ADC_MEAS_VSYS]       = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Msk,
-        [NPMX_ADC_MEAS_VBUS]       = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Msk,
         [NPMX_ADC_MEAS_VBAT0]      = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Msk,
         [NPMX_ADC_MEAS_VBAT1]      = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Msk,
         [NPMX_ADC_MEAS_VBAT2_IBAT] = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Msk,
@@ -203,7 +215,6 @@ static uint16_t lsb_position_get(npmx_adc_meas_t meas)
         [NPMX_ADC_MEAS_BAT_TEMP]   = ADC_ADCGP0RESULTLSBS_NTCRESULTLSB_Pos,
         [NPMX_ADC_MEAS_DIE_TEMP]   = ADC_ADCGP0RESULTLSBS_TEMPRESULTLSB_Pos,
         [NPMX_ADC_MEAS_VSYS]       = ADC_ADCGP0RESULTLSBS_VSYSRESULTLSB_Pos,
-        [NPMX_ADC_MEAS_VBUS]       = ADC_ADCGP1RESULTLSBS_VBAT3RESULTLSB_Pos,
         [NPMX_ADC_MEAS_VBAT0]      = ADC_ADCGP1RESULTLSBS_VBAT0RESULTLSB_Pos,
         [NPMX_ADC_MEAS_VBAT1]      = ADC_ADCGP1RESULTLSBS_VBAT1RESULTLSB_Pos,
         [NPMX_ADC_MEAS_VBAT2_IBAT] = ADC_ADCGP1RESULTLSBS_VBAT2RESULTLSB_Pos,
@@ -447,15 +458,16 @@ static npmx_error_t code_to_value(npmx_adc_t const * p_instance,
         [NPMX_ADC_MEAS_BAT_TEMP]   = code_to_bat_temp,
         [NPMX_ADC_MEAS_DIE_TEMP]   = code_to_die_temp,
         [NPMX_ADC_MEAS_VSYS]       = code_to_vsys,
-        [NPMX_ADC_MEAS_VBUS]       = code_to_vbus,
         [NPMX_ADC_MEAS_VBAT0]      = NULL,
         [NPMX_ADC_MEAS_VBAT1]      = NULL,
         [NPMX_ADC_MEAS_VBAT2_IBAT] = code_to_ibat,
-        [NPMX_ADC_MEAS_VBAT3_VBUS] = NULL,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = code_to_vbus,
     };
 
     if (p_instance->burst)
     {
+        code_to_value_funs[NPMX_ADC_MEAS_VBAT0] = code_to_vbat;
+        code_to_value_funs[NPMX_ADC_MEAS_VBAT1] = code_to_vbat;
         code_to_value_funs[NPMX_ADC_MEAS_VBAT2_IBAT] = code_to_vbat;
         code_to_value_funs[NPMX_ADC_MEAS_VBAT3_VBUS] = code_to_vbat;
     }
@@ -761,18 +773,22 @@ npmx_error_t npmx_adc_meas_check(npmx_adc_t const * p_instance,
     NPMX_ASSERT(meas < NPMX_ADC_MEAS_COUNT);
     NPMX_ASSERT(p_ready);
 
-    static const uint8_t meas_masks[NPMX_ADC_MEAS_COUNT] =
+    static uint8_t meas_masks[NPMX_ADC_MEAS_COUNT] =
     {
         [NPMX_ADC_MEAS_VBAT]       = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
         [NPMX_ADC_MEAS_BAT_TEMP]   = MAIN_EVENTSADCSET_EVENTADCNTCRDY_Msk,
         [NPMX_ADC_MEAS_DIE_TEMP]   = MAIN_EVENTSADCSET_EVENTADCTEMPRDY_Msk,
         [NPMX_ADC_MEAS_VSYS]       = MAIN_EVENTSADCSET_EVENTADCVSYSRDY_Msk,
-        [NPMX_ADC_MEAS_VBUS]       = MAIN_EVENTSADCSET_EVENTADCVBUS7V0RDY_Msk,
         [NPMX_ADC_MEAS_VBAT0]      = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
         [NPMX_ADC_MEAS_VBAT1]      = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
         [NPMX_ADC_MEAS_VBAT2_IBAT] = MAIN_EVENTSADCSET_EVENTADCIBATRDY_Msk,
-        [NPMX_ADC_MEAS_VBAT3_VBUS] = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk,
+        [NPMX_ADC_MEAS_VBAT3_VBUS] = MAIN_EVENTSADCSET_EVENTADCVBUS7V0RDY_Msk,
     };
+
+    if (p_instance->burst) {
+        meas_masks[NPMX_ADC_MEAS_VBAT2_IBAT] = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk;
+        meas_masks[NPMX_ADC_MEAS_VBAT3_VBUS] = MAIN_EVENTSADCSET_EVENTADCVBATRDY_Msk;
+    }
 
     uint8_t      data;
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
@@ -797,25 +813,34 @@ npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
     NPMX_ASSERT(meas < NPMX_ADC_MEAS_COUNT);
     NPMX_ASSERT(p_value);
 
-    uint8_t  data[NPM_ADC_MEAS_LSB_MAX_OFFSET];
+    uint8_t msb_reg_data;
+    uint8_t lsb_reg_data;
     uint16_t msb_reg_address = msb_register_address_get(meas);
-
-    uint8_t lsb_reg_offset = lsb_register_offset_get(meas);
+    uint8_t lsb_reg_address = lsb_register_address_get(meas);
 
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        msb_reg_address,
-                                                       data,
-                                                       lsb_reg_offset + 1U);
+                                                       &msb_reg_data,
+                                                       1U);
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
+                                          lsb_reg_address,
+                                          &lsb_reg_data,
+                                          1U);
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;
     }
 
     /* Get LSB data. */
-    uint16_t code = (data[lsb_reg_offset] & (uint8_t)lsb_mask_get(meas)) >> lsb_position_get(meas);
+    uint16_t code = (lsb_reg_data & (uint8_t)lsb_mask_get(meas)) >> lsb_position_get(meas);
 
     /* Get MSB data. */
-    code |= ((uint16_t)data[0] << NPM_ADC_RESULT_MSB_SHIFT);
+    code |= ((uint16_t)msb_reg_data << NPM_ADC_RESULT_MSB_SHIFT);
 
     /* Transform code to value */
     return code_to_value(p_instance, meas, code, p_value);
@@ -841,9 +866,10 @@ npmx_error_t npmx_adc_meas_all_get(npmx_adc_t const *    p_instance,
     for (uint8_t i = NPMX_ADC_MEAS_VBAT; i < NPMX_ADC_MEAS_COUNT; i++)
     {
         uint8_t  lsb_reg_offset = lsb_register_offset_get(i);
-        uint16_t code           = (data[i + lsb_reg_offset] & (uint8_t)lsb_mask_get(i))
+        uint8_t  msb_reg_offset = msb_register_offset_get(i);
+        uint16_t code           = (data[lsb_reg_offset] & (uint8_t)lsb_mask_get(i))
                                   >> lsb_position_get(i);
-        code |= ((uint16_t)data[i] << NPM_ADC_RESULT_MSB_SHIFT);
+        code |= ((uint16_t)data[msb_reg_offset] << NPM_ADC_RESULT_MSB_SHIFT);
 
         err_code = code_to_value(p_instance, (npmx_adc_meas_t)i, code, &p_values->values[i]);
         if ((err_code != NPMX_SUCCESS) && (err_code != NPMX_ERROR_INVALID_PARAM))

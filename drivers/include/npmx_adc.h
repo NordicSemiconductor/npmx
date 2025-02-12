@@ -75,7 +75,6 @@ typedef enum
     NPMX_ADC_MEAS_BAT_TEMP,                          ///< Battery temperature (in millidegrees Celsius). For proper temperature calculations, a thermistor type and NTC beta value should be set with the @ref npmx_adc_config_set function.
     NPMX_ADC_MEAS_DIE_TEMP,                          ///< Internal die temperature measurement (in millidegrees Celsius).
     NPMX_ADC_MEAS_VSYS,                              ///< VSYS voltage measurement (in millivolts).
-    NPMX_ADC_MEAS_VBUS,                              ///< VBUS (7 Volt range) measurement (in millivolts).
     NPMX_ADC_MEAS_VBAT0,                             ///< VBAT0 from burst mode measurement (in millivolts).
     NPMX_ADC_MEAS_VBAT1,                             ///< VBAT1 from burst mode measurement (in millivolts).
     NPMX_ADC_MEAS_VBAT2_IBAT,                        ///< Measurement of either VBAT2 in burst mode or IBAT (respectively in millivolts or milliamperes).
