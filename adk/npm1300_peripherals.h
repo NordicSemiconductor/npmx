@@ -117,7 +117,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NPM_ADC_BITS_RESOLUTION  1024UL    ///< Bits resolution of 10-bit SAR ADC from the product specification.
 #define NPM_ADC_RESULT_MSB_SHIFT 0x2UL     ///< ADC data from MSB's register needs to be shifted.
 
-#define NPM_ADC_MEAS_LSB_MAX_OFFSET  5UL    ///< Max offset of LSB register from MSB register for values returned by ADC.
 #define NPM_ADC_MEAS_REGISTERS_COUNT 10UL   ///< Number of registers containing values returned by ADC.
 
 /*Neutrino GPIOS registers*/
