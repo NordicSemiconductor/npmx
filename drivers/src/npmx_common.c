@@ -179,9 +179,9 @@ float npmx_common_fabs_get(float variable)
 
 float npmx_common_exp_get(float variable)
 {
-    double a = 1.0, e = a;
+    float a = 1.0f, e = a;
 
-    for (int n = 1; npmx_common_fabs_get(a) > 0.0001; ++n)
+    for (int n = 1; npmx_common_fabs_get(a) > 0.0001f; ++n)
     {
         a = a * variable / n;
         e = e + a;
@@ -197,6 +197,6 @@ float npmx_common_ln_get(float variable)
 
     bx       = 1065353216 | (bx & 8388607);
     variable = *(float *)(&bx);
-    return -1.49278 + ((2.11263 + (-0.729104 + 0.10969 * variable) * variable) * variable) +
-           0.6931471806 * t;
+    return -1.49278f + ((2.11263f + (-0.729104f + 0.10969f * variable) * variable) * variable) +
+           0.6931471806f * t;
 }
