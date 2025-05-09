@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 - 2023, Nordic Semiconductor ASA
+ * Copyright (c) 2025, Nordic Semiconductor ASA
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -31,30 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NPMX_ERROR_H__
-#define NPMX_ERROR_H__
+#ifndef NPMX_CONFIG_NPM1304_H__
+#define NPMX_CONFIG_NPM1304_H__
 
-/**
- * @defgroup npmx_error_codes Global Error Codes
- * @{
- * @ingroup npmx
- *
- * @brief Global error code definitions.
- */
+#ifndef NPMX_CONFIG_H__
+    #error "This file should not be included directly. Include npmx_config.h instead."
+#endif
 
-/** @brief Base number of error codes. */
-#define NPMX_ERROR_BASE_NUM 0x2BAD0000
-
-/** @brief Enumerated type for error codes. */
-typedef enum
-{
-    NPMX_SUCCESS             = (NPMX_ERROR_BASE_NUM + 0), ///< Operation performed successfully.
-    NPMX_ERROR_INVALID_PARAM = (NPMX_ERROR_BASE_NUM + 1), ///< Invalid parameter.
-    NPMX_ERROR_IO            = (NPMX_ERROR_BASE_NUM + 2), ///< Error using IO bus line.
-    NPMX_ERROR_INVALID_MEAS  = (NPMX_ERROR_BASE_NUM + 3), ///< Invalid measurement.
-    NPMX_ERROR_NOT_SUPPORTED = (NPMX_ERROR_BASE_NUM + 4), ///< Not supported for given PMIC.
-} npmx_error_t;
-
-/** @} */
-
-#endif // NPMX_ERROR_H__
+#endif // NPMX_CONFIG_NPM1304_H__

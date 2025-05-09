@@ -323,10 +323,12 @@ npmx_charger_voltage_t npmx_charger_voltage_convert(uint32_t millivolts)
 {
     switch (millivolts)
     {
+#if defined(NPM1300)
         case 3500:
             return NPMX_CHARGER_VOLTAGE_3V50;
         case 3550:
             return NPMX_CHARGER_VOLTAGE_3V55;
+#endif /* defined(NPM1300) */
         case 3600:
             return NPMX_CHARGER_VOLTAGE_3V60;
         case 3650:
@@ -351,6 +353,16 @@ npmx_charger_voltage_t npmx_charger_voltage_convert(uint32_t millivolts)
             return NPMX_CHARGER_VOLTAGE_4V40;
         case 4450:
             return NPMX_CHARGER_VOLTAGE_4V45;
+#if defined(NPM1304)
+        case 4500:
+            return NPMX_CHARGER_VOLTAGE_4V50;
+        case 4550:
+            return NPMX_CHARGER_VOLTAGE_4V55;
+        case 4600:
+            return NPMX_CHARGER_VOLTAGE_4V60;
+        case 4650:
+            return NPMX_CHARGER_VOLTAGE_4V65;
+#endif /* defined(NPM1304) */
         default:
             return NPMX_CHARGER_VOLTAGE_INVALID;
     }
@@ -360,12 +372,14 @@ bool npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value, uint3
 {
     switch (enum_value)
     {
+#if defined(NPM1300)
         case NPMX_CHARGER_VOLTAGE_3V50:
             *p_val = 3500;
             break;
         case NPMX_CHARGER_VOLTAGE_3V55:
             *p_val = 3550;
             break;
+#endif /* defined(NPM1300) */
         case NPMX_CHARGER_VOLTAGE_3V60:
             *p_val = 3600;
             break;
@@ -402,6 +416,20 @@ bool npmx_charger_voltage_convert_to_mv(npmx_charger_voltage_t enum_value, uint3
         case NPMX_CHARGER_VOLTAGE_4V45:
             *p_val = 4450;
             break;
+#if defined(NPM1304)
+        case NPMX_CHARGER_VOLTAGE_4V50:
+            *p_val = 4500;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V55: 
+            *p_val = 4550;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V60:
+            *p_val = 4600;
+            break;
+        case NPMX_CHARGER_VOLTAGE_4V65:
+            *p_val = 4650;
+            break;
+#endif /* defined(NPM1304) */
         default:
             return false;
     }
@@ -441,10 +469,16 @@ npmx_charger_iterm_t npmx_charger_iterm_convert(uint32_t percent)
 {
     switch (percent)
     {
+#if defined(NPM1304)
+        case 5:
+            return NPMX_CHARGER_ITERM_5;
+#endif /* defined(NPM1304) */
         case 10:
             return NPMX_CHARGER_ITERM_10;
+#if defined(NPM1300)
         case 20:
             return NPMX_CHARGER_ITERM_20;
+#endif /* defined(NPM1300) */
         default:
             return NPMX_CHARGER_ITERM_INVALID;
     }
@@ -454,12 +488,19 @@ bool npmx_charger_iterm_convert_to_pct(npmx_charger_iterm_t enum_value, uint32_t
 {
     switch (enum_value)
     {
+#if defined(NPM1304)
+        case NPMX_CHARGER_ITERM_5:
+            *p_val = 5;
+            break;
+#endif /* defined(NPM1304) */
         case NPMX_CHARGER_ITERM_10:
             *p_val = 10;
             break;
+#if defined(NPM1300)
         case NPMX_CHARGER_ITERM_20:
             *p_val = 20;
             break;
+#endif /* defined(NPM1300) */
         default:
             return false;
     }
@@ -645,6 +686,7 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
 {
     NPMX_ASSERT(p_instance);
 
+#if defined(NPM1300)
     if ((current < NPM_BCHARGER_DISCHARGING_CURRENT_MIN_MA) ||
         (current > NPM_BCHARGER_DISCHARGING_CURRENT_MAX_MA))
     {
@@ -673,6 +715,9 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETDISCHARGEMSB),
                                        data,
                                        2);
+#endif /* defined(NPM1300)*/
+
+    return NPMX_ERROR_NOT_SUPPORTED;
 }
 
 npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, uint16_t * p_current)
@@ -680,6 +725,7 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_current);
 
+#if defined(NPM1300)
     uint8_t      data[2];
     uint16_t     code;
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
@@ -703,6 +749,9 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
                             NPM_BCHARGER_DISCHARGING_MULTIPLIER);
 
     p_instance->discharging_current_ma = *p_current;
+#else
+    p_instance->discharging_current_ma = NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT;
+#endif /* defined(NPM1300) */
 
     return NPMX_SUCCESS;
 }

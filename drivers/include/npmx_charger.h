@@ -86,8 +86,10 @@ typedef enum
 /** @brief Battery charger termination voltage Normal and Warm. */
 typedef enum
 {
+#if defined(NPM1300)
     NPMX_CHARGER_VOLTAGE_3V50    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_3V50, ///< 3.50 V
     NPMX_CHARGER_VOLTAGE_3V55    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_3V55, ///< 3.55 V
+#endif /* defined(NPM1300) */
     NPMX_CHARGER_VOLTAGE_3V60    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_3V60, ///< 3.60 V
     NPMX_CHARGER_VOLTAGE_3V65    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_3V65, ///< 3.65 V
     NPMX_CHARGER_VOLTAGE_4V00    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V00, ///< 4.00 V
@@ -100,6 +102,12 @@ typedef enum
     NPMX_CHARGER_VOLTAGE_4V35    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V35, ///< 4.35 V
     NPMX_CHARGER_VOLTAGE_4V40    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V40, ///< 4.40 V
     NPMX_CHARGER_VOLTAGE_4V45    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V45, ///< 4.45 V
+#if defined(NPM1304)
+    NPMX_CHARGER_VOLTAGE_4V50    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V50, ///< 4.50 V
+    NPMX_CHARGER_VOLTAGE_4V55    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V55, ///< 4.55 V
+    NPMX_CHARGER_VOLTAGE_4V60    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V60, ///< 4.60 V
+    NPMX_CHARGER_VOLTAGE_4V65    = BCHARGER_BCHGVTERMR_BCHGVTERMREDUCED_4V65, ///< 4.65 V
+#endif /* defined(NPM1304) */
     NPMX_CHARGER_VOLTAGE_COUNT,                                               ///< Possible voltages count.
     NPMX_CHARGER_VOLTAGE_DEFAULT = NPMX_CHARGER_VOLTAGE_3V60,                 ///< Default 3.60 V.
     NPMX_CHARGER_VOLTAGE_MAX     = NPMX_CHARGER_VOLTAGE_4V45,                 ///< Maximum voltage.
@@ -134,10 +142,13 @@ typedef enum
 typedef enum
 {
     NPMX_CHARGER_ITERM_10      = BCHARGER_BCHGITERMSEL_BCHGITERMSEL_SEL10, ///< ITERM current set to 10 percent of charging current.
+#if defined(NPM1304)
+    NPMX_CHARGER_ITERM_5      = BCHARGER_BCHGITERMSEL_BCHGITERMSEL_SEL5, ///< ITERM current set to 5 percent of charging current.
+#endif /* defined(NPM1304) */
+#if defined(NPM1300)
     NPMX_CHARGER_ITERM_20      = BCHARGER_BCHGITERMSEL_BCHGITERMSEL_SEL20, ///< ITERM current set to 20 percent of charging current.
+#endif /* defined(NPM1300) */
     NPMX_CHARGER_ITERM_COUNT,                                              ///< ITERM current max count.
-    NPMX_CHARGER_ITERM_DEFAULT = NPMX_CHARGER_ITERM_10,                    ///< Default ITERM current set to 10 percent of charging current.
-    NPMX_CHARGER_ITERM_MAX     = NPMX_CHARGER_ITERM_20,                    ///< Maximum ITERM current set to 20 percent of charging current.
     NPMX_CHARGER_ITERM_INVALID = NPMX_INVALID_ENUM_VALUE,                  ///< Invalid ITERM current.
 } npmx_charger_iterm_t;
 
