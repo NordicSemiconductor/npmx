@@ -50,6 +50,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined (NPM1300)
     #include "npm1300.h"
     #include "npm1300_peripherals.h"
+#elif defined (NPM1304)
+    #include "npm1304.h"
+    #include "npm1304_peripherals.h"
 #endif
 
 #endif /* ADK_H_ */

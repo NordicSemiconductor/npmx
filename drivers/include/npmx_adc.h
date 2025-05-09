@@ -125,12 +125,11 @@ typedef enum
 /** @brief Battery charging current. */
 typedef enum
 {
-    NPMX_ADC_IBAT_MEAS_CURRENT_TRICKLE = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_TRICKLE, ///< 10% charge (Trickle).
-    NPMX_ADC_IBAT_MEAS_CURRENT_LOWTEMP = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_LOWTEMP, ///< 50% charge (Low Temp).
-    NPMX_ADC_IBAT_MEAS_CURRENT_RFU     = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_RFU,     ///< 10% charge (default, RFU).
-    NPMX_ADC_IBAT_MEAS_CURRENT_FAST    = ADC_ADCIBATMEASSTATUS_BCHARGERICHARGE_FAST,    ///< 100% charge (Fast).
-    NPMX_ADC_IBAT_MEAS_CURRENT_MAX     = NPMX_ADC_IBAT_MEAS_CURRENT_FAST,               ///< Maximum current value.
-    NPMX_ADC_IBAT_MEAS_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,                       ///< Invalid current value.
+    NPMX_ADC_IBAT_MEAS_CURRENT_TRICKLE,                               ///< 10% charge (Trickle).
+    NPMX_ADC_IBAT_MEAS_CURRENT_LOWTEMP,                               ///< 50% charge (Low Temp).
+    NPMX_ADC_IBAT_MEAS_CURRENT_FAST,                                  ///< 100% charge (Fast).
+    NPMX_ADC_IBAT_MEAS_CURRENT_MAX = NPMX_ADC_IBAT_MEAS_CURRENT_FAST, ///< Maximum current value.
+    NPMX_ADC_IBAT_MEAS_CURRENT_INVALID = NPMX_INVALID_ENUM_VALUE,     ///< Invalid current value.
 } npmx_adc_ibat_meas_current_t;
 
 /** @brief Configuration structure for ADC. */

@@ -36,6 +36,8 @@
 
 #if defined(NPM1300)
     #include <npmx_config_npm1300.h>
+#if defined(NPM1304)
+    #include <npmx_config_npm1304.h>
 #else
     #error "Unknown device."
 #endif

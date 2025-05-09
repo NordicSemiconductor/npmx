@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.1.0] - 2025-05-xx
+### Fixed
+ - Fixed offset issue in npmx_adc_meas_all_get.
+ - Fixed -Wdouble-promotion build warnings.
+
+## [1.0.0] - 2023-12-01
+### Added
+ - Added support for nPM1304 PMIC.
+
+### Changed
+- npmx_adc ibat measurement is now reported in microamperes instead of milliamperes.
+- NPMX_ADC_IBAT_MEAS_CURRENT_RFU member removed from npmx_adc_ibat_meas_current_t enum.
+
 ## [1.0.1] - 2024-07-12
 ### Fixed
  - Corrected discharge fullscale current.
