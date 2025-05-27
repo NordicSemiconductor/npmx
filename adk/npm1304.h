@@ -104,7 +104,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ======================================================= Struct MAIN ======================================================= */
 /**
-  * @brief Neutrino MAIN Registers
+  * @brief nPM1304 MAIN Registers
   */
   typedef struct {                                   /*!< MAIN Structure                                                       */
     __IM uint8_t  RESERVED;
@@ -1981,7 +1981,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct SYSTEM ====================================================== */
 /**
-  * @brief Neutrino SYSTEM registers
+  * @brief nPM1304 SYSTEM registers
   */
   typedef struct {                                   /*!< SYSTEM Structure                                                     */
     __IM uint8_t  RESERVED;
@@ -2005,7 +2005,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct VBUSIN ====================================================== */
 /**
-  * @brief Neutrino VBUSIN registers
+  * @brief nPM1304 VBUSIN registers
   */
   typedef struct {                                   /*!< VBUSIN Structure                                                     */
     __OM uint8_t  TASKUPDATEILIMSW;                  /*!< (@ 0x00000000) Select input current limit                            */
@@ -2198,7 +2198,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ===================================================== Struct BCHARGER ===================================================== */
 /**
-  * @brief Neutrino BCHARGER registers
+  * @brief nPM1304 BCHARGER registers
   */
   typedef struct {                                   /*!< BCHARGER Structure                                                   */
     __OM uint8_t  TASKRELEASEERR;                    /*!< (@ 0x00000000) Release charger from error                            */
@@ -2830,7 +2830,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ======================================================= Struct BUCK ======================================================= */
 /**
-  * @brief Neutrino BUCK registers
+  * @brief nPM1304 BUCK registers
   */
   typedef struct {                                   /*!< BUCK Structure                                                       */
     __OM uint8_t  BUCK1ENASET;                       /*!< (@ 0x00000000) Enable BUCK1                                          */
@@ -3403,7 +3403,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ======================================================= Struct ADC ======================================================== */
 /**
-  * @brief Neutrino ADC registers
+  * @brief nPM1304 ADC registers
   */
   typedef struct {                                   /*!< ADC Structure                                                        */
     __OM uint8_t  TASKVBATMEASURE;                   /*!< (@ 0x00000000) Battery voltage measurement                           */
@@ -3769,7 +3769,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct GPIOS ======================================================= */
 /**
-  * @brief Neutrino GPIOS registers
+  * @brief nPM1304 GPIOS registers
   */
   typedef struct {                                   /*!< GPIOS Structure                                                      */
     __IOM uint8_t GPIOMODE0;                         /*!< (@ 0x00000000) GPIO mode configuration                               */
@@ -4268,7 +4268,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct TIMER ======================================================= */
 /**
-  * @brief Neutrino TIMER registers
+  * @brief nPM1304 TIMER registers
   */
   typedef struct {                                   /*!< TIMER Structure                                                      */
     __OM uint8_t  TIMERSET;                          /*!< (@ 0x00000000) Start timer                                           */
@@ -4414,7 +4414,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ======================================================= Struct LDSW ======================================================= */
 /**
-  * @brief Neutrino LDSW registers
+  * @brief nPM1304 LDSW registers
   */
   typedef struct {                                   /*!< LDSW Structure                                                       */
     __OM uint8_t  TASKLDSW1SET;                      /*!< (@ 0x00000000) Enable LDSW1                                          */
@@ -4743,7 +4743,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ======================================================= Struct POF ======================================================== */
 /**
-  * @brief Neutrino POF registers
+  * @brief nPM1304 POF registers
   */
   typedef struct {                                   /*!< POF Structure                                                        */
     __IOM uint8_t POFCONFIG;                         /*!< (@ 0x00000000) Configuration for power failure                       */
@@ -4802,7 +4802,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct LEDDRV ====================================================== */
 /**
-  * @brief Neutrino LEDDRV registers
+  * @brief nPM1304 LEDDRV registers
   */
   typedef struct {                                   /*!< LEDDRV Structure                                                     */
     __IOM uint8_t LEDDRV0MODESEL;                    /*!< (@ 0x00000000) Select LED0 mode                                      */
@@ -4942,7 +4942,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct SHPHLD ====================================================== */
 /**
-  * @brief Neutrino SHPHLD registers
+  * @brief nPM1304 SHPHLD registers
   */
   typedef struct {                                   /*!< SHPHLD Structure                                                     */
     __OM uint8_t  TASKENTERHIBERNATE;                /*!< (@ 0x00000000) Enter Hibernate                                       */
@@ -5150,7 +5150,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(__ASSEMBLER__) && !defined(__ASSEMBLY__) /*!< Ignore C structs for assembly code.                                 */
 /* ====================================================== Struct ERRLOG ====================================================== */
 /**
-  * @brief Neutrino ERRLOG registers
+  * @brief nPM1304 ERRLOG registers
   */
   typedef struct {                                   /*!< ERRLOG Structure                                                     */
     __OM uint8_t  TASKCLRERRLOG;                     /*!< (@ 0x00000000) Task to clear the Errlog registers                    */
