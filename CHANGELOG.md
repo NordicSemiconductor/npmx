@@ -1,12 +1,11 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
-## [1.1.0] - 2025-05-xx
+## [1.1.0] - 2025-05-28
 ### Fixed
  - Fixed offset issue in npmx_adc_meas_all_get.
  - Fixed -Wdouble-promotion build warnings.
 
-## [1.0.0] - 2023-12-01
 ### Added
  - Added support for nPM1304 PMIC.
 
