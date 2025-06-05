@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.2.0] - 2025-xx-xx
+### Changed
+- Allowed values for `npmx_charger_discharging_current_set` is updated to be aligned with nPM1300 Product Specification v1.2. There are now only two allowed values: 200 mA and 1000 mA (low and high limits).
+- `npmx_charger_discharging_current_set` no longer returns NPMX_ERROR_NOT_SUPPORTED when used with nPM1304 (which only has a single allowed battery discharge limit value).
+- nPM1300 battery current calculation updated to be aligned with nPM1300 Product Specification v1.2.
+
 ## [1.1.0] - 2025-05-28
 ### Fixed
  - Fixed offset issue in npmx_adc_meas_all_get.

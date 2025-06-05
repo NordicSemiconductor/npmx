@@ -77,7 +77,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define NPM_BCHARGER_ADC_BITS_RESOLUTION         1023UL  ///< Bits resolution of 10-bit SAR ADC, from the product specification.
 #define NPM_BCHARGER_ADC_CALC_DISCHARGE_MUL      1000    ///< Multiplication value used do calculate discharge current from ADC value.
-#define NPM_BCHARGER_ADC_CALC_DISCHARGE_DIV      1196    ///< Divisor value used do calculate discharge current from ADC value.
+#define NPM_BCHARGER_ADC_CALC_DISCHARGE_DIV      893     ///< Divisor value used do calculate discharge current from ADC value.
 #define NPM_BCHARGER_ADC_CALC_CHARGE_MUL         1250    ///< Multiplication value used do calculate charge current from ADC value.
 #define NPM_BCHARGER_ADC_CALC_CHARGE_DIV         -1000   ///< Divisor value used do calculate charge current from ADC value.
 
@@ -86,11 +86,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NPM_BCHARGER_CHARGING_CURRENT_STEP_MA    2UL     ///< Charging current step in milliamperes, from the product specification.
 #define NPM_BCHARGER_CHARGING_CURRENT_DEFAULT    32UL    ///< Default charging current in milliamperes.
 
-#define NPM_BCHARGER_DISCHARGING_CURRENT_MIN_MA  270UL   ///< Minimum possible discharging current in milliamperes, from the product specification.
-#define NPM_BCHARGER_DISCHARGING_CURRENT_MAX_MA  1340UL  ///< Maximum possible discharging current in milliamperes, from the product specification.
-#define NPM_BCHARGER_DISCHARGING_MULTIPLIER      100UL   ///< Magic number used to calculate discharging code as fixed point number.
-#define NPM_BCHARGER_DISCHARGING_CONST           323UL   ///< Magic number used to calculate discharging code.
-#define NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT 1340UL  ///< Default discharging current in milliamperes.
+#define NPM_BCHARGER_DISCHARGING_CURRENTS_MA     {200UL, 1000UL} ///< List of allowed discharging currents in milliamperes, from the product specification.
+#define NPM_BCHARGER_DISCHARGING_CURRENTS_CODE   {84UL, 415UL} ///< List of allowed discharging current codes in milliamperes, from the product specification.
+#define NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT 1000UL  ///< Default discharging current in milliamperes.
 
 #define NPM_BCHARGER_DIE_TEMPERATURE_CONST_1     3946700UL ///< Magic number from "Equation for die temperature limits" in the product specification.
 #define NPM_BCHARGER_DIE_TEMPERATURE_CONST_2     7926UL    ///< Magic number from "Equation for die temperature limits" in the product specification.
