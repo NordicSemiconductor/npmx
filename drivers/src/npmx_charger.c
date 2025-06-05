@@ -686,22 +686,25 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
 {
     NPMX_ASSERT(p_instance);
 
-#if defined(NPM1300)
-    if ((current < NPM_BCHARGER_DISCHARGING_CURRENT_MIN_MA) ||
-        (current > NPM_BCHARGER_DISCHARGING_CURRENT_MAX_MA))
-    {
+    const uint16_t allowed_currents[] = NPM_BCHARGER_DISCHARGING_CURRENTS_MA;
+    const uint16_t allowed_codes[] = NPM_BCHARGER_DISCHARGING_CURRENTS_CODE;
+    int idx;
+
+    NPMX_STATIC_ASSERT(sizeof(allowed_currents) == sizeof(allowed_codes));
+
+    idx = -1;
+    for (int i = 0; i < (sizeof(allowed_currents) / sizeof(allowed_currents[0])); ++i) {
+        if (current == allowed_currents[i]) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) {
         return NPMX_ERROR_INVALID_PARAM;
     }
 
-    uint32_t code = (uint32_t)current * NPM_BCHARGER_DISCHARGING_MULTIPLIER;
-    uint32_t mod  = code % NPM_BCHARGER_DISCHARGING_CONST;
-
-    code /= NPM_BCHARGER_DISCHARGING_CONST;
-
-    if (mod > (NPM_BCHARGER_DISCHARGING_CONST / 2UL))
-    {
-        code++;
-    }
+    uint16_t code = allowed_codes[idx];
 
     uint8_t data[2] =
     {
@@ -715,7 +718,6 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETDISCHARGEMSB),
                                        data,
                                        2);
-#endif /* defined(NPM1300)*/
 
     return NPMX_ERROR_NOT_SUPPORTED;
 }
@@ -725,7 +727,9 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_current);
 
-#if defined(NPM1300)
+    const uint16_t allowed_currents[] = NPM_BCHARGER_DISCHARGING_CURRENTS_MA;
+    const uint16_t allowed_codes[] = NPM_BCHARGER_DISCHARGING_CURRENTS_CODE;
+
     uint8_t      data[2];
     uint16_t     code;
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
@@ -745,15 +749,16 @@ npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance, u
     /* Get LSB current data. */
     code += data[1];
 
-    *p_current = (uint16_t)(((uint32_t)code * NPM_BCHARGER_DISCHARGING_CONST) /
-                            NPM_BCHARGER_DISCHARGING_MULTIPLIER);
+    for (int i = 0; i < (sizeof(allowed_codes) / sizeof(allowed_codes[0])); ++i) {
+        if (code == allowed_codes[i]) {
+            *p_current = allowed_currents[i];
+            p_instance->discharging_current_ma = *p_current;
 
-    p_instance->discharging_current_ma = *p_current;
-#else
-    p_instance->discharging_current_ma = NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT;
-#endif /* defined(NPM1300) */
+            return NPMX_SUCCESS;
+        }
+    }
 
-    return NPMX_SUCCESS;
+    return NPMX_ERROR_NOT_SUPPORTED;
 }
 
 npmx_error_t npmx_charger_termination_normal_voltage_set(npmx_charger_t const * p_instance,
