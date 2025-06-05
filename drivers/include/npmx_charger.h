@@ -51,7 +51,7 @@ extern "C" {
 typedef struct
 {
     npmx_instance_t * p_pmic;                 ///< Pointer to the PMIC instance.
-    uint16_t          charging_current_ma;    ///< Charging current in milliamperes.
+    uint32_t          charging_current_ua;    ///< Charging current in microamperes.
     uint16_t          discharging_current_ma; ///< Discharging current in milliamperes.
 } npmx_charger_t;
 
@@ -284,31 +284,31 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance,
                                      uint32_t *             p_modules_mask);
 
 /**
- * @brief Function for setting charger current of nPM device. Default value after reset is 32 mA.
+ * @brief Function for setting charger current of nPM device.
  *
  * @note Charger has to be disabled before changing the current setting.
  *       The setting takes effect when charging is enabled or re-enabled.
  *
  * @param[in] p_instance Pointer to the CHARGER instance.
- * @param[in] current    Charger current in milliamperes in a range from 32 to 800 with a step of 2.
+ * @param[in] current    Charger current in microamperes.
  *
  * @retval NPMX_SUCCESS             Operation performed successfully.
  * @retval NPMX_ERROR_INVALID_PARAM Current out of range.
  * @retval NPMX_ERROR_IO            Error using IO bus line.
  */
-npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint16_t current);
+npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint32_t current);
 
 /**
- * @brief Function for reading charger current from nPM device. Default value after reset is 32 mA.
+ * @brief Function for reading charger current from nPM device.
  *
  * @param[in]  p_instance Pointer to the CHARGER instance.
  * @param[out] p_current  Pointer to the current variable.
- *                        Charger current in milliamperes in a range from 32 to 800 with a step of 2.
+ *                        Charger current in microamperes.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
  */
-npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint16_t * p_current);
+npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint32_t * p_current);
 
 /**
  * @brief Function for setting maximum discharging current of nPM device.
@@ -327,10 +327,11 @@ npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, u
  *
  * @param[in]  p_instance Pointer to the CHARGER instance.
  * @param[out] p_current  Pointer to the current variable.
- *                        Maximum discharging current in milliamperes from.
+ *                        Maximum discharging current in milliamperes.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
+ * @retval NPMX_ERROR_NOT_SUPPORTED Unexpected/unsupported discharge current value.
  */
 npmx_error_t npmx_charger_discharging_current_get(npmx_charger_t * p_instance,
                                                   uint16_t *       p_current);
