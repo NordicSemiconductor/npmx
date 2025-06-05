@@ -311,10 +311,10 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint
 npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint16_t * p_current);
 
 /**
- * @brief Function for setting maximum discharging current of nPM device. Default value after reset is 1000 mA.
+ * @brief Function for setting maximum discharging current of nPM device.
  *
  * @param[in] p_instance Pointer to the CHARGER instance.
- * @param[in] current    Maximum discharging current in milliamperes in a range from 270 to 1340 with a step of 2.
+ * @param[in] current    Maximum discharging current in milliamperes.
  *
  * @retval NPMX_SUCCESS             Operation performed successfully.
  * @retval NPMX_ERROR_INVALID_PARAM Current out of range.
@@ -323,11 +323,11 @@ npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint
 npmx_error_t npmx_charger_discharging_current_set(npmx_charger_t * p_instance, uint16_t current);
 
 /**
- * @brief Function for reading maximum discharging current of nPM device. Default value after reset is 1000 mA.
+ * @brief Function for reading maximum discharging current of nPM device.
  *
  * @param[in]  p_instance Pointer to the CHARGER instance.
  * @param[out] p_current  Pointer to the current variable.
- *                        Maximum discharging current in milliamperes from in a range from 270 to 1340 with a step of 2.
+ *                        Maximum discharging current in milliamperes from.
  *
  * @retval NPMX_SUCCESS  Operation performed successfully.
  * @retval NPMX_ERROR_IO Error using IO bus line.
