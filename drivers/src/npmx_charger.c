@@ -621,17 +621,17 @@ npmx_error_t npmx_charger_module_get(npmx_charger_t const * p_instance, uint32_t
     return NPMX_SUCCESS;
 }
 
-npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint16_t current)
+npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint32_t current)
 {
     NPMX_ASSERT(p_instance);
 
-    if ((current < NPM_BCHARGER_CHARGING_CURRENT_MIN_MA) ||
-        (current > NPM_BCHARGER_CHARGING_CURRENT_MAX_MA))
+    if ((current < NPM_BCHARGER_CHARGING_CURRENT_MIN_UA) ||
+        (current > NPM_BCHARGER_CHARGING_CURRENT_MAX_UA))
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
 
-    if (current % NPM_BCHARGER_CHARGING_CURRENT_STEP_MA)
+    if (current % NPM_BCHARGER_CHARGING_CURRENT_STEP_UA)
     {
         return NPMX_ERROR_INVALID_PARAM;
     }
@@ -644,7 +644,7 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint
         [1] = (uint8_t)(code & 1U)
     };
 
-    p_instance->charging_current_ma = current;
+    p_instance->charging_current_ua = current;
 
     return npmx_backend_register_write(p_instance->p_pmic->p_backend,
                                        NPMX_REG_TO_ADDR(NPM_BCHARGER->BCHGISETMSB),
@@ -652,7 +652,7 @@ npmx_error_t npmx_charger_charging_current_set(npmx_charger_t * p_instance, uint
                                        2);
 }
 
-npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint16_t * p_current)
+npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint32_t * p_current)
 {
     NPMX_ASSERT(p_instance);
     NPMX_ASSERT(p_current);
@@ -675,9 +675,9 @@ npmx_error_t npmx_charger_charging_current_get(npmx_charger_t * p_instance, uint
     /* Get LSB code data. */
     code += data[1];
 
-    *p_current = (uint16_t)(code * NPM_BCHARGER_CHARGING_CURRENT_DIVIDER);
+    *p_current = (uint32_t)code * NPM_BCHARGER_CHARGING_CURRENT_DIVIDER;
 
-    p_instance->charging_current_ma = *p_current;
+    p_instance->charging_current_ua = *p_current;
 
     return NPMX_SUCCESS;
 }
