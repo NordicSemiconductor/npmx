@@ -76,15 +76,15 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NPM_BCHARGER_ERR_COUNT                   2UL     ///< Errlog errors register count.
 
 #define NPM_BCHARGER_ADC_BITS_RESOLUTION         1023UL  ///< Bits resolution of 10-bit SAR ADC, from the product specification.
-#define NPM_BCHARGER_ADC_CALC_DISCHARGE_MUL      1000    ///< Multiplication value used do calculate discharge current from ADC value.
-#define NPM_BCHARGER_ADC_CALC_DISCHARGE_DIV      893     ///< Divisor value used do calculate discharge current from ADC value.
+#define NPM_BCHARGER_ADC_CALC_DISCHARGE_MUL      112     ///< Multiplication value used do calculate discharge current from ADC value.
+#define NPM_BCHARGER_ADC_CALC_DISCHARGE_DIV      100     ///< Divisor value used do calculate discharge current from ADC value.
 #define NPM_BCHARGER_ADC_CALC_CHARGE_MUL         1250    ///< Multiplication value used do calculate charge current from ADC value.
 #define NPM_BCHARGER_ADC_CALC_CHARGE_DIV         -1000   ///< Divisor value used do calculate charge current from ADC value.
 
-#define NPM_BCHARGER_CHARGING_CURRENT_MIN_MA     32UL    ///< Minimum possible charging current in milliamperes, from the product specification.
-#define NPM_BCHARGER_CHARGING_CURRENT_MAX_MA     800UL   ///< Maximum possible charging current in milliamperes, from the product specification.
-#define NPM_BCHARGER_CHARGING_CURRENT_STEP_MA    2UL     ///< Charging current step in milliamperes, from the product specification.
-#define NPM_BCHARGER_CHARGING_CURRENT_DEFAULT    32UL    ///< Default charging current in milliamperes.
+#define NPM_BCHARGER_CHARGING_CURRENT_MIN_UA     32000UL    ///< Minimum possible charging current in microamperes, from the product specification.
+#define NPM_BCHARGER_CHARGING_CURRENT_MAX_UA     800000UL   ///< Maximum possible charging current in microamperes, from the product specification.
+#define NPM_BCHARGER_CHARGING_CURRENT_STEP_UA    2000UL     ///< Charging current step in microamperes, from the product specification.
+#define NPM_BCHARGER_CHARGING_CURRENT_DEFAULT    32000UL    ///< Default charging current in microamperes.
 
 #define NPM_BCHARGER_DISCHARGING_CURRENTS_MA     {200UL, 1000UL} ///< List of allowed discharging currents in milliamperes, from the product specification.
 #define NPM_BCHARGER_DISCHARGING_CURRENTS_CODE   {84UL, 415UL} ///< List of allowed discharging current codes in milliamperes, from the product specification.
@@ -97,7 +97,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NPM_BCHARGER_DIE_TEMPERATURE_MIN_VAL     -40L      ///< Min temperature value - junction temperature. Reference: nPM1300 OPS v0.7: Chapter: Recommended operating conditions.
 #define NPM_BCHARGER_DIE_TEMPERATURE_MSB_SHIFT   0x2UL     ///< Temperature data from MSB's register needs to be shifted.
 
-#define NPM_BCHARGER_CHARGING_CURRENT_DIVIDER    2UL     ///< Magic number used to get charging code from current in milliamperes, from the product specification.
+#define NPM_BCHARGER_CHARGING_CURRENT_DIVIDER    2000UL     ///< Magic number used to get charging code from current in microamperes, from the product specification.
 #define NPM_BCHARGER_CHARGING_CODE_MSB_SHIFT     1UL     ///< Shift used to divide charging code value into two bytes.
 #define NPM_BCHARGER_DISCHARGING_CODE_MSB_SHIFT  1UL     ///< Shift used to divide discharging code value into two bytes.
 

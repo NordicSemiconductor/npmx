@@ -278,15 +278,16 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
         p_pm->charger[i].p_pmic = p_pm;
         if (restore_values)
         {
-            uint16_t current;
+            uint32_t charging_current;
+            uint16_t discharging_current;
             npmx_charger_t * charger = npmx_charger_get(p_pm, i);
-            npmx_error_t ret = npmx_charger_charging_current_get(charger, &current);
+            npmx_error_t ret = npmx_charger_charging_current_get(charger, &charging_current);
             if (ret != NPMX_SUCCESS)
             {
                 return ret;
             }
 
-            ret = npmx_charger_discharging_current_get(charger, &current);
+            ret = npmx_charger_discharging_current_get(charger, &discharging_current);
             if (ret != NPMX_SUCCESS)
             {
                 return ret;
@@ -294,7 +295,7 @@ npmx_error_t npmx_core_init(npmx_instance_t * p_pm,
         }
         else
         {
-            p_pm->charger[i].charging_current_ma    = NPM_BCHARGER_CHARGING_CURRENT_DEFAULT;
+            p_pm->charger[i].charging_current_ua    = NPM_BCHARGER_CHARGING_CURRENT_DEFAULT;
             p_pm->charger[i].discharging_current_ma = NPM_BCHARGER_DISCHARGING_CURRENT_DEFAULT;
         }
     }

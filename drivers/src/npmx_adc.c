@@ -446,8 +446,8 @@ static npmx_error_t code_to_ibat(npmx_adc_t const * p_instance, uint16_t code, i
 
     if (ibat_meas_status.charging)
     {
-        full_scale_ua = (int32_t)(p_instance->p_pmic->charger->charging_current_ma *
-                NPM_BCHARGER_ADC_CALC_CHARGE_MUL * 1000) / NPM_BCHARGER_ADC_CALC_CHARGE_DIV;
+        full_scale_ua = (int32_t)(p_instance->p_pmic->charger->charging_current_ua *
+                NPM_BCHARGER_ADC_CALC_CHARGE_MUL) / NPM_BCHARGER_ADC_CALC_CHARGE_DIV;
     }
     else
     {
