@@ -186,7 +186,7 @@ After `npmx_core_init` is called with the TWI functions, you can start using npm
 > **_NOTE:_**  Be aware of the context you are calling npmx functions from, as they will call the TWI functions directly. For example, if npmx functions are called from an interrupt with higher priority than TWI, you could risk a deadlock.
 
 ## Interrupt processing
-In order for nPM13xx PMIC to signal interrupts, one of the GPIOs must be configured accordingly. This is done using the `npmx_gpio_mode_set` function. Below is an example of configuring nPM1300 GPIO3 as an interrupt signal.
+In order for nPM13xx PMIC to signal interrupts, one of the GPIOs must be configured accordingly. This is done using the `npmx_gpio_mode_set` function. Below is an example of configuring nPM1300 GPIO3 as an interrupt output.
 ```
 npmx_error_t ret;
 
