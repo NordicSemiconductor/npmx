@@ -3,7 +3,7 @@
 from pathlib import Path
 import re
 from os import walk, makedirs, path
-from distutils.dir_util import copy_tree
+from shutil import copytree
 
 CONF_DIR = Path(__file__).absolute().parent
 """conf.py directory."""
@@ -12,7 +12,7 @@ with open(CONF_DIR / ".." / "npmx.doxyfile") as f:
     VERSION = re.search(r'PROJECT_NUMBER\s+=\s+"(.*)"', f.read()).group(1)
 
 # Copy doxygen-generated XML files
-copy_tree(str(CONF_DIR.parent / "xml"), str(CONF_DIR.parent / "html_sphinx" / "xml"))
+copytree(str(CONF_DIR.parent / "xml"), str(CONF_DIR.parent / "html_sphinx" / "xml"))
 
 # Creare drivers directory with .rst files
 drivers_include_directory = CONF_DIR / ".." / ".." / "drivers" / "include"
