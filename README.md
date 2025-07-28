@@ -23,3 +23,6 @@ A comprehensive set of [Zephyr samples](https://github.com/NordicSemiconductor/n
  ├── templates       # Templates of npmx integration files
  └── zephyr          # Zephyr integration files
 ```
+
+## Porting to other platforms
+See the [Porting guide](PORTING.md) for guidance on porting npmx to other platforms.

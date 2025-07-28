@@ -49,7 +49,7 @@ Add the following include directories:
 ```
 
 > [!NOTE]
-> This includes the npmx root directory where this porting guide is located.
+> This includes the `npmx` root directory where this porting guide is located.
     
 Make a copy of the `templates` folder, and add it as an include directory.
 
@@ -80,15 +80,15 @@ To inform npmx of these functions, call the `npmx_core_init` function, as in the
 static npmx_instance_t npm1300_instance;
 static npmx_backend_t npm1300_backend;
 
-static npmx_error_t my_i2c_write_function(void * p_context, uint32_t register_address,
+static npmx_error_t my_twi_write_function(void * p_context, uint32_t register_address,
     uint8_t * p_data, size_t num_of_bytes);
-static npmx_error_t my_i2c_read_function(void * p_context, uint32_t register_address,
+static npmx_error_t my_twi_read_function(void * p_context, uint32_t register_address,
     uint8_t * p_data, size_t num_of_bytes);
 
 static void my_npmx_initialization_function(void)
 {
-    npm1300_backend.p_read = my_i2c_read_function;
-    npm1300_backend.p_write = my_i2c_write_function;
+    npm1300_backend.p_read = my_twi_read_function;
+    npm1300_backend.p_write = my_twi_write_function;
     npm1300_backend.p_context = NULL; // Optional context for our use
 
     npmx_error_t npmx_err = npmx_core_init(&npm1300_instance, &npm1300_backend, NULL, true);
@@ -96,7 +96,8 @@ static void my_npmx_initialization_function(void)
 }
 ```
 
-See the example implementations of the I2C `read` and `write` functions using nRF5 SDK as follows:
+See the example implementations of the TWI `read` and `write` functions using nRF5 SDK as follows:
+
 ```
 #include <nrfx_twim.h>
 #include "nrf_atomic.h"
@@ -119,7 +120,7 @@ static void my_twim_event_handler(nrfx_twim_evt_t const * p_event, void * p_cont
     nrf_atomic_flag_set(&twim_op_done);
 }
 
-static npmx_error_t my_i2c_write_function(void * p_context, uint32_t register_address,
+static npmx_error_t my_twi_write_function(void * p_context, uint32_t register_address,
     uint8_t * p_data, size_t num_of_bytes)
 {
     uint8_t data[TWIM_BUF_SIZE];
@@ -153,7 +154,7 @@ static npmx_error_t my_i2c_write_function(void * p_context, uint32_t register_ad
     return NPMX_SUCCESS;
 }
 
-static npmx_error_t my_i2c_read_function(void * p_context, uint32_t register_address,
+static npmx_error_t my_twi_read_function(void * p_context, uint32_t register_address,
         uint8_t * p_data, size_t num_of_bytes)
 {
     uint8_t reg_addr[2];
@@ -213,7 +214,9 @@ The application must provide callback functions for each interrupt type it wants
 
 When an interrupt is detected on the host processor side, npmx must be informed of this using the `npmx_core_interrupt` function. This sets a flag in npmx. The actual interrupt processing happens when the `npmx_core_proc` function is called. It reads and clears the event registers, and triggers callback functions registered by the application.
 > [!IMPORTANT]
-> `npmx_core_interrupt` can be safely called from an interrupt handler, but `npmx_core_proc` should not be. `npmx_core_proc` performs TWI read/write operations and calls user-registered callbacks.
+> You can safely call `npmx_core_interrupt` from an interrupt handler.
+>
+> Do not call `npmx_core_proc` from an interrupt handler as it performs TWI read/write operations and calls user-registered callbacks.
 
 > [!NOTE]
 > The nPM13xx interrupt GPIO signal will be active until the interrupt event registers are cleared by calling the `npmx_core_proc` function.
