@@ -1,21 +1,25 @@
 # Porting guide
-This document is intended to serve as a basic guide for porting npmx to a new hardware platform or SDK.
+
+This document serves as a basic guide for porting npmx to a new hardware platform or SDK.
 
 ## Hardware dependencies
-The following hardware functionality is used by npmx:
-1. (mandatory) TWI (Two-wire interface, also called I2C)
-2. (optional) GPIO
 
-TWI is used for communication with the pmic, and is a mandatory requirement.
-GPIO is optionally used for interrupt and power failure signalling.
+npmx uses the the following hardware functionalities:
+
+* (mandatory) TWI (Two-wire interface, also called I2C) - Used for communication with the PMIC
+* (optional) GPIO -  Used for interrupt and power failure signalling
+
 
 ## Compiler configuration
-In order to inform npmx of which device you are compiling for, "NPM1300" or "NPM1304" definitions should be added to your preprocessor settings. For example:
+
+To inform npmx of which device you are compiling for, nPM1300 or nPM1304, add their definitions to your preprocessor settings. For example:
+
 ```
 CFLAGS += -DNPM1300
 ```
 
-The following .c files should be compiled:
+Compile the following .c files:
+
 ```
  .
  ├── backends
@@ -36,22 +40,25 @@ The following .c files should be compiled:
      └── npmx_vbusin.c
 ```
 
-The following include directories should be added, **note that this includes the npmx root directory where this porting guide is located**:
+Add the following include directories:
+
 ```
  .
  ├── backends
  └── drivers/include
 ```
 
-You should make a copy of the following folder, and add the copy as an include directory:
-```
- .
- └── templates
-```
-In your copy of the `templates` directory you can modify `npmx_glue.h`, implementing the macros defined there. This is an optional step in order to help with debugging.
+> [!NOTE]
+> This includes the npmx root directory where this porting guide is located.
+    
+Make a copy of the `templates` folder, and add it as an include directory.
+
+In your copy of the `templates` directory you can modify the `npmx_glue.h` file, implementing the macros defined there. This is an optional step to help with debugging.
 
 ## TWI implementation
-npmx defines two TWI functions which must be implemented, one for reading and one for writing registers. Both functions uses the same prototype definition:
+
+npmx defines two TWI functions that you must implement, one for reading and one for writing registers. Both functions uses the same prototype definition:
+
 ```
 typedef npmx_error_t(*npmx_backend_function_t)(void *    p_context,
                                                uint32_t  register_address,
@@ -59,9 +66,12 @@ typedef npmx_error_t(*npmx_backend_function_t)(void *    p_context,
                                                size_t    num_of_bytes);
 ```
 
-Note that nPM13xx PMICs uses 16-bit register addresses, in big endian format. The TWI functions needs to handle this.
 
-You inform npmx of these functions by calling the `npmx_core_init` function, as in the example seen below.
+> [!IMPORTANT]
+> The nPM13xx PMICs uses 16-bit register addresses, in big endian format. The TWI functions needs to handle this.
+
+To inform npmx of these functions, call the `npmx_core_init` function, as in the following example:
+
 ```
 #include <npmx.h>
 #include <npmx_core.h>
@@ -86,7 +96,7 @@ static void my_npmx_initialization_function(void)
 }
 ```
 
-See example implementations of the i2c read and write functions using nRF5 SDK below.
+See the example implementations of the I2C `read` and `write` functions using nRF5 SDK as follows:
 ```
 #include <nrfx_twim.h>
 #include "nrf_atomic.h"
@@ -181,12 +191,15 @@ static void my_twim_init_function(void)
 }
 ```
 
-After `npmx_core_init` is called with the TWI functions, you can start using npmx functions.
+After calling `npmx_core_init` with the TWI functions, you can start using npmx functions.
 
-> **_NOTE:_**  Be aware of the context you are calling npmx functions from, as they will call the TWI functions directly. For example, if npmx functions are called from an interrupt with higher priority than TWI, you could risk a deadlock.
+> [!IMPORTANT]
+> Be aware of the context you are calling npmx functions from, as they will call the TWI functions directly. For example, if npmx functions are called from an interrupt with higher priority than TWI, you could risk a deadlock.
 
 ## Interrupt processing
-In order for nPM13xx PMIC to signal interrupts, one of the GPIOs must be configured accordingly. This is done using the `npmx_gpio_mode_set` function. Below is an example of configuring nPM1300 GPIO3 as an interrupt output.
+
+To make the nPM13xx PMIC signal the interrupts, one of the GPIOs must be configured accordingly using the `npmx_gpio_mode_set` function. See the following example of configuring nPM1300 GPIO3 as an interrupt output:
+
 ```
 npmx_error_t ret;
 
@@ -194,16 +207,18 @@ ret = npmx_gpio_mode_set(npmx_gpio_get(&npm1300_instance, 3), NPMX_GPIO_MODE_OUT
 // TODO: Verify that ret == NPMX_SUCCESS
 ```
 
-This GPIO must be connected to a Host processor GPIO, which must be configured to generate interrupts. This is a hardware specific function which you must implement.
+This GPIO must be connected to a host processor GPIO that must be configured to generate interrupts. You must implement this hardware-specific function.
 
-The application must provide callback functions for each interrupt type it wants to receive, and additionally enable these interrupts. This is done via `npmx_core_register_cb` and `npmx_core_event_interrupt_enable` functions.
+The application must provide callback functions for each interrupt type it wants to receive and enable these interrupts. Use the `npmx_core_register_cb` and `npmx_core_event_interrupt_enable` functions for this.
 
-When an interrupt is detected on the Host processor side, npmx must be informed of this by calling the `npmx_core_interrupt` function. This simply sets a flag in npmx. The actual interrupt processing happens when the `npmx_core_proc` function is called. `npmx_core_proc` reads and clears the event registers, and triggers callback functions registered by the application.
-> **_NOTE:_** `npmx_core_interrupt` can be safely called from an interrupt handler, but `npmx_core_proc` should not be. `npmx_core_proc` performs TWI read/write operations and calls user-registered callbacks.
+When an interrupt is detected on the host processor side, npmx must be informed of this using the `npmx_core_interrupt` function. This sets a flag in npmx. The actual interrupt processing happens when the `npmx_core_proc` function is called. It reads and clears the event registers, and triggers callback functions registered by the application.
+> [!IMPORTANT]
+> `npmx_core_interrupt` can be safely called from an interrupt handler, but `npmx_core_proc` should not be. `npmx_core_proc` performs TWI read/write operations and calls user-registered callbacks.
 
-> **_NOTE:_** The nPM13xx interrupt GPIO signal will be active until the interrupt event registers are cleared by calling the `npmx_core_proc` function.
+> [!NOTE]
+> The nPM13xx interrupt GPIO signal will be active until the interrupt event registers are cleared by calling the `npmx_core_proc` function.
 
-Below is an example using nRF5 SDK where the application connects nPM1300 GPIO3 to nRF52840 P1.12, and enables interrupt for "VBUS" events.
+In the following nRF5 SDK example, the application connects the nPM1300 GPIO3 to nRF52840 P1.12 and enables an interrupt for VBUS events:
 
 ```
 #include <nrfx_gpiote.h>
