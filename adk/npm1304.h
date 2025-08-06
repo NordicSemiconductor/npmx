@@ -4605,10 +4605,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                                                             LDSW1SOFTSTARTSEL field.*/                            
   #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_Min (0x0UL) /*!< Min enumerator value of LDSW1SOFTSTARTSEL field.                  */
   #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_Max (0x3UL) /*!< Max enumerator value of LDSW1SOFTSTARTSEL field.                  */
-  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_10MA (0x0UL) /*!< 10 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_20MA (0x1UL) /*!< 20 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_35MA (0x2UL) /*!< 35 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50MA (0x3UL) /*!< 50 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_25MA (0x0UL) /*!< 25 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50MA (0x1UL) /*!< 50 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_75MA (0x2UL) /*!< 75 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_100MA (0x3UL) /*!< 100 mA                                                            */
 
 /* LDSW2SOFTSTARTSEL @Bits 4..5 : Select soft start level for LDSW2 */
   #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_Pos (4UL) /*!< Position of LDSW2SOFTSTARTSEL field.                                */
@@ -4616,10 +4616,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                                                             LDSW2SOFTSTARTSEL field.*/                            
   #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_Min (0x0UL) /*!< Min enumerator value of LDSW2SOFTSTARTSEL field.                  */
   #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_Max (0x3UL) /*!< Max enumerator value of LDSW2SOFTSTARTSEL field.                  */
-  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_10MA (0x0UL) /*!< 10 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_20MA (0x1UL) /*!< 20 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_35MA (0x2UL) /*!< 35 mA                                                            */
-  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_50MA (0x3UL) /*!< 50 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_25MA (0x0UL) /*!< 25 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_50MA (0x1UL) /*!< 50 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_75MA (0x2UL) /*!< 75 mA                                                            */
+  #define LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_100MA (0x3UL) /*!< 100 mA                                                            */
 
 /* LDSW1ACTIVEDISCHARGE @Bit 6 : LDSW1 active discharge enable */
   #define LDSW_LDSWCONFIG_LDSW1ACTIVEDISCHARGE_Pos (6UL) /*!< Position of LDSW1ACTIVEDISCHARGE field.                          */
