@@ -44,14 +44,14 @@
 #endif
 
 /* A static assert of LDSW Soft Start Levels. */
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_10MA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_10MA);
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_20MA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_20MA);
-NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_35MA ==
-                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_35MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_25MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_25MA);
 NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_50MA ==
                    LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_50MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_75MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_75MA);
+NPMX_STATIC_ASSERT(LDSW_LDSWCONFIG_LDSW1SOFTSTARTSEL_100MA ==
+                   LDSW_LDSWCONFIG_LDSW2SOFTSTARTSEL_100MA);
 
 static const uint8_t m_en_gpio_pos[NPM_LDSW_COUNT] =
 {
@@ -257,14 +257,14 @@ npmx_ldsw_soft_start_current_t npmx_ldsw_soft_start_current_convert(uint32_t mil
 {
     switch (milliamperes)
     {
-        case 10:
-            return NPMX_LDSW_SOFT_START_CURRENT_10_MA;
-        case 20:
-            return NPMX_LDSW_SOFT_START_CURRENT_20_MA;
-        case 35:
-            return NPMX_LDSW_SOFT_START_CURRENT_35_MA;
+        case 25:
+            return NPMX_LDSW_SOFT_START_CURRENT_25_MA;
         case 50:
             return NPMX_LDSW_SOFT_START_CURRENT_50_MA;
+        case 75:
+            return NPMX_LDSW_SOFT_START_CURRENT_75_MA;
+        case 100:
+            return NPMX_LDSW_SOFT_START_CURRENT_100_MA;
         default:
             return NPMX_LDSW_SOFT_START_CURRENT_INVALID;
     }
@@ -275,17 +275,17 @@ bool npmx_ldsw_soft_start_current_convert_to_ma(npmx_ldsw_soft_start_current_t e
 {
     switch (enum_value)
     {
-        case NPMX_LDSW_SOFT_START_CURRENT_10_MA:
-            *p_val = 10;
-            return true;
-        case NPMX_LDSW_SOFT_START_CURRENT_20_MA:
-            *p_val = 20;
-            return true;
-        case NPMX_LDSW_SOFT_START_CURRENT_35_MA:
-            *p_val = 35;
+        case NPMX_LDSW_SOFT_START_CURRENT_25_MA:
+            *p_val = 25;
             return true;
         case NPMX_LDSW_SOFT_START_CURRENT_50_MA:
             *p_val = 50;
+            return true;
+        case NPMX_LDSW_SOFT_START_CURRENT_75_MA:
+            *p_val = 75;
+            return true;
+        case NPMX_LDSW_SOFT_START_CURRENT_100_MA:
+            *p_val = 100;
             return true;
         default:
             return false;
