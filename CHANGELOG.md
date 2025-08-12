@@ -1,13 +1,14 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
-## [1.2.0] - 2025-xx-xx
+## [1.2.0] - 2025-08-12
 ### Changed
 - `npmx_charger_charging_current_get` and `npmx_charger_charging_current_set` now uses microamperes instead of milliamperes in order to support the more fine-grained adjustment options for nPM1304.
 - Allowed values for `npmx_charger_discharging_current_set` is updated to be aligned with nPM1300 Product Specification v1.2. There are now only two allowed values: 200 mA and 1000 mA (low and high limits).
 - `npmx_charger_discharging_current_set` no longer returns NPMX_ERROR_NOT_SUPPORTED when used with nPM1304 (which only has a single allowed battery discharge limit value).
 - nPM1300 battery current calculation updated to be aligned with nPM1300 Product Specification v1.2.
 - Updated LDSW soft start current options to be aligned with nPM1300 Product Specification v1.x.
+- Added [porting guide](PORTING.md).
 
 ## [1.1.0] - 2025-05-28
 ### Fixed
