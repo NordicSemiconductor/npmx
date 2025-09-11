@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.2.1] - 2025-09-11
+### Fixed
+ - Fixed issue in npmx_adc_meas_get where 2 lsbits would be incorrect.
+
 ## [1.2.0] - 2025-08-12
 ### Changed
 - `npmx_charger_charging_current_get` and `npmx_charger_charging_current_set` now uses microamperes instead of milliamperes in order to support the more fine-grained adjustment options for nPM1304.

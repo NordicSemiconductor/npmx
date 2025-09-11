@@ -842,7 +842,7 @@ npmx_error_t npmx_adc_meas_get(npmx_adc_t const * p_instance,
     uint8_t msb_reg_data;
     uint8_t lsb_reg_data;
     uint16_t msb_reg_address = msb_register_address_get(meas);
-    uint8_t lsb_reg_address = lsb_register_address_get(meas);
+    uint16_t lsb_reg_address = lsb_register_address_get(meas);
 
     npmx_error_t err_code = npmx_backend_register_read(p_instance->p_pmic->p_backend,
                                                        msb_reg_address,
