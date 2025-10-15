@@ -77,7 +77,7 @@ typedef enum
     NPMX_ADC_MEAS_VSYS,                              ///< VSYS voltage measurement (in millivolts).
     NPMX_ADC_MEAS_VBAT0,                             ///< VBAT0 from burst mode measurement (in millivolts).
     NPMX_ADC_MEAS_VBAT1,                             ///< VBAT1 from burst mode measurement (in millivolts).
-    NPMX_ADC_MEAS_VBAT2_IBAT,                        ///< Measurement of either VBAT2 in burst mode or IBAT (respectively in millivolts or milliamperes).
+    NPMX_ADC_MEAS_VBAT2_IBAT,                        ///< Measurement of either VBAT2 in burst mode or IBAT (respectively in millivolts or microamperes).
     NPMX_ADC_MEAS_VBAT3_VBUS,                        ///< Measurement of either VBAT3 in burst mode or VBUS (both in millivolts).
     NPMX_ADC_MEAS_COUNT,                             ///< ADC requests maximum count.
     NPMX_ADC_MEAS_INVALID = NPMX_INVALID_ENUM_VALUE, ///< Invalid ADC measurement.
