@@ -59,7 +59,7 @@ In your copy of the `templates` directory you can modify the `npmx_glue.h` file,
 
 npmx defines two TWI functions that you must implement, one for reading and one for writing registers. Both functions uses the same prototype definition:
 
-```
+```c
 typedef npmx_error_t(*npmx_backend_function_t)(void *    p_context,
                                                uint32_t  register_address,
                                                uint8_t * p_data,
@@ -72,7 +72,7 @@ typedef npmx_error_t(*npmx_backend_function_t)(void *    p_context,
 
 To inform npmx of these functions, call the `npmx_core_init` function, as in the following example:
 
-```
+```c
 #include <npmx.h>
 #include <npmx_core.h>
 #include <npmx_instance.h>
@@ -98,7 +98,7 @@ static void my_npmx_initialization_function(void)
 
 See the example implementations of the TWI `read` and `write` functions using nRF5 SDK as follows:
 
-```
+```c
 #include <nrfx_twim.h>
 #include "nrf_atomic.h"
 
@@ -201,7 +201,7 @@ After calling `npmx_core_init` with the TWI functions, you can start using npmx 
 
 To make the nPM13xx PMIC signal the interrupts, one of the GPIOs must be configured accordingly using the `npmx_gpio_mode_set` function. See the following example of configuring nPM1300 GPIO3 as an interrupt output:
 
-```
+```c
 npmx_error_t ret;
 
 ret = npmx_gpio_mode_set(npmx_gpio_get(&npm1300_instance, 3), NPMX_GPIO_MODE_OUTPUT_IRQ);
@@ -223,7 +223,7 @@ When an interrupt is detected on the host processor side, npmx must be informed 
 
 In the following nRF5 SDK example, the application connects the nPM1300 GPIO3 to nRF52840 P1.12 and enables an interrupt for VBUS events:
 
-```
+```c
 #include <nrfx_gpiote.h>
 
 #include <npmx.h>
