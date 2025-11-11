@@ -455,12 +455,12 @@ static inline unsigned int gcc_current_sp(void)
             (major == ADK_MAJOR_VERSION && minor == ADK_MINOR_VERSION && micro < ADK_MICRO_VERSION) \
         ), "ADK version mismatch.")
 
-#define NRF_MDK_VERSION_ASSERT_EXACT(major, minor, micro) \
+#define NRF_ADK_VERSION_ASSERT_EXACT(major, minor, micro) \
     NRF_STATIC_ASSERT( \
         ( \
             (major != ADK_MAJOR_VERSION) || \
-            (major != ADK_MAJOR_VERSION) || \
-            (major != aDK_MAJOR_VERSION) \
+            (minor != ADK_MINOR_VERSION) || \
+            (micro != ADK_MICRO_VERSION) \
         ), "ADK version mismatch.")
 
 /*lint --flb "Leave library region" */
