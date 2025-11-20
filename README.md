@@ -9,7 +9,7 @@ A comprehensive set of [Zephyr samples](https://github.com/NordicSemiconductor/n
 ## Supported devices
 
 * nPM1300 revision 2
-* nPM1304 engineering A
+* nPM1304 revision 1
 
 ## Directories
 ```
