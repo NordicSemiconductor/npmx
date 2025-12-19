@@ -484,10 +484,34 @@ npmx_error_t npmx_ldsw_mode_set(npmx_ldsw_t const * p_instance, npmx_ldsw_mode_t
     NPMX_ASSERT(mode < NPMX_LDSW_MODE_COUNT);
 
     uint8_t      data;
-    npmx_error_t err_code = npmx_backend_register_read(p_instance->p_backend,
-                                                       m_ldo_sel_reg_addr[p_instance->hw_index],
-                                                       &data,
-                                                       1);
+    npmx_error_t err_code;
+
+    if (mode == NPMX_LDSW_MODE_LDO_SOFT_START)
+    {
+        /* NOTE: applicable only to nPM1304 rev >= 1.1 */
+        /* TODO: replace hard-coded values when they are available in adk */
+        err_code = npmx_backend_register_read(p_instance->p_backend, 0x0208, &data, 1);
+        if (err_code != NPMX_SUCCESS)
+        {
+            return err_code;
+        }
+        
+        data |= 1U << p_instance->hw_index;
+        err_code = npmx_backend_register_write(p_instance->p_backend, 0x0208, &data, 1);
+        if (err_code != NPMX_SUCCESS)
+        {
+            return err_code;
+        }
+
+        /* For the soft start to be effective in LDO mode, the LDOSEL register needs to be set to
+         * the Load Switch mode */
+        mode = NPMX_LDSW_MODE_LOAD_SWITCH;
+    }
+
+    err_code = npmx_backend_register_read(p_instance->p_backend,
+                                          m_ldo_sel_reg_addr[p_instance->hw_index],
+                                          &data,
+                                          1);
     if (err_code != NPMX_SUCCESS)
     {
         return err_code;

@@ -475,3 +475,26 @@ void * npmx_core_context_get(npmx_instance_t * p_pm)
 
     return p_pm->p_user_context;
 }
+
+npmx_error_t npmx_core_pmic_revision_get(npmx_instance_t * p_pm,
+                                         uint8_t * major,
+                                         uint8_t * minor,
+                                         uint8_t * patch)
+{
+    // TODO: replace hard-coded values when they are available in adk
+    NPMX_ASSERT(p_pm);
+
+    uint8_t version_regs[2];
+    npmx_error_t err_code = npmx_backend_register_read(p_pm->p_backend, 0x0026, version_regs,
+                                                       sizeof(version_regs));
+    if (err_code != NPMX_SUCCESS)
+    {
+        return err_code;
+    }
+
+    *major = version_regs[0];
+    *minor = version_regs[1] & 0x0FU;
+    *patch = (version_regs[1] & 0xF0U) >> 4U;
+
+    return NPMX_SUCCESS;
+}

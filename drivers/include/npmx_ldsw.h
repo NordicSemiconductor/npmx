@@ -136,6 +136,7 @@ typedef enum
 {
     NPMX_LDSW_MODE_LOAD_SWITCH = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_LDSW, ///< LDSW configured as load switch.
     NPMX_LDSW_MODE_LDO         = LDSW_LDSW1LDOSEL_LDSW1LDOSEL_LDO,  ///< LDSW configured as LDO.
+    NPMX_LDSW_MODE_LDO_SOFT_START,                                  ///< LDO with soft start (applicable to nPM1304 rev >=1.1)
     NPMX_LDSW_MODE_COUNT,                                           ///< LDSW modes count.
     NPMX_LDSW_MODE_INVALID     = NPMX_INVALID_ENUM_VALUE,           ///< Invalid LDSW mode.
 } npmx_ldsw_mode_t;
