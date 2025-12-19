@@ -159,6 +159,22 @@ void npmx_core_context_set(npmx_instance_t * p_pm, void * p_context);
  */
 void * npmx_core_context_get(npmx_instance_t * p_pm);
 
+/**
+ * @brief Get PMIC's revision
+ *
+ * @param[in]  p_pm  Pointer to the instance of nPM device.
+ * @param[out] major Pointer to the variable to store the major part of the revision.
+ * @param[out] minor Pointer to the variable to store the minor part of the revision.
+ * @param[out] patch Pointer to the variable to store the patch part of the revision.
+ *
+ * @retval NPMX_SUCCESS  Operation performed successfully.
+ * @retval NPMX_ERROR_IO Error using IO bus line.
+ */
+npmx_error_t npmx_core_pmic_revision_get(npmx_instance_t * p_pm,
+                                         uint8_t * major,
+                                         uint8_t * minor,
+                                         uint8_t * patch);
+
 /** @} */
 
 #ifdef __cplusplus
