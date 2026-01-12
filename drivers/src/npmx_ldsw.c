@@ -556,6 +556,24 @@ npmx_error_t npmx_ldsw_mode_get(npmx_ldsw_t const * p_instance, npmx_ldsw_mode_t
                >> m_ldo_sel_pos[p_instance->hw_index]) ==
               LDSW_LDSW1LDOSEL_LDSW1LDOSEL_LDO;
 
+    if (*p_mode == NPMX_LDSW_MODE_LOAD_SWITCH) {
+        /* This might actually be the LDO with soft start mode */
+        /* On devices without this feature the following register is not used and is 0 on reset,
+         * so it's safe to assume the new mode if the corresponding bits are set without checking
+         * the device revision. */
+        /* TODO: replace hard-coded values when they are available in adk */
+        err_code = npmx_backend_register_read(p_instance->p_backend, 0x0208, &data, 1);
+
+        if (err_code != NPMX_SUCCESS)
+        {
+            return err_code;
+        }
+
+        if (data & (1U << p_instance->hw_index)) {
+            *p_mode = NPMX_LDSW_MODE_LDO_SOFT_START;
+        }
+    }
+
     return NPMX_SUCCESS;
 }
 
