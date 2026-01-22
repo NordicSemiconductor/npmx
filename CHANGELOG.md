@@ -1,10 +1,14 @@
 # Changelog
 All notable changes to this project are documented in this file.
 
+## [1.3.1] - 2026-01-23
+### Fixed
+- Issue where switching a LDSW regualator from the `NPMX_LDSW_MODE_LDO_SOFT_START` mode to `NPMX_LDSW_MODE_LOAD_SWITCH` had no effect on nPM1304 rev 1.1
+
 ## [1.3.0] - 2026-01-21
-### Changed
-- Added the `npmx_core_pmic_revision_get` function to retrieve the PMIC revision.
-- Added a new mode `NPMX_LDSW_MODE_LDO_SOFT_START` to the `npmx_ldsw_mode_t` enum. Pass this mode to the `npmx_ldsw_mode_set` function to configure a LDSW regulator in LDO mode with soft start. Available on the following PMIC revisions:
+### Added
+- The `npmx_core_pmic_revision_get` function to retrieve the PMIC revision.
+- A new mode `NPMX_LDSW_MODE_LDO_SOFT_START` to the `npmx_ldsw_mode_t` enum. Pass this mode to the `npmx_ldsw_mode_set` function to configure a LDSW regulator in LDO mode with soft start. Available on the following PMIC revisions:
   - nPM1304: >= 1.1
   - nPM1300: TBA
 
