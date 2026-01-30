@@ -463,6 +463,26 @@ static inline unsigned int gcc_current_sp(void)
             (micro != ADK_MICRO_VERSION) \
         ), "ADK version mismatch.")
 
+
+/* Due to name space conflict with nrfx */
+#ifdef MDK_MAJOR_VERSION
+#define NRF_MDK_VERSION_ASSERT_AT_LEAST(major, minor, micro) \
+    NRF_STATIC_ASSERT( \
+        ( \
+            (major < MDK_MAJOR_VERSION) || \
+            (major == MDK_MAJOR_VERSION && minor < MDK_MINOR_VERSION) || \
+            (major == MDK_MAJOR_VERSION && minor == MDK_MINOR_VERSION && micro < MDK_MICRO_VERSION) \
+        ), "MDK version mismatch.")
+
+#define NRF_MDK_VERSION_ASSERT_EXACT(major, minor, micro) \
+    NRF_STATIC_ASSERT( \
+        ( \
+            (major != MDK_MAJOR_VERSION) || \
+            (major != MDK_MAJOR_VERSION) || \
+            (major != MDK_MAJOR_VERSION) \
+        ), "MDK version mismatch.")
+#endif
+
 /*lint --flb "Leave library region" */
 
 #endif
